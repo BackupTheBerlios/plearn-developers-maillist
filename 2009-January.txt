@@ -1,0 +1,75 @@
+From nouiz at nouiz.org  Wed Jan 21 19:22:16 2009
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Wed, 21 Jan 2009 13:22:16 -0500
+Subject: [Plearn-developers] Change in the default behavior of PTester?
+Message-ID: <2d1d7fe70901211022v33ad953fubf3ffb6026e38b7f@mail.gmail.com>
+
+Hi,
+
+in the commit 9862, I added flags to PLearner and PTester. The current
+default don't change the current behavior, but I think that we should change
+the default. The flag in PLearner::finalized was added. This flag default to
+false, but when the fct PLearner::finilize() is called, it set the flag to
+true. When PLearner::forget() is called the flag is set to false.
+This is to remember when the training of a learner is supposed to be
+finished. This allow some optimisation in the memory usage at load time and
+I need those optimization.
+
+Also, the flag PTester::finalise_learner was added with the default value of
+false. If true, will call learner->finalize() after the training.
+The current default is the current behavior. I would change it so that be
+default, we finalize the learner after the training. Is their any objection?
+If not, I will do so. This will break many test because the value of the
+flags will change, but I can change them in PLearn, but I can't do it at
+Apstat.
+
+Fred
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20090121/db9c4485/attachment.html>
+
+From saintmlx at apstat.com  Tue Jan 27 00:26:33 2009
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Mon, 26 Jan 2009 18:26:33 -0500
+Subject: [Plearn-developers] Change in the default behavior of PTester?
+In-Reply-To: <2d1d7fe70901211022v33ad953fubf3ffb6026e38b7f@mail.gmail.com>
+References: <2d1d7fe70901211022v33ad953fubf3ffb6026e38b7f@mail.gmail.com>
+Message-ID: <497E46A9.1010500@apstat.com>
+
+Sorry for this late answer.  I have no problem with this modification.
+
+Xavier
+
+Fr?d?ric Bastien wrote:
+> Hi,
+>
+> in the commit 9862, I added flags to PLearner and PTester. The current 
+> default don't change the current behavior, but I think that we should 
+> change the default. The flag in PLearner::finalized was added. This 
+> flag default to false, but when the fct PLearner::finilize() is 
+> called, it set the flag to true. When PLearner::forget() is called the 
+> flag is set to false.
+> This is to remember when the training of a learner is supposed to be 
+> finished. This allow some optimisation in the memory usage at load 
+> time and I need those optimization.
+>
+> Also, the flag PTester::finalise_learner was added with the default 
+> value of false. If true, will call learner->finalize() after the training.
+> The current default is the current behavior. I would change it so that 
+> be default, we finalize the learner after the training. Is their any 
+> objection? If not, I will do so. This will break many test because the 
+> value of the flags will change, but I can change them in PLearn, but I 
+> can't do it at Apstat.
+>
+> Fred
+>
+> ------------------------------------------------------------------------
+>
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>   
+
+
+

@@ -1,0 +1,228 @@
+From delallea at iro.umontreal.ca  Mon Jan  9 15:23:15 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Mon, 9 Jan 2006 09:23:15 -0500
+Subject: [Plearn-developers] Conjugate gradient optimization
+Message-ID: <20060109142315.GA14456@lsvm.iro.umontreal.ca>
+
+Until now, conjugate gradient optimization in PLearn has never really
+worked (at least from my own experience and from what I heard from other
+users). I have implemented in PLearn the algorithm originally written in
+Matlab by Carl Rasmussen. Hopefully, this one will work better than
+previous PLearn CJ implementations (I still need to test it more
+thoroughly...).
+
+I plan to clean the code of ConjGradientOptimizer to leave only this
+algorithm, and thus remove the current unnecessary complexity. So:
+
+==> Previous code using ConjGradientOptimizer WILL BE BROKEN <==
+
+If this is not acceptable to you, please let me know asap.
+
+--
+Olivier
+
+
+From bengioy at iro.umontreal.ca  Tue Jan 10 19:06:31 2006
+From: bengioy at iro.umontreal.ca (Yoshua Bengio)
+Date: Tue, 10 Jan 2006 13:06:31 -0500
+Subject: [Plearn-developers] bug in linearRegression
+Message-ID: <43C3F7A7.6080709@iro.umontreal.ca>
+
+Hi,
+
+In case you were a user of linearRegression (defined in 
+TMat_maths_impl.h), please
+note that there was a bug with the following consequence: the correct 
+computation was
+performed only the FIRST time that it was called (hence the bug passed 
+some tests
+I suppose when the function was first written).
+
+This function was used the by the LinearRegressor class.
+
+I have committed the correction and it should work correctly now.
+
+-- 
+Yoshua Bengio 
+Full Professor / Professeur titulaire 
+Canada Research Chair in Statistical Learning Algorithms / 
+titulaire de la chaire de recherche du Canada en algorithmes d'apprentissage statistique
+D?partement d'Informatique et Recherche Op?rationnelle
+Universit? de Montr?al, 
+adresse postale: C.P. 6128 Succ. Centre-Ville, Montr?al, Qu?bec, Canada H3C 3J7
+adresse civique: 2920 Chemin de la Tour, Montr?al, Qu?bec, Canada H3T 1J8, #2194
+Tel: 514-343-6804. Fax: 514-343-5834. Bureau 3339.
+http://www.iro.umontreal.ca/~bengioy
+http://www.iro.umontreal.ca/~lisa
+
+
+
+From delallea at iro.umontreal.ca  Tue Jan 10 22:49:53 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Tue, 10 Jan 2006 16:49:53 -0500
+Subject: [Plearn-developers] Conjugate gradient optimization
+In-Reply-To: <20060109142315.GA14456@lsvm.iro.umontreal.ca>
+References: <20060109142315.GA14456@lsvm.iro.umontreal.ca>
+Message-ID: <20060110214953.GA15536@lsvm.iro.umontreal.ca>
+
+The update is done (a test in will be added in the test-suite very
+soon). Note that I took the opportunity to clean a bit the code of the
+Optimizer object, and I removed a lot of stuff that was either useless,
+unused or deprecated. If you have your own (old) subclasses of
+Optimizer, this may cause some little trouble.
+
+--
+Olivier
+
+On 09 Jan 2006, Olivier Delalleau wrote:
+> Until now, conjugate gradient optimization in PLearn has never really
+> worked (at least from my own experience and from what I heard from other
+> users). I have implemented in PLearn the algorithm originally written in
+> Matlab by Carl Rasmussen. Hopefully, this one will work better than
+> previous PLearn CJ implementations (I still need to test it more
+> thoroughly...).
+> 
+> I plan to clean the code of ConjGradientOptimizer to leave only this
+> algorithm, and thus remove the current unnecessary complexity. So:
+> 
+> ==> Previous code using ConjGradientOptimizer WILL BE BROKEN <==
+> 
+> If this is not acceptable to you, please let me know asap.
+> 
+
+
+From bengioy at iro.umontreal.ca  Fri Jan 20 00:55:57 2006
+From: bengioy at iro.umontreal.ca (Yoshua Bengio)
+Date: Thu, 19 Jan 2006 18:55:57 -0500
+Subject: [Plearn-developers] new class BoundedMemoryCache
+Message-ID: <43D0270D.5040700@iro.umontreal.ca>
+
+Hello,
+
+I have committed some new code for implementing a computation cache.
+The main class is plearn/base/BoundedMemoryCache and it works somewhat
+like a map (you can specify KeyType and ValueType) but with the property
+that it will FORGET entries that have not been accessed for a long time
+and guarantee a maximum memory usage. The heuristic for giving more
+priority to more recently accessed stuff is the 'move-to-front' heuristic.
+When an entry is read or set it is  moved to the front of a list. When
+the allowed memory has been overrun the last element of the list is
+dropped. The list is implemented with the new class 
+plearn/base/DoublyLinkedList,
+a doubly-linked list with removeLast() and moveToFront() methods.
+
+Both classes have been tested successfully under multiple scenarios of use.
+
+What would be nice to have but I am not sure how to do nicely in C++ is
+a way to specify what computation should be done to calculate the value
+of an entry in the cache, when it is not already in the cache. It would 
+be easy
+in scheme, though...
+
+For now, typical usage is as follows:
+
+BoundedMemoryCache<KeyT,ValueT> cache;
+...
+cache.setMaxMemory(n_bytes_to_allow_in_cache);
+...
+KeyT key;
+ValueT value;
+...
+// deeper in your code:
+   ValueT* val_p = cache(key);
+   if (val_p)
+      value =*val_p;
+   else {
+      value=compute_the_value(key);
+      cache.set(key,result);
+   }
+...
+// at the end of computation you may want to check how successful and 
+useful was the cache:
+cout << "fraction of cache accesses that are successful = " << 
+cache.successRate() << endl;
+
+
+To implement the memory bound, I have had to implement a 'global' 
+function sizeInBytes(T x)
+which is now defined for a few basic types (in general.h), plus TVec, 
+TMat, pair, and pointers (N.B. right now
+we include in the count the size of the stuff pointed to by the pointer, 
+and not just the space of the pointer).
+If you want to use the BoundedMemoryCache on other types you will have 
+to define this
+function for them.
+
+-- 
+Yoshua Bengio 
+Full Professor / Professeur titulaire 
+Canada Research Chair in Statistical Learning Algorithms / 
+titulaire de la chaire de recherche du Canada en algorithmes d'apprentissage statistique
+D?partement d'Informatique et Recherche Op?rationnelle
+Universit? de Montr?al, 
+adresse postale: C.P. 6128 Succ. Centre-Ville, Montr?al, Qu?bec, Canada H3C 3J7
+adresse civique: 2920 Chemin de la Tour, Montr?al, Qu?bec, Canada H3T 1J8, #2194
+Tel: 514-343-6804. Fax: 514-343-5834. Bureau 3339.
+http://www.iro.umontreal.ca/~bengioy
+http://www.iro.umontreal.ca/~lisa
+
+
+
+
+From bengioy at iro.umontreal.ca  Fri Jan 20 01:50:08 2006
+From: bengioy at iro.umontreal.ca (Yoshua Bengio)
+Date: Thu, 19 Jan 2006 19:50:08 -0500
+Subject: [Plearn-developers] new class BoundedMemoryCache
+In-Reply-To: <43D0270D.5040700@iro.umontreal.ca>
+References: <43D0270D.5040700@iro.umontreal.ca>
+Message-ID: <43D033C0.2000903@iro.umontreal.ca>
+
+Yoshua Bengio a ?crit :
+
+>
+> Hello,
+>
+> I have committed some new code for implementing a computation cache.
+> The main class is plearn/base/BoundedMemoryCache and it works somewhat
+
+...
+
+> For now, typical usage is as follows:
+>
+> BoundedMemoryCache<KeyT,ValueT> cache;
+> ...
+> cache.setMaxMemory(n_bytes_to_allow_in_cache);
+> ...
+> KeyT key;
+> ValueT value;
+> ...
+> // deeper in your code:
+>   ValueT* val_p = cache(key);
+>   if (val_p)
+>      value =*val_p;
+>   else {
+>      value=compute_the_value(key);
+>      cache.set(key,result);
+
+last line should have been
+
+          cache.set(key,value);
+
+of course.
+
+-- 
+Yoshua Bengio 
+Full Professor / Professeur titulaire 
+Canada Research Chair in Statistical Learning Algorithms / 
+titulaire de la chaire de recherche du Canada en algorithmes d'apprentissage statistique
+D?partement d'Informatique et Recherche Op?rationnelle
+Universit? de Montr?al, 
+adresse postale: C.P. 6128 Succ. Centre-Ville, Montr?al, Qu?bec, Canada H3C 3J7
+adresse civique: 2920 Chemin de la Tour, Montr?al, Qu?bec, Canada H3T 1J8, #2194
+Tel: 514-343-6804. Fax: 514-343-5834. Bureau 3339.
+http://www.iro.umontreal.ca/~bengioy
+http://www.iro.umontreal.ca/~lisa
+
+
+
+

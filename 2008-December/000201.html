@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Default value for logging
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Default%20value%20for%20logging&In-Reply-To=%3C49396558.5040602%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000200.html">
+   <LINK REL="Next"  HREF="000202.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Default value for logging</H1>
+    <B>Xavier Saint-Mleux</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Default%20value%20for%20logging&In-Reply-To=%3C49396558.5040602%40apstat.com%3E"
+       TITLE="[Plearn-developers] Default value for logging">saintmlx at apstat.com
+       </A><BR>
+    <I>Fri Dec  5 18:31:04 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000200.html">[Plearn-developers] Default value for logging
+</A></li>
+        <LI>Next message: <A HREF="000202.html">[Plearn-developers] Default value for logging
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#201">[ date ]</a>
+              <a href="thread.html#201">[ thread ]</a>
+              <a href="subject.html#201">[ subject ]</a>
+              <a href="author.html#201">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Fr&#233;d&#233;ric Bastien wrote:
+&gt;<i> 1) with pymake -dbg, should print de debug level of log
+</I>&gt;<i> 2) The named log should be on for all module by default.
+</I>&gt;<i> That way new plearn developer won't miss log that they need and old
+</I>&gt;<i> developer could target the log they want. This will solve all
+</I>&gt;<i> objection that was raised about moving from PLWARNING to *LOG.
+</I>&gt;<i>   
+</I>
+I agree with the idea of having a different default for logging 
+depending on the compilation options; this was already possible with the 
+pymake option &quot;-logging=...&quot; but I have no problem if &quot;-dbg&quot; also 
+implies &quot;-logging=dbg&quot;, as long as it can still be overriden with 
+another &quot;-logging=...&quot; option.  I also think that non-debug modes 
+should, by default, not print any debug-related messages.
+
+As for which module logs should be displayed by default, again I think 
+that the most verbose option should apply only to debug modes (is it 
+what you had in mind?)  That is, I think the default for any non-debug 
+compilation should remain &quot;__NONE__&quot;.  Also, it might be useful to 
+consider implementing a way to omit some modules when the default is 
+&quot;__ALL__&quot;; it may become necessary if, for example, PP is instrumented 
+to log all refs and unrefs.  As another example, I am currently 
+debugging the PLearn&lt;-&gt;Python bridge (to allow parallel execution) and I 
+think most people will want to omit debug logs from PythonObjectWrapper 
+and PythonExtension once I'm done; I would rather not have to remove all 
+logs since they may be useful again in the future (and it would defeat 
+the purpose of logs altogether.)
+
+What remains to be solved is the exact definition of the different 
+logging levels.  We probably need to start using it and experimenting 
+with it before we can take any final decision.  For now, the following 
+examples illustrate messages which I think may belong to different levels:
+1- low-level core system debugging information; e.g. logging each ref 
+and unref to every PP
+2- machine-learning-related low-level information; e.g. number of rows 
+selected by SelectRowsVMatrix
+3- machine-learning-related potential errors; e.g. warning for bagging 
+with several identical bags
+4- user-oriented low-level information; e.g. validation error at each 
+stage of hyper-learning
+5- global progress information; e.g. start of a new split
+Does this list make sense to you?  If so, how would you assign each of 
+these messages to the different levels of logs?
+
+
+Xavier
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000200.html">[Plearn-developers] Default value for logging
+</A></li>
+	<LI>Next message: <A HREF="000202.html">[Plearn-developers] Default value for logging
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#201">[ date ]</a>
+              <a href="thread.html#201">[ thread ]</a>
+              <a href="subject.html#201">[ subject ]</a>
+              <a href="author.html#201">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

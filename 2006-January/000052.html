@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] new class BoundedMemoryCache
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-January/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20new%20class%20BoundedMemoryCache&In-Reply-To=%3C43D0270D.5040700%40iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000050.html">
+   <LINK REL="Next"  HREF="000053.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] new class BoundedMemoryCache</H1>
+    <B>Yoshua Bengio</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20new%20class%20BoundedMemoryCache&In-Reply-To=%3C43D0270D.5040700%40iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] new class BoundedMemoryCache">bengioy at iro.umontreal.ca
+       </A><BR>
+    <I>Fri Jan 20 00:55:57 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000050.html">[Plearn-developers] bug in linearRegression
+</A></li>
+        <LI>Next message: <A HREF="000053.html">[Plearn-developers] new class BoundedMemoryCache
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#52">[ date ]</a>
+              <a href="thread.html#52">[ thread ]</a>
+              <a href="subject.html#52">[ subject ]</a>
+              <a href="author.html#52">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello,
+
+I have committed some new code for implementing a computation cache.
+The main class is plearn/base/BoundedMemoryCache and it works somewhat
+like a map (you can specify KeyType and ValueType) but with the property
+that it will FORGET entries that have not been accessed for a long time
+and guarantee a maximum memory usage. The heuristic for giving more
+priority to more recently accessed stuff is the 'move-to-front' heuristic.
+When an entry is read or set it is  moved to the front of a list. When
+the allowed memory has been overrun the last element of the list is
+dropped. The list is implemented with the new class 
+plearn/base/DoublyLinkedList,
+a doubly-linked list with removeLast() and moveToFront() methods.
+
+Both classes have been tested successfully under multiple scenarios of use.
+
+What would be nice to have but I am not sure how to do nicely in C++ is
+a way to specify what computation should be done to calculate the value
+of an entry in the cache, when it is not already in the cache. It would 
+be easy
+in scheme, though...
+
+For now, typical usage is as follows:
+
+BoundedMemoryCache&lt;KeyT,ValueT&gt; cache;
+...
+cache.setMaxMemory(n_bytes_to_allow_in_cache);
+...
+KeyT key;
+ValueT value;
+...
+// deeper in your code:
+   ValueT* val_p = cache(key);
+   if (val_p)
+      value =*val_p;
+   else {
+      value=compute_the_value(key);
+      cache.set(key,result);
+   }
+...
+// at the end of computation you may want to check how successful and 
+useful was the cache:
+cout &lt;&lt; &quot;fraction of cache accesses that are successful = &quot; &lt;&lt; 
+cache.successRate() &lt;&lt; endl;
+
+
+To implement the memory bound, I have had to implement a 'global' 
+function sizeInBytes(T x)
+which is now defined for a few basic types (in general.h), plus TVec, 
+TMat, pair, and pointers (N.B. right now
+we include in the count the size of the stuff pointed to by the pointer, 
+and not just the space of the pointer).
+If you want to use the BoundedMemoryCache on other types you will have 
+to define this
+function for them.
+
+-- 
+Yoshua Bengio 
+Full Professor / Professeur titulaire 
+Canada Research Chair in Statistical Learning Algorithms / 
+titulaire de la chaire de recherche du Canada en algorithmes d'apprentissage statistique
+D&#233;partement d'Informatique et Recherche Op&#233;rationnelle
+Universit&#233; de Montr&#233;al, 
+adresse postale: C.P. 6128 Succ. Centre-Ville, Montr&#233;al, Qu&#233;bec, Canada H3C 3J7
+adresse civique: 2920 Chemin de la Tour, Montr&#233;al, Qu&#233;bec, Canada H3T 1J8, #2194
+Tel: 514-343-6804. Fax: 514-343-5834. Bureau 3339.
+<A HREF="http://www.iro.umontreal.ca/~bengioy">http://www.iro.umontreal.ca/~bengioy</A>
+<A HREF="http://www.iro.umontreal.ca/~lisa">http://www.iro.umontreal.ca/~lisa</A>
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000050.html">[Plearn-developers] bug in linearRegression
+</A></li>
+	<LI>Next message: <A HREF="000053.html">[Plearn-developers] new class BoundedMemoryCache
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#52">[ date ]</a>
+              <a href="thread.html#52">[ thread ]</a>
+              <a href="subject.html#52">[ subject ]</a>
+              <a href="author.html#52">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

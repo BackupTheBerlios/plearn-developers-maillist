@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] PCA Missings Imputation
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-June/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PCA%20Missings%20Imputation&In-Reply-To=%3C448AEC42.4080504%40iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000097.html">
+   <LINK REL="Next"  HREF="000099.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] PCA Missings Imputation</H1>
+    <B>Yoshua Bengio</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PCA%20Missings%20Imputation&In-Reply-To=%3C448AEC42.4080504%40iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] PCA Missings Imputation">bengioy at iro.umontreal.ca
+       </A><BR>
+    <I>Sat Jun 10 17:58:58 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000097.html">[Plearn-developers] PCA Missings Imputation
+</A></li>
+        <LI>Next message: <A HREF="000099.html">[Plearn-developers] PCA Missings Imputation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#98">[ date ]</a>
+              <a href="thread.html#98">[ thread ]</a>
+              <a href="subject.html#98">[ subject ]</a>
+              <a href="author.html#98">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Nicolas,
+
+This is a good point, but maybe this illustrates a flaw in our design.
+We now think of the VMatrix as two different things: a source
+of data, and a procedural preprocessing mechanism for the data.
+However, indeed if we use a Learner directly with ComputeOutput, outside 
+the context
+of the Learner::Test method, i.e. without a VMatrix to feed it, we may
+be in trouble with this system. Somehow we would like to be
+able to wrap the prepocessing and the Learner in the same
+package, to be able to use it in new contexts. This is especially
+important when the preprocessing is data-dependent (such as
+imputation of missing values by the mean).
+
+A reasonable way to go, without changing the basic design, could be
+to put all our preprocessing in a combined Learner that wraps the 
+preprocessing
+and the actual learner.
+
+Nicolas Chapados a &#233;crit :
+&gt;<i> But there is not necessarily an associated VMatrix for computeOutput...
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Olivier Delalleau wrote:
+</I>&gt;&gt;<i> Personally, it seems to me it would make more sense to put this in the
+</I>&gt;&gt;<i> VMatrices (this can be done for instance with the
+</I>&gt;&gt;<i> MeanImputationVMatrix), rather than add the same code in all learners.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> -- 
+</I>&gt;&gt;<i> Olivier
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On 10 Jun 2006, Nicolas Chapados wrote:
+</I>&gt;&gt;<i>  
+</I>&gt;&gt;&gt;<i> Hello all,
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Just a quick note: I added an &quot;impute_missings&quot; option to PCA.  If 
+</I>&gt;&gt;&gt;<i> true, and a missing value is encountered on a computeOutput(), then 
+</I>&gt;&gt;&gt;<i> it is replaced by the mean.  Note that this applies only to 
+</I>&gt;&gt;&gt;<i> computeOutput, not train().  [To filter out train-time missing 
+</I>&gt;&gt;&gt;<i> values, you can still rely on DisregardRowsVMatrix.]
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> I hereby make a suggestion: to use the same option name 
+</I>&gt;&gt;&gt;<i> &quot;impute_missings&quot; when a learner is capable of doing just so.  Does 
+</I>&gt;&gt;&gt;<i> it make sense to include this in PLearner?
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>     + Nicolas
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>     
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> Plearn-developers mailing list
+</I>&gt;&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">Plearn-developers at lists.berlios.de</A>
+</I>&gt;&gt;<i> <A HREF="http://lists.berlios.de/mailman/listinfo/plearn-developers">http://lists.berlios.de/mailman/listinfo/plearn-developers</A>
+</I>&gt;&gt;<i>   
+</I>&gt;<i>
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000097.html">[Plearn-developers] PCA Missings Imputation
+</A></li>
+	<LI>Next message: <A HREF="000099.html">[Plearn-developers] PCA Missings Imputation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#98">[ date ]</a>
+              <a href="thread.html#98">[ thread ]</a>
+              <a href="subject.html#98">[ subject ]</a>
+              <a href="author.html#98">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

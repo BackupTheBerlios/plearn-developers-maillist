@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Compiler Warnings
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-February/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Compiler%20Warnings&In-Reply-To=%3C43EB6B1E.3080907%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000055.html">
+   <LINK REL="Next"  HREF="000057.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Compiler Warnings</H1>
+    <B>Nicolas Chapados</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Compiler%20Warnings&In-Reply-To=%3C43EB6B1E.3080907%40apstat.com%3E"
+       TITLE="[Plearn-developers] Compiler Warnings">chapados at apstat.com
+       </A><BR>
+    <I>Thu Feb  9 17:17:34 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000055.html">[Plearn-developers] Named logging in PLearn
+</A></li>
+        <LI>Next message: <A HREF="000057.html">[Plearn-developers] SVN links
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#56">[ date ]</a>
+              <a href="thread.html#56">[ thread ]</a>
+              <a href="subject.html#56">[ subject ]</a>
+              <a href="author.html#56">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello all PLearners,
+
+I would like to emphasize one more time that COMPILER WARNINGS are not 
+generally acceptable for code committed into PLearn.  You should always 
+compile at the highest warning level and make sure that code &quot;compiles 
+cleanly&quot;. 
+
+Incidentally (no finger pointing, just a little friendly teaching), this 
+morning I was recompiling after a PLearn update, and I stumble upon:
+
+BallTreeNearestNeighbors.cc : /home/chapados/PLearn/plearn_learners/nearest_neighbors/BallTreeNearestNeighbors.cc: In
+   member function `virtual void 
+   PLearn::BallTreeNearestNeighbors::BallKNN(std::priority_queue&lt;std::pair&lt;double,
+   int&gt;, std::vector&lt;std::pair&lt;double, int&gt;, std::allocator&lt;std::pair&lt;double, 
+   int&gt; &gt; &gt;, std::less&lt;std::pair&lt;double, int&gt; &gt; &gt;&amp;, 
+   PLearn::PP&lt;PLearn::BinaryBallTree&gt;, const PLearn::Vec&amp;, double&amp;, double, 
+   int) const':
+/home/chapados/PLearn/plearn_learners/nearest_neighbors/BallTreeNearestNeighbors.cc:746: warning: comparison
+   between signed and unsigned integer expressions
+
+This happens on the following code:
+
+void BallTreeNearestNeighbors::BallKNN(
+     priority_queue&lt; pair&lt;real,int&gt; &gt;&amp; q, BinBallTree node,
+     const Vec&amp; t, real&amp; d2_sofar, real d2_pivot, const int k ) const
+{
+	// ...
+                if( q.size() &gt; k )
+                {
+                    q.pop();
+                    d2_sofar = q.top().first;
+                }
+}
+
+OK, this happens of course because all STL containers return size_t 
+(some unsigned type) for size().  Should we fix this as:
+
+	if (int(q.size()) &gt; k) { }
+
+or
+
+	if (q.size() &gt; unsigned(k)) { }
+
+???
+
+Notice what happens if k==-1.  In the second case, this is converted to 
+(assuming a 32-bit machine) 0xFFFFFFFF, which is the LARGEST unsigned 
+integer!  Hence the &quot;if&quot; in the second case is always false. 
+
+Moral of the story, you should cast from unsigned to signed (in that 
+direction), and PLEASE DON'T COMMIT CODE THAT CONTAINS WARNINGS.
+
+    Thanks and happy PLearning,
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000055.html">[Plearn-developers] Named logging in PLearn
+</A></li>
+	<LI>Next message: <A HREF="000057.html">[Plearn-developers] SVN links
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#56">[ date ]</a>
+              <a href="thread.html#56">[ thread ]</a>
+              <a href="subject.html#56">[ subject ]</a>
+              <a href="author.html#56">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

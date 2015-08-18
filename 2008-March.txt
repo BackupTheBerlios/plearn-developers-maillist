@@ -1,0 +1,407 @@
+From delallea at iro.umontreal.ca  Fri Mar  7 17:52:13 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 7 Mar 2008 11:52:13 -0500
+Subject: [Plearn-developers] Changement a la syntaxe python pour
+	vmat.getFieldIndex
+Message-ID: <20080307165212.GA7360@opale.iro.umontreal.ca>
+
+Salut,
+
+Juste pour vous dire que si vous utilisez la (remote-declared) methode
+VMatrix.getFieldIndex(field) dans un script Python, il faut maintenant
+rajouter un second argument pour indiquer si on veut lancer une erreur
+quand le champ 'field' n'existe pas :
+    - True => erreur
+    - False => pas d'erreur (retourne -1)
+
+Vu que cette methode n'a ete declaree remote que recemment (par
+moi-meme), je me suis permis de le faire en esperant que ca ne cassera
+pas grand-chose :)
+
+--
+Olivier
+
+PS: a quand les valeurs par defaut ?
+
+
+From saintmlx at apstat.com  Fri Mar  7 19:22:35 2008
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Fri, 07 Mar 2008 13:22:35 -0500
+Subject: [Plearn-developers] Changement a la syntaxe python
+	pour	vmat.getFieldIndex
+In-Reply-To: <20080307165212.GA7360@opale.iro.umontreal.ca>
+References: <20080307165212.GA7360@opale.iro.umontreal.ca>
+Message-ID: <47D187EB.9040200@apstat.com>
+
+Pour ce qui est des valeurs par d?faut, ce n'est pas trivial et ?a 
+risque de ne pas ?tre fait avant longtemps.  Sinon, pourquoi ne pas 
+simplement d?crarer fieldIndex remote? ?a renvoie d?j? -1 pour les 
+champs qui n'existent pas (et getFieldIndex l'utilise.)  Autrement, il 
+me semble qu'un try/except serait appropri? au lieu de toujours avoir ? 
+passer un bool?en en plus, non?
+
+Xavier
+
+PS: m?me si c'est r?cent, j'utilise d?j? beaucoup getFieldIndex...
+
+
+Olivier Delalleau wrote:
+> Salut,
+>
+> Juste pour vous dire que si vous utilisez la (remote-declared) methode
+> VMatrix.getFieldIndex(field) dans un script Python, il faut maintenant
+> rajouter un second argument pour indiquer si on veut lancer une erreur
+> quand le champ 'field' n'existe pas :
+>     - True => erreur
+>     - False => pas d'erreur (retourne -1)
+>
+> Vu que cette methode n'a ete declaree remote que recemment (par
+> moi-meme), je me suis permis de le faire en esperant que ca ne cassera
+> pas grand-chose :)
+>
+> --
+> Olivier
+>
+> PS: a quand les valeurs par defaut ?
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>   
+
+
+
+From delallea at iro.umontreal.ca  Fri Mar  7 20:10:30 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 7 Mar 2008 14:10:30 -0500
+Subject: [Plearn-developers] Changement a la syntaxe python
+	pour	vmat.getFieldIndex
+In-Reply-To: <47D187EB.9040200@apstat.com>
+References: <20080307165212.GA7360@opale.iro.umontreal.ca>
+	<47D187EB.9040200@apstat.com>
+Message-ID: <20080307191030.GA11606@opale.iro.umontreal.ca>
+
+En fait j'esperais que les valeurs par defaut allaient etre arrangees
+plus tot que ca, ce qui aurait regle le probleme du booleen en plus ;)
+J'esperais aussi que + ou - personne n'utilisait vraiment getFieldIndex,
+mais je voulais justement verifier. Je n'aime pas trop le try/except
+car je pense que le comportement "sans erreur" est suffisamment utile
+pour meriter une syntaxe plus lisible.
+
+Je serais ok pour revenir au comportement precedent et avoir fieldIndex
+et getFieldIndex, mais est-ce que ce ne serait pas une bonne occasion
+pour trouver un meilleur nom ? (la difference entre les deux n'est
+vraiment pas evidente a premiere vue...).
+Peut-etre qu'on pourrait avoir :
+    - getFieldIndex(name/num): comme avant, avec PLERROR potentiel
+    - checkFieldIndex(name) <--> fieldIndex (i.e -1 si n'existe pas)
+
+Qqun a une objection / une meilleure idee ?
+
+--
+Olivier
+
+On 07 Mar 2008, Xavier Saint-Mleux wrote:
+> Pour ce qui est des valeurs par d?faut, ce n'est pas trivial et ?a risque 
+> de ne pas ?tre fait avant longtemps.  Sinon, pourquoi ne pas simplement 
+> d?crarer fieldIndex remote? ?a renvoie d?j? -1 pour les champs qui 
+> n'existent pas (et getFieldIndex l'utilise.)  Autrement, il me semble qu'un 
+> try/except serait appropri? au lieu de toujours avoir ? passer un 
+> bool?en en plus, non?
+>
+> Xavier
+>
+> PS: m?me si c'est r?cent, j'utilise d?j? beaucoup getFieldIndex...
+>
+>
+> Olivier Delalleau wrote:
+>> Salut,
+>>
+>> Juste pour vous dire que si vous utilisez la (remote-declared) methode
+>> VMatrix.getFieldIndex(field) dans un script Python, il faut maintenant
+>> rajouter un second argument pour indiquer si on veut lancer une erreur
+>> quand le champ 'field' n'existe pas :
+>>     - True => erreur
+>>     - False => pas d'erreur (retourne -1)
+>>
+>> Vu que cette methode n'a ete declaree remote que recemment (par
+>> moi-meme), je me suis permis de le faire en esperant que ca ne cassera
+>> pas grand-chose :)
+>>
+>> --
+>> Olivier
+>>
+>> PS: a quand les valeurs par defaut ?
+>> _______________________________________________
+>> Plearn-developers mailing list
+>> Plearn-developers at lists.berlios.de
+>> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>>   
+
+
+From saintmlx at apstat.com  Fri Mar  7 20:44:28 2008
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Fri, 07 Mar 2008 14:44:28 -0500
+Subject: [Plearn-developers] Changement a la syntaxe
+	python	pour	vmat.getFieldIndex
+In-Reply-To: <20080307191030.GA11606@opale.iro.umontreal.ca>
+References: <20080307165212.GA7360@opale.iro.umontreal.ca>	<47D187EB.9040200@apstat.com>
+	<20080307191030.GA11606@opale.iro.umontreal.ca>
+Message-ID: <47D19B1C.5010805@apstat.com>
+
+? titre d'exemple, pour les strings python la m?thode find renvoie -1 
+pour les caract?res non pr?sents alors que la m?thode index l?ve une 
+ValueError (http://docs.python.org/lib/string-methods.html).  Pour la 
+STL, il n'y a que des find qui renvoient end() ou string::npos.  Si on 
+veut suivre cette "convention", ?a nous fait e.g. findField --> -1 et 
+fieldIndex --> PLERROR; par contre, ?a foutrait encore plus le bordel 
+par rapport ? ce qu'on a d?j? dans PLearn...
+
+Je n'ai pas vraiment de meilleure id?e, alors je te laisse d?cider 
+quelle option est la "moins pire". 
+
+Xavier
+
+Olivier Delalleau wrote:
+> En fait j'esperais que les valeurs par defaut allaient etre arrangees
+> plus tot que ca, ce qui aurait regle le probleme du booleen en plus ;)
+> J'esperais aussi que + ou - personne n'utilisait vraiment getFieldIndex,
+> mais je voulais justement verifier. Je n'aime pas trop le try/except
+> car je pense que le comportement "sans erreur" est suffisamment utile
+> pour meriter une syntaxe plus lisible.
+>
+> Je serais ok pour revenir au comportement precedent et avoir fieldIndex
+> et getFieldIndex, mais est-ce que ce ne serait pas une bonne occasion
+> pour trouver un meilleur nom ? (la difference entre les deux n'est
+> vraiment pas evidente a premiere vue...).
+> Peut-etre qu'on pourrait avoir :
+>     - getFieldIndex(name/num): comme avant, avec PLERROR potentiel
+>     - checkFieldIndex(name) <--> fieldIndex (i.e -1 si n'existe pas)
+>
+> Qqun a une objection / une meilleure idee ?
+>
+> --
+> Olivier
+>
+> On 07 Mar 2008, Xavier Saint-Mleux wrote:
+>   
+>> Pour ce qui est des valeurs par d?faut, ce n'est pas trivial et ?a risque 
+>> de ne pas ?tre fait avant longtemps.  Sinon, pourquoi ne pas simplement 
+>> d?crarer fieldIndex remote? ?a renvoie d?j? -1 pour les champs qui 
+>> n'existent pas (et getFieldIndex l'utilise.)  Autrement, il me semble qu'un 
+>> try/except serait appropri? au lieu de toujours avoir ? passer un 
+>> bool?en en plus, non?
+>>
+>> Xavier
+>>
+>> PS: m?me si c'est r?cent, j'utilise d?j? beaucoup getFieldIndex...
+>>
+>>
+>> Olivier Delalleau wrote:
+>>     
+>>> Salut,
+>>>
+>>> Juste pour vous dire que si vous utilisez la (remote-declared) methode
+>>> VMatrix.getFieldIndex(field) dans un script Python, il faut maintenant
+>>> rajouter un second argument pour indiquer si on veut lancer une erreur
+>>> quand le champ 'field' n'existe pas :
+>>>     - True => erreur
+>>>     - False => pas d'erreur (retourne -1)
+>>>
+>>> Vu que cette methode n'a ete declaree remote que recemment (par
+>>> moi-meme), je me suis permis de le faire en esperant que ca ne cassera
+>>> pas grand-chose :)
+>>>
+>>> --
+>>> Olivier
+>>>
+>>> PS: a quand les valeurs par defaut ?
+>>> _______________________________________________
+>>> Plearn-developers mailing list
+>>> Plearn-developers at lists.berlios.de
+>>> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>>>   
+>>>       
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>   
+
+
+
+From delallea at iro.umontreal.ca  Fri Mar  7 20:50:57 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 7 Mar 2008 14:50:57 -0500
+Subject: [Plearn-developers] Changement a la syntaxe python
+	pour	vmat.getFieldIndex
+In-Reply-To: <47D19B1C.5010805@apstat.com>
+References: <20080307165212.GA7360@opale.iro.umontreal.ca>
+	<47D187EB.9040200@apstat.com>
+	<20080307191030.GA11606@opale.iro.umontreal.ca>
+	<47D19B1C.5010805@apstat.com>
+Message-ID: <20080307195057.GA12784@opale.iro.umontreal.ca>
+
+Ok merci, je pense que je vais aller pour :
+    - getFieldIndex (pour rester backward-compatible et proche de
+      PLearn)   <---> getFieldIndex
+    - findFieldIndex (pour l'idee qu'un find peut renvoyer -1 quand on
+      echoue)   <---> fieldIndex
+
+--
+Olivier
+
+On 07 Mar 2008, Xavier Saint-Mleux wrote:
+> ? titre d'exemple, pour les strings python la m?thode find renvoie -1 
+> pour les caract?res non pr?sents alors que la m?thode index l?ve une 
+> ValueError (http://docs.python.org/lib/string-methods.html).  Pour la STL, 
+> il n'y a que des find qui renvoient end() ou string::npos.  Si on veut 
+> suivre cette "convention", ?a nous fait e.g. findField --> -1 et 
+> fieldIndex --> PLERROR; par contre, ?a foutrait encore plus le bordel par 
+> rapport ? ce qu'on a d?j? dans PLearn...
+>
+> Je n'ai pas vraiment de meilleure id?e, alors je te laisse d?cider quelle 
+> option est la "moins pire". 
+> Xavier
+>
+> Olivier Delalleau wrote:
+>> En fait j'esperais que les valeurs par defaut allaient etre arrangees
+>> plus tot que ca, ce qui aurait regle le probleme du booleen en plus ;)
+>> J'esperais aussi que + ou - personne n'utilisait vraiment getFieldIndex,
+>> mais je voulais justement verifier. Je n'aime pas trop le try/except
+>> car je pense que le comportement "sans erreur" est suffisamment utile
+>> pour meriter une syntaxe plus lisible.
+>>
+>> Je serais ok pour revenir au comportement precedent et avoir fieldIndex
+>> et getFieldIndex, mais est-ce que ce ne serait pas une bonne occasion
+>> pour trouver un meilleur nom ? (la difference entre les deux n'est
+>> vraiment pas evidente a premiere vue...).
+>> Peut-etre qu'on pourrait avoir :
+>>     - getFieldIndex(name/num): comme avant, avec PLERROR potentiel
+>>     - checkFieldIndex(name) <--> fieldIndex (i.e -1 si n'existe pas)
+>>
+>> Qqun a une objection / une meilleure idee ?
+>>
+>> --
+>> Olivier
+>>
+>> On 07 Mar 2008, Xavier Saint-Mleux wrote:
+>>   
+>>> Pour ce qui est des valeurs par d?faut, ce n'est pas trivial et ?a 
+>>> risque de ne pas ?tre fait avant longtemps.  Sinon, pourquoi ne pas 
+>>> simplement d?crarer fieldIndex remote? ?a renvoie d?j? -1 pour les 
+>>> champs qui n'existent pas (et getFieldIndex l'utilise.)  Autrement, il me 
+>>> semble qu'un try/except serait appropri? au lieu de toujours avoir ? 
+>>> passer un bool?en en plus, non?
+>>>
+>>> Xavier
+>>>
+>>> PS: m?me si c'est r?cent, j'utilise d?j? beaucoup getFieldIndex...
+>>>
+>>>
+>>> Olivier Delalleau wrote:
+>>>     
+>>>> Salut,
+>>>>
+>>>> Juste pour vous dire que si vous utilisez la (remote-declared) methode
+>>>> VMatrix.getFieldIndex(field) dans un script Python, il faut maintenant
+>>>> rajouter un second argument pour indiquer si on veut lancer une erreur
+>>>> quand le champ 'field' n'existe pas :
+>>>>     - True => erreur
+>>>>     - False => pas d'erreur (retourne -1)
+>>>>
+>>>> Vu que cette methode n'a ete declaree remote que recemment (par
+>>>> moi-meme), je me suis permis de le faire en esperant que ca ne cassera
+>>>> pas grand-chose :)
+>>>>
+>>>> --
+>>>> Olivier
+>>>>
+>>>> PS: a quand les valeurs par defaut ?
+>>>> _______________________________________________
+>>>> Plearn-developers mailing list
+>>>> Plearn-developers at lists.berlios.de
+>>>> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>>>>         
+>> _______________________________________________
+>> Plearn-developers mailing list
+>> Plearn-developers at lists.berlios.de
+>> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>>   
+
+
+From chapados at iro.umontreal.ca  Fri Mar  7 20:43:39 2008
+From: chapados at iro.umontreal.ca (chapados at iro.umontreal.ca)
+Date: Fri, 07 Mar 2008 14:43:39 -0500
+Subject: [Plearn-developers] Changement a la syntaxe python
+	pour	vmat.getFieldIndex
+In-Reply-To: <20080307191030.GA11606@opale.iro.umontreal.ca>
+References: <20080307165212.GA7360@opale.iro.umontreal.ca>
+	<47D187EB.9040200@apstat.com>
+	<20080307191030.GA11606@opale.iro.umontreal.ca>
+Message-ID: <20080307144339.3gcf9fw8gsc8ooso@webmail.iro.umontreal.ca>
+
+Je ne me prononce pas sur les noms de fonction (car je ne les utilise 
+pas), mais
+Xavier a raison que l'overload de m?thodes remote-callable est un tantinet
+compliqu?.  Sans trop de mal (mais c'est juste un peu chiant) on pourrait
+permettre un overload sur le nombre d'arguments, mais pour aller jusqu'? un
+overload sur le type (ou pis, des conversions automatiques de type) l? ?a se
+complique lourdement.
+
+Pour ce qui est de permettre des arguments par d?faut, l'id?e serait justement
+de passer par des overloads sur le nombre d'arguments, car (au niveau de la
+d?finition des m?thodes remote-callable dans les classes PLearn) il n'est pas
+possible de retourner de pointeur ? une fonction-membre sujette ? currying en
+C++ (mais il y a peut-?tre quelque chose dans Boost pour ce faire -- faudrait
+regarder).
+
+    + Nicolas
+
+
+P.S. Pour Xavier et autres techies. On peut permettre l'overload sur le nombre
+d'arguments de la mani?re suivante: il suffit de permettre ? declareMethod
+d'enregistrer plusieurs m?thodes du m?me nom, et de modifier les trampolines
+afin qu'elles sauvegardent le nombre d'arguments de la fonction avec laquelle
+elles ont ?t? instanci?es.  Ensuite lorsqu'un dispatch est fait ? une
+m?thode de nom X, on regarde le nombre effectif d'arguments qui est pass?
+(cet entier est le premier objet ? suivre le nom de m?thode sur le PStream,
+si je me souviens bien), on trouve la m?thode du bon nom avec le bon nombre
+d'arguments, et on appelle la trampoline.  Pour permettre les overloads par
+type, la solution la plus simple (mais la moins ?l?gante, et la plus lente),
+est de faire une s?rie d'appels ? toutes les trampolines ayant le bon nombre
+d'arguments, en les entourant dans des try/catch.  Si un argument donn? ne
+peut d?s?rialiser (car il n'a pas le bon type), on essaie la m?thode
+suivante.  ?videmment, ?a ralentit ?norm?ment le method-dispatch, pour des
+b?n?fices douteux ? mon humble (hum!) avis.
+
+
+Quoting Olivier Delalleau <delallea at iro.umontreal.ca>:
+
+> En fait j'esperais que les valeurs par defaut allaient etre arrangees
+> plus tot que ca, ce qui aurait regle le probleme du booleen en plus ;)
+> J'esperais aussi que + ou - personne n'utilisait vraiment getFieldIndex,
+> mais je voulais justement verifier. Je n'aime pas trop le try/except
+> car je pense que le comportement "sans erreur" est suffisamment utile
+> pour meriter une syntaxe plus lisible.
+>
+> Je serais ok pour revenir au comportement precedent et avoir fieldIndex
+> et getFieldIndex, mais est-ce que ce ne serait pas une bonne occasion
+> pour trouver un meilleur nom ? (la difference entre les deux n'est
+> vraiment pas evidente a premiere vue...).
+> Peut-etre qu'on pourrait avoir :
+>    - getFieldIndex(name/num): comme avant, avec PLERROR potentiel
+>    - checkFieldIndex(name) <--> fieldIndex (i.e -1 si n'existe pas)
+>
+> Qqun a une objection / une meilleure idee ?
+>
+> --
+> Olivier
+>
+
+
+----------------------------------------------------------------
+This message was sent using IMP, the Internet Messaging Program.
+
+
+

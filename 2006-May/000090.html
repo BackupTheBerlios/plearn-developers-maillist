@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Logging in Optimizers
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-May/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Logging%20in%20Optimizers&In-Reply-To=%3C447B4933.105%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000089.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Logging in Optimizers</H1>
+    <B>Nicolas Chapados</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Logging%20in%20Optimizers&In-Reply-To=%3C447B4933.105%40apstat.com%3E"
+       TITLE="[Plearn-developers] Logging in Optimizers">chapados at apstat.com
+       </A><BR>
+    <I>Mon May 29 21:19:15 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000089.html">[Plearn-developers] Advertisement: NEW! plearn/base/tuple.h
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#90">[ date ]</a>
+              <a href="thread.html#90">[ thread ]</a>
+              <a href="subject.html#90">[ subject ]</a>
+              <a href="author.html#90">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello all,
+
+This is just to inform you of a small change I made to GradientOptimizer 
+and ConjGradientOptimizer: logging is now carried out through named 
+logs, in order to facilitate sorting out the bunch of output messages 
+that may come out of a PLearn run.
+
+SO, in order to view the progress of your optimization, as before you 
+need to set the optimizer verbosity to 1 or 2, and IN ADDITION, you need 
+to invoke PLearn with the option:
+
+	plearn --enable-logging GradientOptimizer,ConjGradientOptimizer [my-script.plearn]
+
+
+Note that if you only use either of GradientOptimizer or 
+ConjGradientOptimizer, you may omit the other enable-logging in the 
+above invocation.
+
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000089.html">[Plearn-developers] Advertisement: NEW! plearn/base/tuple.h
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#90">[ date ]</a>
+              <a href="thread.html#90">[ thread ]</a>
+              <a href="subject.html#90">[ subject ]</a>
+              <a href="author.html#90">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

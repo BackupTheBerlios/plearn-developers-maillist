@@ -1,0 +1,81 @@
+From delallea at iro.umontreal.ca  Fri Dec 16 16:53:14 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 16 Dec 2005 10:53:14 -0500
+Subject: [Plearn-developers] Renamed options and variables in PDistribution
+Message-ID: <20051216155314.GA23915@lsvm.iro.umontreal.ca>
+
+Heya,
+
+This is hopefully the last big non-backward-compatible change in the
+PDistribution class. In order to remove confusion in options and
+variables names, I have renamed some of them. If you are using a
+PDistribution that is not in the PLearn repository, or a saved
+PDistribution in a PLearn script, you must:
+
+I. In C++ code, rename (old => new):
+    n_input             => n_predictor
+    n_target            => n_predicted
+    n_input_            => predictor_size
+    n_target_           => predicted_size
+    input_part          => predictor_part
+    target_part         => predicted_part
+    setInputTargetSizes => setPredictorPredictedSizes
+    setInput            => setPredictor
+
+II. In PLearn scripts, rename (old => new):
+    n_input             => predictor_size
+    n_target            => predicted_size
+    input_part          => predictor_part
+    n_input_learnt      => n_predictor
+    n_target_learnt     => n_predicted
+
+--
+Olivier
+
+
+From delallea at iro.umontreal.ca  Wed Dec 21 16:32:50 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Wed, 21 Dec 2005 10:32:50 -0500
+Subject: [Plearn-developers] PLearn, SAS and NSPR DLL crash under Windows
+Message-ID: <20051221153250.GA11894@lsvm.iro.umontreal.ca>
+
+This email is mainly meant for archive, in case it might help a future
+user of PLearn under Windows.
+When trying to build a DLL with PLearn code that could be called within
+SAS, I experienced a crash of SAS after the DLL code returned.
+I was using the NSPR DLL build from:
+ftp://ftp.mozilla.org/pub/mozilla.org/nspr/releases/v4.6/WINNT5.0_OPT.OBJ/
+
+The solution is instead to use the more generic Win32 build from:
+ftp://ftp.mozilla.org/pub/mozilla.org/nspr/releases/v4.6/WIN954.0_OPT.OBJ/
+
+If anyone is interested, such a crash can be triggered by writing a DLL
+function that looks like:
+
+#include <mozilla/nspr/prio.h>
+extern "C" {
+void test_function () {
+    PR_STDOUT;
+    return;
+}
+}
+
+then calling it within SAS with the SAS program:
+
+filename sascbtbl 'C:\tmp\test_dll.dat';
+data _null_;
+  call module('*i', 'test_dll,test_function');
+run;
+
+Where 'C:\tmp\test_dll.dat' contains:
+
+routine test_function
+minarg=0
+maxarg=0
+CALLSEQ=BYVALUE
+MODULE=test_dll;
+
+--
+Olivier
+
+

@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Drop support of python2.3?
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2009-March/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Drop%20support%20of%20python2.3%3F&In-Reply-To=%3C2d1d7fe70903041132g3cb52256wd7156a32eb8e3e0b%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000215.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Drop support of python2.3?</H1>
+    <B>Fr&#233;d&#233;ric Bastien</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Drop%20support%20of%20python2.3%3F&In-Reply-To=%3C2d1d7fe70903041132g3cb52256wd7156a32eb8e3e0b%40mail.gmail.com%3E"
+       TITLE="[Plearn-developers] Drop support of python2.3?">nouiz at nouiz.org
+       </A><BR>
+    <I>Wed Mar  4 20:32:18 CET 2009</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000215.html">[Plearn-developers] Drop support of python2.3?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#214">[ date ]</a>
+              <a href="thread.html#214">[ thread ]</a>
+              <a href="subject.html#214">[ subject ]</a>
+              <a href="author.html#214">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+I have modified PLearn to be able to link again python 2.6. It is
+work, with one exception that make the test fail. We have this
+DeprecationWarning that is generated as we use popen2 that is
+deprecated. We could use the subprocess instead, but it was added in
+python 2.4. So is their anybody with objection that we don't officialy
+support python2.3 to allow using python 2.6? Do you know how to use
+the subprocess package on python 2.3?
+
+Here is the warning:
+
+/home/bastienf/PLearn/python_modules/plearn/utilities/toolkit.py:8: DeprecationW
+arning: The popen2 module is deprecated.  Use the subprocess module.
+  import inspect, os, popen2, shutil, string, sys, time, types
+
+We need to use python2.6 the new mammouth serie.
+
+thanks
+
+Fred
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000215.html">[Plearn-developers] Drop support of python2.3?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#214">[ date ]</a>
+              <a href="thread.html#214">[ thread ]</a>
+              <a href="subject.html#214">[ subject ]</a>
+              <a href="author.html#214">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,232 @@
+From delallea at iro.umontreal.ca  Mon May  5 19:05:25 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Mon, 5 May 2008 13:05:25 -0400
+Subject: [Plearn-developers] Processing macros when reading pyplearn scripts
+Message-ID: <20080505170522.GA7593@opale.iro.umontreal.ca>
+
+In plearn/io/PyPLearnScript.cc, line 307:
+    PStream is     = openString( plearn_script, PStream::raw_ascii );
+    time_t latest  = 0 ;
+    plearn_script  = readAndMacroProcess( is, vars, latest );
+
+Is there a good reason to process macros in Python scripts? It can
+create some issues if we have some code that manipulates characters like
+${}.
+An example is when trying to create a PPath with an environment variable
+in it, since the syntax of a PPath environment variable is the same as a
+.plearn script macro definition (${VAR}), the program crashes when
+trying to convert ${VAR} since no such macro exists.
+
+Since it should be much easier (and cleaner) to deal with variables in
+Python rather than generate the corresponding .plearn scripting syntax,
+there seems to be little point in the current implementation: I'd rather
+skip the macro processing part. Any objection/thought?
+
+--
+Olivier
+
+
+
+From pascal at apstat.com  Mon May  5 19:42:52 2008
+From: pascal at apstat.com (Pascal Vincent)
+Date: Mon, 5 May 2008 13:42:52 -0400
+Subject: [Plearn-developers] Processing macros when reading pyplearn
+	scripts
+In-Reply-To: <20080505170522.GA7593@opale.iro.umontreal.ca>
+References: <20080505170522.GA7593@opale.iro.umontreal.ca>
+Message-ID: <B00C9574-303D-4F04-862B-91D03B78DD78@apstat.com>
+
+
+Le 08-05-05 ? 13:05, Olivier Delalleau a ?crit :
+
+> In plearn/io/PyPLearnScript.cc, line 307:
+>     PStream is     = openString( plearn_script, PStream::raw_ascii );
+>     time_t latest  = 0 ;
+>     plearn_script  = readAndMacroProcess( is, vars, latest );
+>
+> Is there a good reason to process macros in Python scripts? It can
+> create some issues if we have some code that manipulates characters  
+> like
+> ${}.
+> An example is when trying to create a PPath with an environment  
+> variable
+> in it, since the syntax of a PPath environment variable is the same  
+> as a
+> .plearn script macro definition (${VAR}), the program crashes when
+> trying to convert ${VAR} since no such macro exists.
+>
+> Since it should be much easier (and cleaner) to deal with variables in
+> Python rather than generate the corresponding .plearn scripting  
+> syntax,
+> there seems to be little point in the current implementation: I'd  
+> rather
+> skip the macro processing part. Any objection/thought?
+
+I'm not sure I understand the issue very well, but my spontaneous  
+reasoning is the following:
+a) we surely do not want to plearn-macro-process python scripts per se.
+b) but my understanding is that the .pyplearn brand of python scripts  
+"outputs" a .plearn object description, and we *should* macro-process  
+this *output* (but clearly not the python script that produces the  
+output...)
+c) of course this doesn't apply for the "python-extension" kinds of  
+scripts (that do not produce a .plearn object description)
+
+I believe the macro-processing to be useful in this case b),  
+especially for .pyplearn scripts that need to 'include' or otherwise  
+interact with some legacy .plearn script.
+
+Now if the PPath system clashes with straight .plearn preprocessing,  
+this is a different kind of problem, that shouldn't be...
+
+
+-- Pascal
+
+
+
+From chapados at iro.umontreal.ca  Mon May  5 19:53:53 2008
+From: chapados at iro.umontreal.ca (chapados at iro.umontreal.ca)
+Date: Mon, 05 May 2008 13:53:53 -0400
+Subject: [Plearn-developers] Processing macros when reading
+	pyplearn	scripts
+In-Reply-To: <B00C9574-303D-4F04-862B-91D03B78DD78@apstat.com>
+References: <20080505170522.GA7593@opale.iro.umontreal.ca>
+	<B00C9574-303D-4F04-862B-91D03B78DD78@apstat.com>
+Message-ID: <20080505135353.7lvi45c1s0gg0g4g@webmail.iro.umontreal.ca>
+
+There are a few reasons why we want to macro-process the .plearn script that
+arises from the .pyplearn.  The main issue is that it is useful for
+"production" models to be in .plearn rather than .pyplearn, and those models
+need to refer to environment variables -- that may not be known at
+.pyplearn-time, but are required at .plearn-time.
+
+As to your particular issue, I'm not sure I fully understand it, but I 
+just want
+to emphasize that the generation of a .plearn from a .pyplearn may be quite
+temporally distant from the execution of the .plearn per se.
+
+    + Nicolas
+
+
+Quoting Pascal Vincent <pascal at apstat.com>:
+
+>
+> Le 08-05-05 =E0 13:05, Olivier Delalleau a =E9crit :
+>
+>> In plearn/io/PyPLearnScript.cc, line 307:
+>>     PStream is     =3D openString( plearn_script, PStream::raw_ascii );
+>>     time_t latest  =3D 0 ;
+>>     plearn_script  =3D readAndMacroProcess( is, vars, latest );
+>>
+>> Is there a good reason to process macros in Python scripts? It can
+>> create some issues if we have some code that manipulates characters  =
+>
+>> like
+>> ${}.
+>> An example is when trying to create a PPath with an environment  =
+>
+>> variable
+>> in it, since the syntax of a PPath environment variable is the same  =
+>
+>> as a
+>> .plearn script macro definition (${VAR}), the program crashes when
+>> trying to convert ${VAR} since no such macro exists.
+>>
+>> Since it should be much easier (and cleaner) to deal with variables in
+>> Python rather than generate the corresponding .plearn scripting  =
+>
+>> syntax,
+>> there seems to be little point in the current implementation: I'd  =
+>
+>> rather
+>> skip the macro processing part. Any objection/thought?
+>
+> I'm not sure I understand the issue very well, but my spontaneous  =
+>
+> reasoning is the following:
+> a) we surely do not want to plearn-macro-process python scripts per se.
+> b) but my understanding is that the .pyplearn brand of python scripts  =
+>
+> "outputs" a .plearn object description, and we *should* macro-process  =
+>
+> this *output* (but clearly not the python script that produces the  =
+>
+> output...)
+> c) of course this doesn't apply for the "python-extension" kinds of  =
+>
+> scripts (that do not produce a .plearn object description)
+>
+> I believe the macro-processing to be useful in this case b),  =
+>
+> especially for .pyplearn scripts that need to 'include' or otherwise  =
+>
+> interact with some legacy .plearn script.
+>
+> Now if the PPath system clashes with straight .plearn preprocessing,  =
+>
+> this is a different kind of problem, that shouldn't be...
+>
+>
+> -- Pascal
+>
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>
+
+
+
+----------------------------------------------------------------
+This message was sent using IMP, the Internet Messaging Program.
+
+
+
+From delallea at iro.umontreal.ca  Mon May  5 19:53:52 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Mon, 5 May 2008 13:53:52 -0400
+Subject: [Plearn-developers] Processing macros when reading
+	pyplearn	scripts
+In-Reply-To: <B00C9574-303D-4F04-862B-91D03B78DD78@apstat.com>
+References: <20080505170522.GA7593@opale.iro.umontreal.ca>
+	<B00C9574-303D-4F04-862B-91D03B78DD78@apstat.com>
+Message-ID: <20080505175352.GA8684@opale.iro.umontreal.ca>
+
+On 05 May 2008, Pascal Vincent wrote:
+> (...)
+> b) but my understanding is that the .pyplearn brand of python scripts  
+> "outputs" a .plearn object description, and we *should* macro-process  
+> this *output* (but clearly not the python script that produces the  
+> output...)
+> (...)
+>
+> I believe the macro-processing to be useful in this case b),  
+> especially for .pyplearn scripts that need to 'include' or otherwise  
+> interact with some legacy .plearn script.
+
+Ah, good point, I had forgotten about the '$INCLUDE' macro. I won't
+touch it then, since I don't really see any easy workaround.
+
+Thanks,
+
+--
+Olivier
+
+
+From nouiz at nouiz.org  Thu May 15 02:19:15 2008
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Wed, 14 May 2008 20:19:15 -0400
+Subject: [Plearn-developers] FilteredVMatrix had a bug
+Message-ID: <2d1d7fe70805141719r7e3c0699j5f404c4395dbf40b@mail.gmail.com>
+
+Hi,
+
+A bug was introduced in the rev 8829 the Thu, 17 Apr 2008. This bug
+caused all new file index to be completly not correlated to the truth.
+The bugfix have been commit a few minutes ago in rev 9004. So If in
+the past mounth you have used it, take the time to verify what
+correction you need to do.
+
+Fred
+
+

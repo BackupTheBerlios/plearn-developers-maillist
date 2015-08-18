@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Changes to StatsCollector and GaussMix
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Changes%20to%20StatsCollector%20and%20GaussMix&In-Reply-To=%3C20050719204839.GA16493%40lsvm.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000010.html">
+   <LINK REL="Next"  HREF="000012.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Changes to StatsCollector and GaussMix</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Changes%20to%20StatsCollector%20and%20GaussMix&In-Reply-To=%3C20050719204839.GA16493%40lsvm.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] Changes to StatsCollector and GaussMix">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Tue Jul 19 22:48:39 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000010.html">[Plearn-developers] Files moved to DEPRECATED directory
+</A></li>
+        <LI>Next message: <A HREF="000012.html">[Plearn-developers] Change in getCovariance() in VecStatsCollector
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11">[ date ]</a>
+              <a href="thread.html#11">[ thread ]</a>
+              <a href="subject.html#11">[ subject ]</a>
+              <a href="author.html#11">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Some more potentially important changes to our beloved PLearn:
+
+1. Normalization for variance computation in StatsCollector has been
+changed in order to provide an (hopefully) unbiased estimator even for
+weighted statistics. This should not change anything for non-weighted
+stats (e.g. costs computed on non-weighted datasets), but will most
+likely yield a different result when using weights.
+
+2. GaussMix is in the process to be modified to handle missing values.
+To this purpose, the K-Means algorithm has been slightly modified (for
+the best), and since it was (almost) the only place in training where
+random numbers were used, I also modified the code in order to use the
+new random numbers generator (and in the generate() method too). This
+means training GaussMix may now give somewhat different results. I don't
+believe many people were using it, but if you *really* need a 100%
+backward-compatible version of GaussMix, please ask me and I'll write
+one just for you because I love you so much.
+
+--
+Olivier, without any internet access until Friday
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000010.html">[Plearn-developers] Files moved to DEPRECATED directory
+</A></li>
+	<LI>Next message: <A HREF="000012.html">[Plearn-developers] Change in getCovariance() in VecStatsCollector
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#11">[ date ]</a>
+              <a href="thread.html#11">[ thread ]</a>
+              <a href="subject.html#11">[ subject ]</a>
+              <a href="author.html#11">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

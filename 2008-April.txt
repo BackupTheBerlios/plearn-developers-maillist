@@ -1,0 +1,1164 @@
+From delallea at iro.umontreal.ca  Fri Apr 11 16:04:46 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 11 Apr 2008 10:04:46 -0400
+Subject: [Plearn-developers] VMatrix in Python
+Message-ID: <20080411140444.GA21943@opale.iro.umontreal.ca>
+
+Hey,
+
+Can anyone point me to some ressource on how I can write a VMatrix in
+Python?
+
+--
+Olivier
+
+
+From delallea at iro.umontreal.ca  Fri Apr 11 16:17:01 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 11 Apr 2008 10:17:01 -0400
+Subject: [Plearn-developers] VMatrix in Python
+In-Reply-To: <20080411140444.GA21943@opale.iro.umontreal.ca>
+References: <20080411140444.GA21943@opale.iro.umontreal.ca>
+Message-ID: <20080411141701.GA22206@opale.iro.umontreal.ca>
+
+Found it! I was looking in plearn/vmat and python_modules/plearn but it
+was in plearn/python.
+
+--
+Olivier
+
+On 11 Apr 2008, Olivier Delalleau wrote:
+> Hey,
+> 
+> Can anyone point me to some ressource on how I can write a VMatrix in
+> Python?
+> 
+
+
+From delallea at iro.umontreal.ca  Fri Apr 11 16:50:29 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 11 Apr 2008 10:50:29 -0400
+Subject: [Plearn-developers] VMatrix in Python
+In-Reply-To: <20080411141701.GA22206@opale.iro.umontreal.ca>
+References: <20080411140444.GA21943@opale.iro.umontreal.ca>
+	<20080411141701.GA22206@opale.iro.umontreal.ca>
+Message-ID: <20080411145029.GA23101@opale.iro.umontreal.ca>
+
+Hmm, it's not so great, it looks like I don't have access to the source
+itself (I guess it was not possible when that class -
+PythonProcessedVMatrix - was written). Any tip?
+
+On 11 Apr 2008, Olivier Delalleau wrote:
+> Found it! I was looking in plearn/vmat and python_modules/plearn but it
+> was in plearn/python.
+> 
+>
+> On 11 Apr 2008, Olivier Delalleau wrote:
+> > Hey,
+> >
+> > Can anyone point me to some ressource on how I can write a VMatrix in
+> > Python?
+
+--
+Olivier
+
+
+From delallea at iro.umontreal.ca  Fri Apr 11 17:16:44 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 11 Apr 2008 11:16:44 -0400
+Subject: [Plearn-developers] VMatrix in Python
+In-Reply-To: <20080411145029.GA23101@opale.iro.umontreal.ca>
+References: <20080411140444.GA21943@opale.iro.umontreal.ca>
+	<20080411141701.GA22206@opale.iro.umontreal.ca>
+	<20080411145029.GA23101@opale.iro.umontreal.ca>
+Message-ID: <20080411151621.GA23616@opale.iro.umontreal.ca>
+
+Well, I tried to fool it and it almost works. Here is what I did:
+
+--- CODE for mydata.pymat ---
+
+from plearn.pyplearn import pl
+
+def main():
+    return pl.PythonProcessedVMatrix(
+        code_path = 'mydata.py',
+        source = pl.AutoVMatrix(        # Give source to make it happy.
+            filename = 'mydata.amat'))
+
+
+--- CODE GIVEN TO PythonProcessedVMatrix, stored in mydata.py ---
+
+def getSource():
+    global source
+    try:
+        return source
+    except:
+        from plearn.pyext import pl
+        source = pl.AutoVMatrix(filename = 'mydata.amat')
+        return source
+
+def getRow(row_no, source_row):
+    return getSource().getRow(row_no)
+
+def getFieldNames(source_field_names):
+    return [ str(i) for i in range(len(source_field_names)) ]
+
+--- PROBLEM ---
+
+Seems to crash somewhere in the garbage collector, when PLearn quits.
+Anything obvious to a Python/C++ guru?
+
+
+On 11 Apr 2008, Olivier Delalleau wrote:
+> Hmm, it's not so great, it looks like I don't have access to the source
+> itself (I guess it was not possible when that class -
+> PythonProcessedVMatrix - was written). Any tip?
+> 
+> On 11 Apr 2008, Olivier Delalleau wrote:
+> > Found it! I was looking in plearn/vmat and python_modules/plearn but it
+> > was in plearn/python.
+> > 
+> >
+> > On 11 Apr 2008, Olivier Delalleau wrote:
+> > > Hey,
+> > >
+> > > Can anyone point me to some ressource on how I can write a VMatrix in
+> > > Python?
+> 
+
+--
+Olivier
+
+
+From chapados at iro.umontreal.ca  Fri Apr 11 17:24:24 2008
+From: chapados at iro.umontreal.ca (chapados at iro.umontreal.ca)
+Date: Fri, 11 Apr 2008 11:24:24 -0400
+Subject: [Plearn-developers] VMatrix in Python
+In-Reply-To: <20080411151621.GA23616@opale.iro.umontreal.ca>
+References: <20080411140444.GA21943@opale.iro.umontreal.ca>
+	<20080411141701.GA22206@opale.iro.umontreal.ca>
+	<20080411145029.GA23101@opale.iro.umontreal.ca>
+	<20080411151621.GA23616@opale.iro.umontreal.ca>
+Message-ID: <20080411112424.yu0wj9cgkgkoock0@webmail.iro.umontreal.ca>
+
+Olivier,
+
+Je ne suis pas s?r de comprendre ton probl?me.  Ne peux-tu pas utiliser la
+fonction getSourceRow inject?e dans ton environnement Python par
+PythonProcessedVMatrix?  Regarde la doc...
+
+    + Nicolas
+
+
+Quoting Olivier Delalleau <delallea at iro.umontreal.ca>:
+
+> Well, I tried to fool it and it almost works. Here is what I did:
+>
+> --- CODE for mydata.pymat ---
+>
+> from plearn.pyplearn import pl
+>
+> def main():
+>    return pl.PythonProcessedVMatrix(
+>        code_path = 'mydata.py',
+>        source = pl.AutoVMatrix(        # Give source to make it happy.
+>            filename = 'mydata.amat'))
+>
+>
+> --- CODE GIVEN TO PythonProcessedVMatrix, stored in mydata.py ---
+>
+> def getSource():
+>    global source
+>    try:
+>        return source
+>    except:
+>        from plearn.pyext import pl
+>        source = pl.AutoVMatrix(filename = 'mydata.amat')
+>        return source
+>
+> def getRow(row_no, source_row):
+>    return getSource().getRow(row_no)
+>
+> def getFieldNames(source_field_names):
+>    return [ str(i) for i in range(len(source_field_names)) ]
+>
+> --- PROBLEM ---
+>
+> Seems to crash somewhere in the garbage collector, when PLearn quits.
+> Anything obvious to a Python/C++ guru?
+>
+>
+> On 11 Apr 2008, Olivier Delalleau wrote:
+>> Hmm, it's not so great, it looks like I don't have access to the source
+>> itself (I guess it was not possible when that class -
+>> PythonProcessedVMatrix - was written). Any tip?
+>>
+>> On 11 Apr 2008, Olivier Delalleau wrote:
+>> > Found it! I was looking in plearn/vmat and python_modules/plearn but it
+>> > was in plearn/python.
+>> >
+>> >
+>> > On 11 Apr 2008, Olivier Delalleau wrote:
+>> > > Hey,
+>> > >
+>> > > Can anyone point me to some ressource on how I can write a VMatrix in
+>> > > Python?
+>>
+>
+> --
+> Olivier
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>
+
+
+
+----------------------------------------------------------------
+This message was sent using IMP, the Internet Messaging Program.
+
+
+
+From delallea at iro.umontreal.ca  Fri Apr 11 17:33:39 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 11 Apr 2008 11:33:39 -0400
+Subject: [Plearn-developers] VMatrix in Python
+In-Reply-To: <20080411112424.yu0wj9cgkgkoock0@webmail.iro.umontreal.ca>
+References: <20080411140444.GA21943@opale.iro.umontreal.ca>
+	<20080411141701.GA22206@opale.iro.umontreal.ca>
+	<20080411145029.GA23101@opale.iro.umontreal.ca>
+	<20080411151621.GA23616@opale.iro.umontreal.ca>
+	<20080411112424.yu0wj9cgkgkoock0@webmail.iro.umontreal.ca>
+Message-ID: <20080411153339.GB24237@opale.iro.umontreal.ca>
+
+Oui, dans mon exemple bidon, je le pourrais, mais je voudrais avoir
+acc?s ? des m?thodes / champs de la VMat qui ne sont pas inject?es dans
+mon environnment Python.
+
+Au fait ?a crashe quand il essaie de supprimer un objet python de type
+AutoVMatrix:
+
+/u/delallea/.PLearn.NOBACKUP/plearn/python/PythonObjectWrapper.cc:450
+(gdb) l
+445
+446         string classname= obj->classname();
+447         pypl_classes_t::iterator clit= m_pypl_classes.find(classname);
+448         if(clit == m_pypl_classes.end())
+449             PLERROR("in PythonObjectWrapper::python_del : "
+450                     "deleting obj. for which no python class exists!");
+451         --clit->second.nref;
+
+(ici classname == AutoVMatrix)
+
+
+On 11 Apr 2008, chapados at iro.umontreal.ca wrote:
+> Olivier,
+>
+> Je ne suis pas s?r de comprendre ton probl?me.  Ne peux-tu pas utiliser la
+> fonction getSourceRow inject?e dans ton environnement Python par
+> PythonProcessedVMatrix?  Regarde la doc...
+>
+>    + Nicolas
+>
+>
+> Quoting Olivier Delalleau <delallea at iro.umontreal.ca>:
+>
+>> Well, I tried to fool it and it almost works. Here is what I did:
+>>
+>> --- CODE for mydata.pymat ---
+>>
+>> from plearn.pyplearn import pl
+>>
+>> def main():
+>>    return pl.PythonProcessedVMatrix(
+>>        code_path = 'mydata.py',
+>>        source = pl.AutoVMatrix(        # Give source to make it happy.
+>>            filename = 'mydata.amat'))
+>>
+>>
+>> --- CODE GIVEN TO PythonProcessedVMatrix, stored in mydata.py ---
+>>
+>> def getSource():
+>>    global source
+>>    try:
+>>        return source
+>>    except:
+>>        from plearn.pyext import pl
+>>        source = pl.AutoVMatrix(filename = 'mydata.amat')
+>>        return source
+>>
+>> def getRow(row_no, source_row):
+>>    return getSource().getRow(row_no)
+>>
+>> def getFieldNames(source_field_names):
+>>    return [ str(i) for i in range(len(source_field_names)) ]
+>>
+>> --- PROBLEM ---
+>>
+>> Seems to crash somewhere in the garbage collector, when PLearn quits.
+>> Anything obvious to a Python/C++ guru?
+>>
+>>
+>> On 11 Apr 2008, Olivier Delalleau wrote:
+>>> Hmm, it's not so great, it looks like I don't have access to the source
+>>> itself (I guess it was not possible when that class -
+>>> PythonProcessedVMatrix - was written). Any tip?
+>>>
+>>> On 11 Apr 2008, Olivier Delalleau wrote:
+>>> > Found it! I was looking in plearn/vmat and python_modules/plearn but it
+>>> > was in plearn/python.
+>>> >
+>>> >
+>>> > On 11 Apr 2008, Olivier Delalleau wrote:
+>>> > > Hey,
+>>> > >
+>>> > > Can anyone point me to some ressource on how I can write a VMatrix in
+>>> > > Python?
+>>>
+>>
+>> --
+>> Olivier
+>> _______________________________________________
+>> Plearn-developers mailing list
+>> Plearn-developers at lists.berlios.de
+>> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>>
+
+--
+Olivier
+
+
+From chapados at iro.umontreal.ca  Fri Apr 11 17:47:30 2008
+From: chapados at iro.umontreal.ca (chapados at iro.umontreal.ca)
+Date: Fri, 11 Apr 2008 11:47:30 -0400
+Subject: [Plearn-developers] VMatrix in Python
+In-Reply-To: <20080411153339.GB24237@opale.iro.umontreal.ca>
+References: <20080411140444.GA21943@opale.iro.umontreal.ca>
+	<20080411141701.GA22206@opale.iro.umontreal.ca>
+	<20080411145029.GA23101@opale.iro.umontreal.ca>
+	<20080411151621.GA23616@opale.iro.umontreal.ca>
+	<20080411112424.yu0wj9cgkgkoock0@webmail.iro.umontreal.ca>
+	<20080411153339.GB24237@opale.iro.umontreal.ca>
+Message-ID: <20080411114730.p9i6qizpwo4c0c00@webmail.iro.umontreal.ca>
+
+Pour le crash, je ne suis pas s?r, mais pour le cas g?n?ral, tu peux ajouter
+une nouvelle fonction (inject?e) ? PythonProcessedVMatrix qui retourne
+carr?ment la VMat source.  Si je ne m'abuse (? moins qu'elles ne soient
+toujours converties en matrices numpy -- Xavier??) tu auras alors acc?s aux
+Remote Methods de VMatrix.
+
+Pour ton crash, je ne suis pas s?r; le m?canisme pour garder en synchro les
+refcounts de PLearn et de Python est un peu complexe, et Xavier est la
+r?f?rence incontest?e du domaine.
+
+    + Nicolas
+
+
+Quoting Olivier Delalleau <delallea at iro.umontreal.ca>:
+
+> Oui, dans mon exemple bidon, je le pourrais, mais je voudrais avoir
+> acc?s ? des m?thodes / champs de la VMat qui ne sont pas inject?es dans
+> mon environnment Python.
+>
+> Au fait ?a crashe quand il essaie de supprimer un objet python de type
+> AutoVMatrix:
+>
+> /u/delallea/.PLearn.NOBACKUP/plearn/python/PythonObjectWrapper.cc:450
+> (gdb) l
+> 445
+> 446         string classname= obj->classname();
+> 447         pypl_classes_t::iterator clit= m_pypl_classes.find(classname);
+> 448         if(clit == m_pypl_classes.end())
+> 449             PLERROR("in PythonObjectWrapper::python_del : "
+> 450                     "deleting obj. for which no python class exists!");
+> 451         --clit->second.nref;
+>
+> (ici classname == AutoVMatrix)
+>
+>
+> On 11 Apr 2008, chapados at iro.umontreal.ca wrote:
+>> Olivier,
+>>
+>> Je ne suis pas s?r de comprendre ton probl?me.  Ne peux-tu pas utiliser la
+>> fonction getSourceRow inject?e dans ton environnement Python par
+>> PythonProcessedVMatrix?  Regarde la doc...
+>>
+>>    + Nicolas
+>>
+>>
+>> Quoting Olivier Delalleau <delallea at iro.umontreal.ca>:
+>>
+>>> Well, I tried to fool it and it almost works. Here is what I did:
+>>>
+>>> --- CODE for mydata.pymat ---
+>>>
+>>> from plearn.pyplearn import pl
+>>>
+>>> def main():
+>>>    return pl.PythonProcessedVMatrix(
+>>>        code_path = 'mydata.py',
+>>>        source = pl.AutoVMatrix(        # Give source to make it happy.
+>>>            filename = 'mydata.amat'))
+>>>
+>>>
+>>> --- CODE GIVEN TO PythonProcessedVMatrix, stored in mydata.py ---
+>>>
+>>> def getSource():
+>>>    global source
+>>>    try:
+>>>        return source
+>>>    except:
+>>>        from plearn.pyext import pl
+>>>        source = pl.AutoVMatrix(filename = 'mydata.amat')
+>>>        return source
+>>>
+>>> def getRow(row_no, source_row):
+>>>    return getSource().getRow(row_no)
+>>>
+>>> def getFieldNames(source_field_names):
+>>>    return [ str(i) for i in range(len(source_field_names)) ]
+>>>
+>>> --- PROBLEM ---
+>>>
+>>> Seems to crash somewhere in the garbage collector, when PLearn quits.
+>>> Anything obvious to a Python/C++ guru?
+>>>
+>>>
+>>> On 11 Apr 2008, Olivier Delalleau wrote:
+>>>> Hmm, it's not so great, it looks like I don't have access to the source
+>>>> itself (I guess it was not possible when that class -
+>>>> PythonProcessedVMatrix - was written). Any tip?
+>>>>
+>>>> On 11 Apr 2008, Olivier Delalleau wrote:
+>>>> > Found it! I was looking in plearn/vmat and python_modules/plearn but it
+>>>> > was in plearn/python.
+>>>> >
+>>>> >
+>>>> > On 11 Apr 2008, Olivier Delalleau wrote:
+>>>> > > Hey,
+>>>> > >
+>>>> > > Can anyone point me to some ressource on how I can write a VMatrix in
+>>>> > > Python?
+>>>>
+>>>
+>>> --
+>>> Olivier
+>>> _______________________________________________
+>>> Plearn-developers mailing list
+>>> Plearn-developers at lists.berlios.de
+>>> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>>>
+>
+> --
+> Olivier
+>
+
+
+
+----------------------------------------------------------------
+This message was sent using IMP, the Internet Messaging Program.
+
+
+
+From delallea at iro.umontreal.ca  Fri Apr 11 17:56:15 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 11 Apr 2008 11:56:15 -0400
+Subject: [Plearn-developers] VMatrix in Python
+In-Reply-To: <20080411114730.p9i6qizpwo4c0c00@webmail.iro.umontreal.ca>
+References: <20080411140444.GA21943@opale.iro.umontreal.ca>
+	<20080411141701.GA22206@opale.iro.umontreal.ca>
+	<20080411145029.GA23101@opale.iro.umontreal.ca>
+	<20080411151621.GA23616@opale.iro.umontreal.ca>
+	<20080411112424.yu0wj9cgkgkoock0@webmail.iro.umontreal.ca>
+	<20080411153339.GB24237@opale.iro.umontreal.ca>
+	<20080411114730.p9i6qizpwo4c0c00@webmail.iro.umontreal.ca>
+Message-ID: <20080411155615.GA25730@opale.iro.umontreal.ca>
+
+Oui, j'ai essaye, et elle est convertie automatiquement en matrice numpy
+;)
+
+
+On 11 Apr 2008, chapados at iro.umontreal.ca wrote:
+> Pour le crash, je ne suis pas s?r, mais pour le cas g?n?ral, tu peux ajouter
+> une nouvelle fonction (inject?e) ? PythonProcessedVMatrix qui retourne
+> carr?ment la VMat source.  Si je ne m'abuse (? moins qu'elles ne soient
+> toujours converties en matrices numpy -- Xavier??) tu auras alors acc?s aux
+> Remote Methods de VMatrix.
+
+
+From chapados at iro.umontreal.ca  Fri Apr 11 18:05:26 2008
+From: chapados at iro.umontreal.ca (chapados at iro.umontreal.ca)
+Date: Fri, 11 Apr 2008 12:05:26 -0400
+Subject: [Plearn-developers] VMatrix in Python
+In-Reply-To: <20080411155615.GA25730@opale.iro.umontreal.ca>
+References: <20080411140444.GA21943@opale.iro.umontreal.ca>
+	<20080411141701.GA22206@opale.iro.umontreal.ca>
+	<20080411145029.GA23101@opale.iro.umontreal.ca>
+	<20080411151621.GA23616@opale.iro.umontreal.ca>
+	<20080411112424.yu0wj9cgkgkoock0@webmail.iro.umontreal.ca>
+	<20080411153339.GB24237@opale.iro.umontreal.ca>
+	<20080411114730.p9i6qizpwo4c0c00@webmail.iro.umontreal.ca>
+	<20080411155615.GA25730@opale.iro.umontreal.ca>
+Message-ID: <20080411120526.kgb1pt0p44008so0@webmail.iro.umontreal.ca>
+
+Et si tu retournes PP<object> ? laplace?
+
+Quoting Olivier Delalleau <delallea at iro.umontreal.ca>:
+
+> Oui, j'ai essaye, et elle est convertie automatiquement en matrice numpy
+> ;)
+>
+>
+> On 11 Apr 2008, chapados at iro.umontreal.ca wrote:
+>> Pour le crash, je ne suis pas s?r, mais pour le cas g?n?ral, tu peux ajouter
+>> une nouvelle fonction (inject?e) ? PythonProcessedVMatrix qui retourne
+>> carr?ment la VMat source.  Si je ne m'abuse (? moins qu'elles ne soient
+>> toujours converties en matrices numpy -- Xavier??) tu auras alors acc?s aux
+>> Remote Methods de VMatrix.
+>
+
+
+
+----------------------------------------------------------------
+This message was sent using IMP, the Internet Messaging Program.
+
+
+
+From saintmlx at apstat.com  Fri Apr 11 18:28:48 2008
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Fri, 11 Apr 2008 12:28:48 -0400
+Subject: [Plearn-developers] VMatrix in Python
+In-Reply-To: <20080411151621.GA23616@opale.iro.umontreal.ca>
+References: <20080411140444.GA21943@opale.iro.umontreal.ca>	<20080411141701.GA22206@opale.iro.umontreal.ca>	<20080411145029.GA23101@opale.iro.umontreal.ca>
+	<20080411151621.GA23616@opale.iro.umontreal.ca>
+Message-ID: <47FF91C0.7040507@apstat.com>
+
+Here is an example that works:
+
+20080411-12:26:08-lodur:~/apstatsoft/python_modules/apstat/ARL/exp> python
+Python 2.4.3 (#2, Mar  7 2008, 01:58:20)
+[GCC 4.0.3 (Ubuntu 4.0.3-1ubuntu5)] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+ >>> from apstat.arllearn_ext import *
+ >>> x= 
+AutoVMatrix(filename="/home/louradoj/apstatsoft/projects/consultation/ARL/experiments/benchmark_test_unknown_haar_l=3_t=none_sl=100_m=sym_st=t4_so=_av=none_pr=True_ti=none_noopt.amat")
+ >>> y= PythonProcessedVMatrix(code="from apstat.ARL.test_ppvmat import 
+*", source=x)
+ >>> y.getRow(0)
+array([  1.00100000e+03,   1.00100000e+03,              nan,
+                    nan,   1.00100000e+03,   1.91600000e+03,
+         3.26700000e+03,   1.00100000e+03,              nan,
+                    nan,              nan,              nan,
+                    nan,              nan,              nan,
+                    nan,              nan,              nan,
+         4.89400000e+00,   3.24800000e+02,              nan,
+         8.06000000e+00,              nan,              nan,
+                    nan,              nan,              nan,
+                    nan,              nan,   2.20100000e+01,
+         6.74500000e+00,   2.92900000e+01,   1.02822000e+03,
+         1.00100000e+03,   1.00100000e+03,   2.00400000e+03,
+         3.00000000e+00,   1.30000000e+01,   1.50000000e+01,
+         1.70000000e+01,   4.80000000e+01,   0.00000000e+00,
+         3.00000000e+00,   7.90655253e-02,   8.20813316e-02,
+         2.24449311e-02,   8.39352561e-02,   7.98720395e-01,
+         2.82839065e+00,   4.73208694e-01,  -2.15559726e+00,
+        -2.15557981e+00,  -2.15550506e+00,  -2.15490999e+00,
+        -2.13970514e+00,   0.00000000e+00,  -9.53008944e-02,
+        -5.72792329e-02,  -3.65856282e-02,  -1.03386498e-01,
+        -7.71219340e-01,  -1.87342742e-05,   2.21751920e+00,
+         8.70332422e-06,  -1.48989109e-05,  -2.15370396e-05,
+        -4.80769101e-04,  -8.00596246e-03,   0.00000000e+00,
+        -5.84939867e-03,   2.56082620e-02,  -3.19826733e-02])
+ >>> len(x.getRow(0))
+144
+ >>> len(y.getRow(0))
+72
+ >>>
+
+
+test_ppvmat.py is as follows:
+
+
+
+def getRow(row_no, source_row):
+    return source_row[:len(source_row)/2]
+
+def getFieldNames(source_field_names):
+    return source_field_names[:len(source_field_names)/2]
+
+
+Xavier
+
+
+
+Olivier Delalleau wrote:
+> Well, I tried to fool it and it almost works. Here is what I did:
+>
+> --- CODE for mydata.pymat ---
+>
+> from plearn.pyplearn import pl
+>
+> def main():
+>     return pl.PythonProcessedVMatrix(
+>         code_path = 'mydata.py',
+>         source = pl.AutoVMatrix(        # Give source to make it happy.
+>             filename = 'mydata.amat'))
+>
+>
+> --- CODE GIVEN TO PythonProcessedVMatrix, stored in mydata.py ---
+>
+> def getSource():
+>     global source
+>     try:
+>         return source
+>     except:
+>         from plearn.pyext import pl
+>         source = pl.AutoVMatrix(filename = 'mydata.amat')
+>         return source
+>
+> def getRow(row_no, source_row):
+>     return getSource().getRow(row_no)
+>
+> def getFieldNames(source_field_names):
+>     return [ str(i) for i in range(len(source_field_names)) ]
+>
+> --- PROBLEM ---
+>
+> Seems to crash somewhere in the garbage collector, when PLearn quits.
+> Anything obvious to a Python/C++ guru?
+>
+>
+> On 11 Apr 2008, Olivier Delalleau wrote:
+>   
+>> Hmm, it's not so great, it looks like I don't have access to the source
+>> itself (I guess it was not possible when that class -
+>> PythonProcessedVMatrix - was written). Any tip?
+>>
+>> On 11 Apr 2008, Olivier Delalleau wrote:
+>>     
+>>> Found it! I was looking in plearn/vmat and python_modules/plearn but it
+>>> was in plearn/python.
+>>>
+>>>
+>>> On 11 Apr 2008, Olivier Delalleau wrote:
+>>>       
+>>>> Hey,
+>>>>
+>>>> Can anyone point me to some ressource on how I can write a VMatrix in
+>>>> Python?
+>>>>         
+>
+> --
+> Olivier
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>   
+
+
+
+From saintmlx at apstat.com  Fri Apr 11 18:41:07 2008
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Fri, 11 Apr 2008 12:41:07 -0400
+Subject: [Plearn-developers] VMatrix in Python
+In-Reply-To: <20080411120526.kgb1pt0p44008so0@webmail.iro.umontreal.ca>
+References: <20080411140444.GA21943@opale.iro.umontreal.ca>	<20080411141701.GA22206@opale.iro.umontreal.ca>	<20080411145029.GA23101@opale.iro.umontreal.ca>	<20080411151621.GA23616@opale.iro.umontreal.ca>	<20080411112424.yu0wj9cgkgkoock0@webmail.iro.umontreal.ca>	<20080411153339.GB24237@opale.iro.umontreal.ca>	<20080411114730.p9i6qizpwo4c0c00@webmail.iro.umontreal.ca>	<20080411155615.GA25730@opale.iro.umontreal.ca>
+	<20080411120526.kgb1pt0p44008so0@webmail.iro.umontreal.ca>
+Message-ID: <47FF94A3.7050502@apstat.com>
+
+La plupart des extensions PLearn pour python ont:
+
+    PythonObjectWrapper::VMatAsPtr= true;
+
+pour choisir d'avoir des vraies VMats ou bien des arrays numpy.
+
+?a peut aussi se changer au runtime en appelant setVMatAsPtr.
+
+Xavier
+
+chapados at iro.umontreal.ca wrote:
+> Et si tu retournes PP<object> ? laplace?
+>
+> Quoting Olivier Delalleau <delallea at iro.umontreal.ca>:
+>
+>   
+>> Oui, j'ai essaye, et elle est convertie automatiquement en matrice numpy
+>> ;)
+>>
+>>
+>> On 11 Apr 2008, chapados at iro.umontreal.ca wrote:
+>>     
+>>> Pour le crash, je ne suis pas s?r, mais pour le cas g?n?ral, tu peux ajouter
+>>> une nouvelle fonction (inject?e) ? PythonProcessedVMatrix qui retourne
+>>> carr?ment la VMat source.  Si je ne m'abuse (? moins qu'elles ne soient
+>>> toujours converties en matrices numpy -- Xavier??) tu auras alors acc?s aux
+>>> Remote Methods de VMatrix.
+>>>       
+>
+>
+>
+> ----------------------------------------------------------------
+> This message was sent using IMP, the Internet Messaging Program.
+>
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>   
+
+
+
+From delallea at iro.umontreal.ca  Fri Apr 11 19:15:10 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 11 Apr 2008 13:15:10 -0400
+Subject: [Plearn-developers] VMatrix in Python
+In-Reply-To: <47FF91C0.7040507@apstat.com>
+References: <20080411140444.GA21943@opale.iro.umontreal.ca>
+	<20080411141701.GA22206@opale.iro.umontreal.ca>
+	<20080411145029.GA23101@opale.iro.umontreal.ca>
+	<20080411151621.GA23616@opale.iro.umontreal.ca>
+	<47FF91C0.7040507@apstat.com>
+Message-ID: <20080411171510.GA29125@opale.iro.umontreal.ca>
+
+Yes I understood how to do it the intended way, my question was about
+being able to access the whole source VMat rather than just the provided
+data.
+Not a big deal though, I realized I could do without it after all. But
+thanks for the help! :)
+
+
+On 11 Apr 2008, Xavier Saint-Mleux wrote:
+> Here is an example that works:
+> (..)
+
+--
+Olivier
+
+
+From delallea at iro.umontreal.ca  Mon Apr 14 20:08:36 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Mon, 14 Apr 2008 14:08:36 -0400
+Subject: [Plearn-developers] PPath in Python
+Message-ID: <20080414180834.GA12295@opale.iro.umontreal.ca>
+
+Heya,
+
+Is there a way to manipulate PPaths in Python, e.g. convert
+/u/delallea/mydir into HOME:mydir, and vice-versa?
+
+--
+Olivier
+
+
+From delallea at iro.umontreal.ca  Mon Apr 14 20:59:10 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Mon, 14 Apr 2008 14:59:10 -0400
+Subject: [Plearn-developers] PPath in Python
+In-Reply-To: <20080414180834.GA12295@opale.iro.umontreal.ca>
+References: <20080414180834.GA12295@opale.iro.umontreal.ca>
+Message-ID: <20080414185910.GA12884@opale.iro.umontreal.ca>
+
+Well, there is at least one now, using the RPPath (for Remote PPath)
+object, which is just a basic wrapper around a PPath.
+
+--
+Olivier
+
+On 14 Apr 2008, Olivier Delalleau wrote:
+> Heya,
+> 
+> Is there a way to manipulate PPaths in Python, e.g. convert
+> /u/delallea/mydir into HOME:mydir, and vice-versa?
+> 
+
+
+From saintmlx at apstat.com  Tue Apr 15 22:22:46 2008
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Tue, 15 Apr 2008 16:22:46 -0400
+Subject: [Plearn-developers] PPath in Python
+In-Reply-To: <20080414185910.GA12884@opale.iro.umontreal.ca>
+References: <20080414180834.GA12295@opale.iro.umontreal.ca>
+	<20080414185910.GA12884@opale.iro.umontreal.ca>
+Message-ID: <48050E96.3000407@apstat.com>
+
+There was already some python code to emulate PPath:
+$PLEARNDIR/python_modules/plearn/utilities/ppath.py
+(This one is used by pytest and others)
+
+Xavier
+
+
+Olivier Delalleau wrote:
+> Well, there is at least one now, using the RPPath (for Remote PPath)
+> object, which is just a basic wrapper around a PPath.
+>
+> --
+> Olivier
+>
+> On 14 Apr 2008, Olivier Delalleau wrote:
+>   
+>> Heya,
+>>
+>> Is there a way to manipulate PPaths in Python, e.g. convert
+>> /u/delallea/mydir into HOME:mydir, and vice-versa?
+>>
+>>     
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>   
+
+
+
+From delallea at iro.umontreal.ca  Wed Apr 16 00:16:29 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Tue, 15 Apr 2008 18:16:29 -0400
+Subject: [Plearn-developers] PPath in Python
+In-Reply-To: <48050E96.3000407@apstat.com>
+References: <20080414180834.GA12295@opale.iro.umontreal.ca>
+	<20080414185910.GA12884@opale.iro.umontreal.ca>
+	<48050E96.3000407@apstat.com>
+Message-ID: <20080415221629.GA780@opale.iro.umontreal.ca>
+
+Yes, but I wasn't able to figure out how to get a canonic PPath from it
+:/
+
+--
+Olivier
+
+On 15 Apr 2008, Xavier Saint-Mleux wrote:
+> There was already some python code to emulate PPath:
+> $PLEARNDIR/python_modules/plearn/utilities/ppath.py
+> (This one is used by pytest and others)
+> 
+> Xavier
+> 
+> 
+> Olivier Delalleau wrote:
+> > Well, there is at least one now, using the RPPath (for Remote PPath)
+> > object, which is just a basic wrapper around a PPath.
+> >
+> > --
+> > Olivier
+> >
+> > On 14 Apr 2008, Olivier Delalleau wrote:
+> >   
+> >> Heya,
+> >>
+> >> Is there a way to manipulate PPaths in Python, e.g. convert
+> >> /u/delallea/mydir into HOME:mydir, and vice-versa?
+> >>
+> >>     
+> > _______________________________________________
+> > Plearn-developers mailing list
+> > Plearn-developers at lists.berlios.de
+> > https://lists.berlios.de/mailman/listinfo/plearn-developers
+> >   
+> 
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+
+
+From delallea at iro.umontreal.ca  Thu Apr 17 17:51:05 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Thu, 17 Apr 2008 11:51:05 -0400
+Subject: [Plearn-developers] SUM sur un ensemble vide
+Message-ID: <20080417155105.GA9345@opale.iro.umontreal.ca>
+
+Salut,
+
+Actuellement, un StatsCollector renvoie un NaN quand on demande SUM et
+qu'aucune observation n'a ete faite (par exemple, uniquement des valeurs
+manquantes).
+
+Je me demandais si on ne voudrait pas plutot renvoyer 0. Mais je ne suis
+pas sur. Qqun a-t-il une bonne raison pour motiver soit NaN, soit 0 ?
+
+--
+Olivier
+
+
+From nouiz at nouiz.org  Thu Apr 17 18:06:31 2008
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Thu, 17 Apr 2008 12:06:31 -0400
+Subject: [Plearn-developers] SUM sur un ensemble vide
+In-Reply-To: <20080417155105.GA9345@opale.iro.umontreal.ca>
+References: <20080417155105.GA9345@opale.iro.umontreal.ca>
+Message-ID: <2d1d7fe70804170906p67f5d2b3pce51c0f8cd020f64@mail.gmail.com>
+
+Salut,
+
+Il serait interessant de regarder ce que numpy fait.
+
+Personnellement, je pense qu'une somme de aucun chiffre n'est pas une
+operation definie. Donc cela motive nan a mon avis. Par contre, au
+niveau de son utilisation, il peut etre tres pratique de retourner
+zero.
+
+Je prendrait le meme traitement que numpy. Pour simplifier leur
+utilisation complementaire dans plearn si cela ne brise rien.
+
+Fred
+
+2008/4/17 Olivier Delalleau <delallea at iro.umontreal.ca>:
+> Salut,
+>
+>  Actuellement, un StatsCollector renvoie un NaN quand on demande SUM et
+>  qu'aucune observation n'a ete faite (par exemple, uniquement des valeurs
+>  manquantes).
+>
+>  Je me demandais si on ne voudrait pas plutot renvoyer 0. Mais je ne suis
+>  pas sur. Qqun a-t-il une bonne raison pour motiver soit NaN, soit 0 ?
+>
+>  --
+>  Olivier
+>  _______________________________________________
+>  Plearn-developers mailing list
+>  Plearn-developers at lists.berlios.de
+>  https://lists.berlios.de/mailman/listinfo/plearn-developers
+>
+
+
+From chapados at iro.umontreal.ca  Thu Apr 17 18:19:16 2008
+From: chapados at iro.umontreal.ca (Nicolas Chapados)
+Date: Thu, 17 Apr 2008 12:19:16 -0400
+Subject: [Plearn-developers] SUM sur un ensemble vide
+In-Reply-To: <2d1d7fe70804170906p67f5d2b3pce51c0f8cd020f64@mail.gmail.com>
+References: <20080417155105.GA9345@opale.iro.umontreal.ca>
+	<2d1d7fe70804170906p67f5d2b3pce51c0f8cd020f64@mail.gmail.com>
+Message-ID: <48077884.2070609@iro.umontreal.ca>
+
+Une somme d'aucun chiffre retourne 0.0.
+
+Un produit d'aucun chiffre retourne 1.0.
+
+Par d?finition.
+
+    + Nicolas
+
+
+Fr?d?ric Bastien wrote:
+> Salut,
+>
+> Il serait interessant de regarder ce que numpy fait.
+>
+> Personnellement, je pense qu'une somme de aucun chiffre n'est pas une
+> operation definie. Donc cela motive nan a mon avis. Par contre, au
+> niveau de son utilisation, il peut etre tres pratique de retourner
+> zero.
+>
+> Je prendrait le meme traitement que numpy. Pour simplifier leur
+> utilisation complementaire dans plearn si cela ne brise rien.
+>
+> Fred
+>
+> 2008/4/17 Olivier Delalleau <delallea at iro.umontreal.ca>:
+>   
+>> Salut,
+>>
+>>  Actuellement, un StatsCollector renvoie un NaN quand on demande SUM et
+>>  qu'aucune observation n'a ete faite (par exemple, uniquement des valeurs
+>>  manquantes).
+>>
+>>  Je me demandais si on ne voudrait pas plutot renvoyer 0. Mais je ne suis
+>>  pas sur. Qqun a-t-il une bonne raison pour motiver soit NaN, soit 0 ?
+>>
+>>  --
+>>  Olivier
+>>  _______________________________________________
+>>  Plearn-developers mailing list
+>>  Plearn-developers at lists.berlios.de
+>>  https://lists.berlios.de/mailman/listinfo/plearn-developers
+>>
+>>     
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>   
+
+-- 
+Nicolas Chapados, Ph.D. candidate
+D?partement d'informatique et recherche op?rationnelle
+Universit? de Montr?al
+http://www.iro.umontreal.ca/~chapados
+
+
+
+
+From delallea at iro.umontreal.ca  Fri Apr 18 18:39:58 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 18 Apr 2008 12:39:58 -0400
+Subject: [Plearn-developers] Passer un VarArray dans Python
+Message-ID: <20080418163958.GB29323@zircon.iro.umontreal.ca>
+
+Salut,
+
+Si j'ai un objet PLearn qui a une option de type VarArray, comment je
+fais pour passer cette option dans Python ?
+Si myvar est une QqueChoseVariable, faire
+    monobjet.monoption = [ myvar ]
+ne fonctionne pas :
+    Exception: Cannot convert this object by value from python (type=VarArray).
+
+--
+Olivier
+
+
+
+From saintmlx at apstat.com  Mon Apr 21 20:00:55 2008
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Mon, 21 Apr 2008 14:00:55 -0400
+Subject: [Plearn-developers] Passer un VarArray dans Python
+In-Reply-To: <20080418163958.GB29323@zircon.iro.umontreal.ca>
+References: <20080418163958.GB29323@zircon.iro.umontreal.ca>
+Message-ID: <480CD657.2070406@apstat.com>
+
+?a devrait fonctionner maintenant avec r8843.  Par contre, m?me si les 
+variables sont par r?f?rence, la structure (array) ne d?rive pas de 
+Object et est copi?e, donc ?a donne une liste de variables c?t? python 
+et non une vraie VarArray.  Le code de conversion est simplement celui 
+pour TVec<T>, avec casts en plus.
+
+Xavier
+
+Olivier Delalleau wrote:
+> Salut,
+>
+> Si j'ai un objet PLearn qui a une option de type VarArray, comment je
+> fais pour passer cette option dans Python ?
+> Si myvar est une QqueChoseVariable, faire
+>     monobjet.monoption = [ myvar ]
+> ne fonctionne pas :
+>     Exception: Cannot convert this object by value from python (type=VarArray).
+>
+> --
+> Olivier
+>
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>   
+
+
+
+From delallea at iro.umontreal.ca  Tue Apr 22 19:37:19 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Tue, 22 Apr 2008 13:37:19 -0400
+Subject: [Plearn-developers] SUM sur un ensemble vide
+In-Reply-To: <48077884.2070609@iro.umontreal.ca>
+References: <20080417155105.GA9345@opale.iro.umontreal.ca>
+	<2d1d7fe70804170906p67f5d2b3pce51c0f8cd020f64@mail.gmail.com>
+	<48077884.2070609@iro.umontreal.ca>
+Message-ID: <20080422173718.GA8658@opale.iro.umontreal.ca>
+
+Un StatsCollector retourne maintenant 0 pour sum() et sumsquare() au
+lieu de NaN quand aucune valeur non manquante n'a ete observee.
+
+--
+Olivier
+
+On 17 Apr 2008, Nicolas Chapados wrote:
+> Une somme d'aucun chiffre retourne 0.0.
+> 
+> Un produit d'aucun chiffre retourne 1.0.
+> 
+> Par d?finition.
+> 
+>     + Nicolas
+> 
+> 
+> Fr?d?ric Bastien wrote:
+> > Salut,
+> >
+> > Il serait interessant de regarder ce que numpy fait.
+> >
+> > Personnellement, je pense qu'une somme de aucun chiffre n'est pas une
+> > operation definie. Donc cela motive nan a mon avis. Par contre, au
+> > niveau de son utilisation, il peut etre tres pratique de retourner
+> > zero.
+> >
+> > Je prendrait le meme traitement que numpy. Pour simplifier leur
+> > utilisation complementaire dans plearn si cela ne brise rien.
+> >
+> > Fred
+> >
+> > 2008/4/17 Olivier Delalleau <delallea at iro.umontreal.ca>:
+> >   
+> >> Salut,
+> >>
+> >>  Actuellement, un StatsCollector renvoie un NaN quand on demande SUM et
+> >>  qu'aucune observation n'a ete faite (par exemple, uniquement des valeurs
+> >>  manquantes).
+> >>
+> >>  Je me demandais si on ne voudrait pas plutot renvoyer 0. Mais je ne suis
+> >>  pas sur. Qqun a-t-il une bonne raison pour motiver soit NaN, soit 0 ?
+> >>
+> >>  --
+> >>  Olivier
+> >>  _______________________________________________
+> >>  Plearn-developers mailing list
+> >>  Plearn-developers at lists.berlios.de
+> >>  https://lists.berlios.de/mailman/listinfo/plearn-developers
+> >>
+> >>     
+> > _______________________________________________
+> > Plearn-developers mailing list
+> > Plearn-developers at lists.berlios.de
+> > https://lists.berlios.de/mailman/listinfo/plearn-developers
+> >   
+> 
+
+
+From delallea at iro.umontreal.ca  Thu Apr 24 18:26:15 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Thu, 24 Apr 2008 12:26:15 -0400
+Subject: [Plearn-developers] Pymake and recompiling dynamic libraries
+Message-ID: <20080424162613.GA20883@opale.iro.umontreal.ca>
+
+In pymake there's a line that looks like:
+
+    if info.corresponding_output_is_up_to_date() and not create_dll and not create_so:
+        # Just refresh the symbolic link
+    else:
+        # Link the whole big crap for 10 mins
+
+Question: why the "and not create_dll and not create_so" ?
+
+--
+Olivier
+
+
+
+From delallea at iro.umontreal.ca  Thu Apr 24 19:32:50 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Thu, 24 Apr 2008 13:32:50 -0400
+Subject: [Plearn-developers] Pymake and recompiling dynamic libraries
+In-Reply-To: <20080424162613.GA20883@opale.iro.umontreal.ca>
+References: <20080424162613.GA20883@opale.iro.umontreal.ca>
+Message-ID: <20080424173250.GA21521@opale.iro.umontreal.ca>
+
+Well, it now does the link refresh with -so and -pyso. Let me know if
+this causes any issue.
+
+--
+Olivier
+
+On 24 Apr 2008, Olivier Delalleau wrote:
+> In pymake there's a line that looks like:
+> 
+>     if info.corresponding_output_is_up_to_date() and not create_dll and not create_so:
+>         # Just refresh the symbolic link
+>     else:
+>         # Link the whole big crap for 10 mins
+> 
+> Question: why the "and not create_dll and not create_so" ?
+> 
+
+

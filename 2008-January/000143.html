@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] GaussianizeVMatrix default behavior changed.
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-January/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20GaussianizeVMatrix%20default%20behavior%20changed.&In-Reply-To=%3C2d1d7fe70801291328r27fe89b2n211edd94f2a44749%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] GaussianizeVMatrix default behavior changed.</H1>
+    <B>Fr&#233;d&#233;ric Bastien</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20GaussianizeVMatrix%20default%20behavior%20changed.&In-Reply-To=%3C2d1d7fe70801291328r27fe89b2n211edd94f2a44749%40mail.gmail.com%3E"
+       TITLE="[Plearn-developers] GaussianizeVMatrix default behavior changed.">nouiz at nouiz.org
+       </A><BR>
+    <I>Tue Jan 29 22:28:18 CET 2008</I>
+    <P><UL>
+        
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#143">[ date ]</a>
+              <a href="thread.html#143">[ thread ]</a>
+              <a href="subject.html#143">[ subject ]</a>
+              <a href="author.html#143">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+I changed the default behavior of GaussianizeVMatrix!
+
+I added a build option, gaussianize_binary, in GaussianizeVMatrix.
+When false binary variable are not gaussianized.
+The default value is false. This change the default behavior as in the
+past only the threshold is used. In some case in the old version
+binary variable was gaussianised. So if you use it in your experiment,
+check them...
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#143">[ date ]</a>
+              <a href="thread.html#143">[ thread ]</a>
+              <a href="subject.html#143">[ subject ]</a>
+              <a href="author.html#143">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

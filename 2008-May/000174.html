@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Processing macros when reading pyplearn scripts
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-May/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Processing%20macros%20when%20reading%20pyplearn%20scripts&In-Reply-To=%3C20080505170522.GA7593%40opale.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000175.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Processing macros when reading pyplearn scripts</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Processing%20macros%20when%20reading%20pyplearn%20scripts&In-Reply-To=%3C20080505170522.GA7593%40opale.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] Processing macros when reading pyplearn scripts">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Mon May  5 19:05:25 CEST 2008</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000175.html">[Plearn-developers] Processing macros when reading pyplearn	scripts
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#174">[ date ]</a>
+              <a href="thread.html#174">[ thread ]</a>
+              <a href="subject.html#174">[ subject ]</a>
+              <a href="author.html#174">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>In plearn/io/PyPLearnScript.cc, line 307:
+    PStream is     = openString( plearn_script, PStream::raw_ascii );
+    time_t latest  = 0 ;
+    plearn_script  = readAndMacroProcess( is, vars, latest );
+
+Is there a good reason to process macros in Python scripts? It can
+create some issues if we have some code that manipulates characters like
+${}.
+An example is when trying to create a PPath with an environment variable
+in it, since the syntax of a PPath environment variable is the same as a
+.plearn script macro definition (${VAR}), the program crashes when
+trying to convert ${VAR} since no such macro exists.
+
+Since it should be much easier (and cleaner) to deal with variables in
+Python rather than generate the corresponding .plearn scripting syntax,
+there seems to be little point in the current implementation: I'd rather
+skip the macro processing part. Any objection/thought?
+
+--
+Olivier
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000175.html">[Plearn-developers] Processing macros when reading pyplearn	scripts
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#174">[ date ]</a>
+              <a href="thread.html#174">[ thread ]</a>
+              <a href="subject.html#174">[ subject ]</a>
+              <a href="author.html#174">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

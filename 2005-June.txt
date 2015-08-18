@@ -1,0 +1,35 @@
+From chapados at apstat.com  Sat Jun 25 01:02:55 2005
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Fri, 24 Jun 2005 19:02:55 -0400
+Subject: [Plearn-developers] Cleanup of unitialized defaults...
+Message-ID: <42BC911F.7050903@apstat.com>
+
+Hello all,
+
+Just a quick note that the next svn update of PLearn will probably turn 
+up more than its fair share of changes.  I spent the better part of the 
+afternoon tracking down uninitialized default variables in many PLearn 
+classes, and adding initializations as appropriate.  These changes 
+should NOT change the behavior of the code; if they do, they are simply 
+revealing that the old code was erroneous, and you should reconsider 
+results that depend on it.
+
+Oh, and in a few cases, I did put a few more help strings as well. :-)
+
+I warmly encourage all PLearn coders to "back-document" the code as they 
+encounter undocumented classes.  Just add the appropriate help to the 
+PLEARN_IMPLEMENT_OBJECT declarations and to declareOption() calls in the 
+.cc files, and they will be automatically reflected in the HTML help 
+(when it's next updated).
+
+    + Nicolas
+
+-- 
+Nicolas Chapados, Ph.D. candidate
+D?partement d'informatique et recherche op?rationnelle
+Universit? de Montr?al
+http://www.iro.umontreal.ca/~chapados
+
+
+
+

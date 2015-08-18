@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Changement a la syntaxe python	pour	vmat.getFieldIndex
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Changement%20a%20la%20syntaxe%20python%0A%09pour%09vmat.getFieldIndex&In-Reply-To=%3C20080307191030.GA11606%40opale.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000145.html">
+   <LINK REL="Next"  HREF="000149.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Changement a la syntaxe python	pour	vmat.getFieldIndex</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Changement%20a%20la%20syntaxe%20python%0A%09pour%09vmat.getFieldIndex&In-Reply-To=%3C20080307191030.GA11606%40opale.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] Changement a la syntaxe python	pour	vmat.getFieldIndex">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Fri Mar  7 20:10:30 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000145.html">[Plearn-developers] Changement a la syntaxe python	pour	vmat.getFieldIndex
+</A></li>
+        <LI>Next message: <A HREF="000149.html">[Plearn-developers] Changement a la syntaxe python	pour	vmat.getFieldIndex
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#146">[ date ]</a>
+              <a href="thread.html#146">[ thread ]</a>
+              <a href="subject.html#146">[ subject ]</a>
+              <a href="author.html#146">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>En fait j'esperais que les valeurs par defaut allaient etre arrangees
+plus tot que ca, ce qui aurait regle le probleme du booleen en plus ;)
+J'esperais aussi que + ou - personne n'utilisait vraiment getFieldIndex,
+mais je voulais justement verifier. Je n'aime pas trop le try/except
+car je pense que le comportement &quot;sans erreur&quot; est suffisamment utile
+pour meriter une syntaxe plus lisible.
+
+Je serais ok pour revenir au comportement precedent et avoir fieldIndex
+et getFieldIndex, mais est-ce que ce ne serait pas une bonne occasion
+pour trouver un meilleur nom ? (la difference entre les deux n'est
+vraiment pas evidente a premiere vue...).
+Peut-etre qu'on pourrait avoir :
+    - getFieldIndex(name/num): comme avant, avec PLERROR potentiel
+    - checkFieldIndex(name) &lt;--&gt; fieldIndex (i.e -1 si n'existe pas)
+
+Qqun a une objection / une meilleure idee ?
+
+--
+Olivier
+
+On 07 Mar 2008, Xavier Saint-Mleux wrote:
+&gt;<i> Pour ce qui est des valeurs par d&#233;faut, ce n'est pas trivial et &#231;a risque 
+</I>&gt;<i> de ne pas &#234;tre fait avant longtemps.  Sinon, pourquoi ne pas simplement 
+</I>&gt;<i> d&#233;crarer fieldIndex remote? &#231;a renvoie d&#233;j&#224; -1 pour les champs qui 
+</I>&gt;<i> n'existent pas (et getFieldIndex l'utilise.)  Autrement, il me semble qu'un 
+</I>&gt;<i> try/except serait appropri&#233; au lieu de toujours avoir &#224; passer un 
+</I>&gt;<i> bool&#233;en en plus, non?
+</I>&gt;<i>
+</I>&gt;<i> Xavier
+</I>&gt;<i>
+</I>&gt;<i> PS: m&#234;me si c'est r&#233;cent, j'utilise d&#233;j&#224; beaucoup getFieldIndex...
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Olivier Delalleau wrote:
+</I>&gt;&gt;<i> Salut,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Juste pour vous dire que si vous utilisez la (remote-declared) methode
+</I>&gt;&gt;<i> VMatrix.getFieldIndex(field) dans un script Python, il faut maintenant
+</I>&gt;&gt;<i> rajouter un second argument pour indiquer si on veut lancer une erreur
+</I>&gt;&gt;<i> quand le champ 'field' n'existe pas :
+</I>&gt;&gt;<i>     - True =&gt; erreur
+</I>&gt;&gt;<i>     - False =&gt; pas d'erreur (retourne -1)
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Vu que cette methode n'a ete declaree remote que recemment (par
+</I>&gt;&gt;<i> moi-meme), je me suis permis de le faire en esperant que ca ne cassera
+</I>&gt;&gt;<i> pas grand-chose :)
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> --
+</I>&gt;&gt;<i> Olivier
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> PS: a quand les valeurs par defaut ?
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> Plearn-developers mailing list
+</I>&gt;&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">Plearn-developers at lists.berlios.de</A>
+</I>&gt;&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">https://lists.berlios.de/mailman/listinfo/plearn-developers</A>
+</I>&gt;&gt;<i>   
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000145.html">[Plearn-developers] Changement a la syntaxe python	pour	vmat.getFieldIndex
+</A></li>
+	<LI>Next message: <A HREF="000149.html">[Plearn-developers] Changement a la syntaxe python	pour	vmat.getFieldIndex
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#146">[ date ]</a>
+              <a href="thread.html#146">[ thread ]</a>
+              <a href="subject.html#146">[ subject ]</a>
+              <a href="author.html#146">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

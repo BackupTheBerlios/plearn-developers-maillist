@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] -fno-coalesce
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20-fno-coalesce&In-Reply-To=%3C20050801014030.GA21254%40lsvm.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000018.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] -fno-coalesce</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20-fno-coalesce&In-Reply-To=%3C20050801014030.GA21254%40lsvm.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] -fno-coalesce">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Mon Aug  1 03:40:30 CEST 2005</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000018.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17">[ date ]</a>
+              <a href="thread.html#17">[ thread ]</a>
+              <a href="subject.html#17">[ subject ]</a>
+              <a href="author.html#17">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 31 Jul 2005, Jasmin Lapalme wrote:
+&gt;<i> Bonjour &#224; tous,
+</I>&gt;<i>     J'essaie toujours de compiler PLearn sur MacOS X et beaucoup de  
+</I>&gt;<i> probl&#232;mes surgissent depuis le d&#233;placement vers berlios.  
+</I>&gt;<i> Premi&#232;rement, il y a l'option -fno-coalesce qui est ajout&#233; par pymake  
+</I>&gt;<i> (ligne 77 de pymake.confif.model de PLearn) lorsque l'on est sur une  
+</I>&gt;<i> platforme darwin. Cette option n'est pas reconnu par le g++ de MacOS  
+</I>&gt;<i> X. &#192; quoi sert cette option? Pourquoi est-elle ajout&#233;e seulement pour  
+</I>&gt;<i> Darwin, soit Mac OS X.
+</I>
+Demander &#224; Pascal:
+
+------------------------------------------------------------------------
+r3653 | plearner | 2005-06-23 12:12:47 -0400 (Thu, 23 Jun 2005) | 2 lines
+Necessary changes for porting to OS X
+
+svn diff -r3652:3653 pymake.config.model
+Index: pymake.config.model
+===================================================================
+--- pymake.config.model (revision 3652)
++++ pymake.config.model (revision 3653)
+@@ -72,7 +72,7 @@
+ elif platform=='win32' :
+     compileflags = '-DWIN32 -D_MINGW_ -DLITTLEENDIAN'
+ elif platform=='darwin' :
+-    compileflags = '-DDARWIN -DBIGENDIAN'
++    compileflags = '-DDARWIN -DBIGENDIAN -fno-coalesce'
+ else:
+     print 'Unknown platform: ' + platform
+     sys.exit()
+
+
+
+&gt;<i>     Si j'enl&#232;ve cette option (-fno-coalesce), j'obtiens  ,...entre  
+</I>&gt;<i> autre..., l'erreur suivante dans Option.h :
+</I>&gt;<i> 
+</I>&gt;<i> /Users/lapalmej/LISA/PLearn/plearn/base/Option.h:132: error: 'ptr'  
+</I>&gt;<i> was not declared in this scope
+</I>&gt;<i> /Users/lapalmej/LISA/PLearn/plearn/base/Option.h: In member function  
+</I>&gt;<i> `virtual void PLearn::TVecOption&lt;ObjectType,  
+</I>&gt;<i> VecElementType&gt;::writeAtIndex(const PLearn::Object*,  
+</I>&gt;<i> PLearn::PStream&amp;, const std::string&amp;) const':
+</I>&gt;<i> /Users/lapalmej/LISA/PLearn/plearn/base/Option.h:138: error: 'ptr'  
+</I>&gt;<i> was not declared in this scope
+</I>&gt;<i> 
+</I>&gt;<i>     Est-ce que quelqu'un peut m'aider?
+</I>&gt;<i> 
+</I>
+Il me semble que c'est l'erreur que rencontrait Hugo r&#233;cemment, et que
+Nicolas devrait avoir corrig&#233; dans la version 3933 d'il y a deux jours.
+
+--
+Olivier
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000018.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#17">[ date ]</a>
+              <a href="thread.html#17">[ thread ]</a>
+              <a href="subject.html#17">[ subject ]</a>
+              <a href="author.html#17">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

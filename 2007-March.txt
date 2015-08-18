@@ -1,0 +1,175 @@
+From vincentp at IRO.UMontreal.CA  Sat Mar 31 19:54:12 2007
+From: vincentp at IRO.UMontreal.CA (Pascal Vincent)
+Date: Sat, 31 Mar 2007 13:54:12 -0400
+Subject: [Plearn-developers] PLearn
+In-Reply-To: <75ACBA41FA7A5A8F9BF633D3@504865A86DAFC087CE87C078>
+References: <75ACBA41FA7A5A8F9BF633D3@504865A86DAFC087CE87C078>
+Message-ID: <E6DFDF33-8FC4-40FD-A10B-CA86FAAFA9A6@IRO.UMontreal.CA>
+
+Le 07-03-27 ? 21:14, Christfried Webers a ?crit :
+
+> Hi Pascal,
+>
+> I started recently here in Alex Smola's Statistical Machine  
+> Learning group in Canberra. Alex told me about PLean and asked me  
+> to send you many greetings.
+
+Hello Christfried,
+
+Send my greetings to Alex too.
+
+>
+> You might have heard of the machine learning toolbox we are  
+> developing here (ELEFANT). Now, we don't intend to invent the wheel  
+> again. So we looked around what is already available. And there is  
+> of course PLearn.
+
+Yes, Alex told me much about the Elefant project at last NIPS.
+
+Sorry for the late reply, I'm currently overwhelmed with all my tasks  
+(and am usually a very sluggish email writer). If you intend to do  
+serious work with PLearn, I suggest you post your questions on the  
+plearn-developers or plearn-core mailing list on berlios. (You may  
+have to subscribe to it on BerliOS, go to www.plearn.org and click on  
+the BerliOS' PLearn project page link at the bottom of the page, then  
+find how to subscribe to the mailing list...).
+
+>
+> I am currently trying to install PLearn on MAC OS X, but  
+> unfortunately couldn't get the numarray library to link. (See  
+> questions further down.)
+
+I am aware of the numarray linking problem on Mac OS X, but this is  
+not required for most of PLearn (detailed explanation below).
+You can get the other 99% of PLearn to compile on Mac OS X.
+The way PLearn works, is that you can compile (with pymake) an  
+executable that contains only the stuff that you need (pymake  
+explores the include tree and compiles and link only what the  
+executable directly or indirectly includes). The big problem for  
+software installation/packaging is always the external dependencies.  
+So in the commands/ subdirectory, I put a number of plearn_....cc  
+files that have been split according to what external library  
+dependencies they require.
+I suggest you try:
+cd commands
+pymake -opt plearn_curses.cc
+This will include most of plearn, except the python and numarray stuff.
+
+This DOESN'T mean that you won't be able to use PLearn from python  
+(see below), but merely that you won't be able to call python "code  
+snippets" from within plearn.
+
+>
+> The idea is to offer users of the ELEFANT toolbox the possibility  
+> to access all the goodies of PLearn. There are of course several  
+> models possible, some of them: are
+> - providing minimal connection between the PLearn and
+>     ELEFANT packages
+> - providing python interface between ELEFANT and PLearn
+> - even some tighter connection.
+
+We have already experimented many flavors of bridges between PLearn  
+and python in both directions.
+   * Python is used as a preprocessor to produce complex .plearn  
+scripts (this is essentially PLearn's object serialization format)  
+from simpler .pyplean (python) scripts.
+   * To call Python code from within PLearn we built the python code  
+snippets mechanism. This is what is not portable on Mac OS X due to  
+the linking problems with numarray that you encountered. This  
+facility is however not generally required.
+   * To call PLearn functions from within Python, we experimented  
+with boost-python (abandonned) and did a bridge for one specific  
+project using ctypes.
+   * The now preferred way to call PLearn from Python is to launch a  
+plearn server process and use the remote object creation and remote  
+method invocation mechanisms for python to create PLearn objects,  
+call methods and get results. This is very easy to use from within  
+python and is working well.
+
+If you want to look at an example of how this latter python calling  
+plearn is done, take a look at pyplot (in scripts/). (Note: you may  
+have to rename your plearn_curses executable as plearn for the script  
+to be able to launch the plearn server).
+A more primitive approach is to simply call a plearn executable with  
+os.system and retrieve results as produced files. This was the system  
+used in oldpyplot (the comparison with the new pyplot should be very  
+instructive).
+
+>
+> We hope that will be beneficial not only for our users but also for  
+> the evolution of both our toolboxes.
+>
+> Dealing with Python and several development packages and different  
+> architectures will probably force us to freeze the version of the  
+> tools in order to offer the users a working package. The practical  
+> question arising from that is:
+>
+> Assuming you find it valuable that we connect with PLearn (if that  
+> is not the case, please let me know!), how can we offer the users a  
+> frozen version without asking them to go into svn or cvs. Do you  
+> plan to offer packaged version in the future? Or, would it be  
+> possible to compile a package here and offer it for download?
+
+You can certainly offer a precompiled plearn executable for download  
+that includes what you wish (and only what you need). We'd appreciate  
+if you let us know :-)
+Proper packaging is nearly a full-time job, and we don't have anybody  
+doing it here for now. But in the future... hmm, maybe.
+
+>
+> What are your future plans on PLearn?
+
+PLearn is in active development in several directions, since it's  
+used a lot in our UofMontreal lab and in our company, both as a  
+research tool and development platform. So you'll see new algorithms  
+functionality and tools added on a regular basis. But the new  
+algortihms are mostly in the directions of our current research  
+interests. However, since I'm newly teaching an undergraduate machine  
+learning course,  simpler and more traditional algorithms should get  
+added every year. Suggestions of would-be-nice-to-have algortihms are  
+welcome.
+
+>
+> Further, more technical questions:
+> - Are you planning to move PLearn to Numpy?
+
+Yes, but no definite timeframe for it yet.
+
+> - Why are the executables in OBJS/ so huge (around 300 MB on my Mac)?
+
+Because there's a lot of stuff linked statically into it (this can be  
+more or less controlled by what you decide to "include" in *your*  
+plearn executable...)
+Also you may want to compile with -opt (or -safeopt) which will  
+generate a lighter executable (and link much faster!) without all the  
+debugging info.
+
+> - Is it a known problem that the final link of the
+>  pymake plearn_python.cc does not link with the libnumarray.so file
+>  on MAC OS X? (I guess, the compiler needs other flags to link in
+>  the Mach-O file. But haven't looked further into it. Therefore, any
+>  help is welcome.)
+
+Yes it's a known and yet unresolved problem. (If you succeed, let me  
+know how!)
+But again, this particular python bridge is not generally needed.
+
+>
+> Many regards from Canberra
+> Chris
+
+Good luck!
+And again, don't hesitate to post on the plearn-developers list
+
+Pascal Vincent,
+Professeur adjoint / Assistant Professor,
+D?partement d'Informatique et Recherche Op?rationnelle,
+Universit? de Montr?al.
+Tel: 514-343-7472
+
+
+
+
+
+
+

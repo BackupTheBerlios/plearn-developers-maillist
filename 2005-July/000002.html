@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] PRandom object for random numbers generation
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PRandom%20object%20for%20random%20numbers%20generation&In-Reply-To=%3C20050712142424.GA28527%40lsvm.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000001.html">
+   <LINK REL="Next"  HREF="000013.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] PRandom object for random numbers generation</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PRandom%20object%20for%20random%20numbers%20generation&In-Reply-To=%3C20050712142424.GA28527%40lsvm.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] PRandom object for random numbers generation">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Tue Jul 12 16:24:24 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000001.html">[Plearn-developers] PRandom object for random numbers generation
+</A></li>
+        <LI>Next message: <A HREF="000013.html">[Plearn-developers] PRandom object for random numbers generation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2">[ date ]</a>
+              <a href="thread.html#2">[ thread ]</a>
+              <a href="subject.html#2">[ subject ]</a>
+              <a href="author.html#2">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+Until now, generating (pseudo)-random numbers in PLearn was a bit
+dangerous when mixing different objects, each with its own seed.
+I have added a new class: &lt;plearn/math/PRandom.h&gt;, which offers (almost)
+the same methods as the 'old' random.h file, but allows each object
+needing random numbers to have its own generator (and thus, seed).
+
+I encourage you to use this new object for your future code, and to
+convert any existing code that may need it. Note however that, in order
+to preserve PLearn's legendary backward-compatibility, there could be a
+need for a transition period where the two methods (old and new)
+co-exist (with a friendly warning when the old method is used, urging
+the user to switch to the new one or be severely tortured).
+
+Basic use is simple. Before you had something like:
+  real x = gaussian_mu_sigma(1,4);
+which will become
+  real x = my_generator.gaussian_mu_sigma(1,4);
+where my_generator is a PRandom class member and will have been
+initialized at build time by:
+  my_generator.manual_seed(seed);
+(where seed is possibly -1 to initialize with the CPU time).
+
+If you don't want to have your own class member and don't care about
+other parts of the code interfering in your computations, you can use
+the static method PRandom::common() which returns a common PP&lt;PRandom&gt;
+object usable by everyone. Basically this means you can just do
+  real x = PRandom::common()-&gt;gaussian_mu_sigma(1,4);
+and even
+  real x = PRandom::common(false)-&gt;gaussian_mu_sigma(1,4);
+(the second option is if you want to use a PRandom object whose seed is
+fixed at compilation time in order to more or less always get the same
+numbers, while in the first one the PRandom seed is set by the CPU time
+and thus will differ at each execution).
+
+Important note: the underlying code is not the same, thus the same seed
+will not generate the same numbers as before. The code is now based on
+Boost, which has the advantage of providing more headaches to people
+trying to install PLearn, in addition to be open-source (while the old
+code is somewhat inspired from Numerical Recipes).
+
+Last, previous random methods are not all available yet, feel free to
+add (or tell me) what you need in it.
+
+--
+Olivier
+
+PS: Hopefully the PLearn mailing-list is now working... sorry for those
+who got two copies of this email.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000001.html">[Plearn-developers] PRandom object for random numbers generation
+</A></li>
+	<LI>Next message: <A HREF="000013.html">[Plearn-developers] PRandom object for random numbers generation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2">[ date ]</a>
+              <a href="thread.html#2">[ thread ]</a>
+              <a href="subject.html#2">[ subject ]</a>
+              <a href="author.html#2">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

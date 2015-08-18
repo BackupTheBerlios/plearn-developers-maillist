@@ -1,0 +1,62 @@
+From nouiz at nouiz.org  Tue Dec 18 20:28:34 2007
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Tue, 18 Dec 2007 14:28:34 -0500
+Subject: [Plearn-developers] Alignment des donnees
+Message-ID: <47681F62.8080500@nouiz.org>
+
+Salut,
+
+Est-ce que quelqu'un a regarder les avantages/inconvenients si on aligne 
+les donnees dans plearn? Je pense particulierement d'aligner le champs 
+Storage.data
+
+Fred
+
+
+From delallea at iro.umontreal.ca  Wed Dec 19 04:42:44 2007
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Tue, 18 Dec 2007 22:42:44 -0500
+Subject: [Plearn-developers] Alignment des donnees
+In-Reply-To: <47681F62.8080500@nouiz.org>
+References: <47681F62.8080500@nouiz.org>
+Message-ID: <20071219034243.GA27296@opale.iro.umontreal.ca>
+
+Pas moi ! (reponse tres constructive)
+
+--
+Olivier
+
+On 18 Dec 2007, Fr?d?ric Bastien wrote:
+> Salut,
+> 
+> Est-ce que quelqu'un a regarder les avantages/inconvenients si on aligne 
+> les donnees dans plearn? Je pense particulierement d'aligner le champs 
+> Storage.data
+> 
+> Fred
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+
+
+From lamblinp at iro.umontreal.ca  Wed Dec 19 05:45:28 2007
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Wed, 19 Dec 2007 05:45:28 +0100
+Subject: [Plearn-developers] Alignment des donnees
+In-Reply-To: <20071219034243.GA27296@opale.iro.umontreal.ca>
+References: <47681F62.8080500@nouiz.org>
+	<20071219034243.GA27296@opale.iro.umontreal.ca>
+Message-ID: <20071219044528.GA9941@pig.zood.org>
+
+On Tue, Dec 18, 2007, Olivier Delalleau wrote:
+> Pas moi ! (reponse tres constructive)
+
+Moi non plus. En fait, je ne pense pas que quelqu'un l'ait d?j? fait, ou
+alors il y a longtemps, ou bien j'ai oubli?, ou il sentait pas bon [1].
+
+-- 
+Pascal
+[1] Oui, c'est une r?f?rence culturelle.
+
+

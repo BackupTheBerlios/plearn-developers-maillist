@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] bug in linearRegression
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-January/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20bug%20in%20linearRegression&In-Reply-To=%3C43C3F7A7.6080709%40iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000051.html">
+   <LINK REL="Next"  HREF="000052.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] bug in linearRegression</H1>
+    <B>Yoshua Bengio</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20bug%20in%20linearRegression&In-Reply-To=%3C43C3F7A7.6080709%40iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] bug in linearRegression">bengioy at iro.umontreal.ca
+       </A><BR>
+    <I>Tue Jan 10 19:06:31 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000051.html">[Plearn-developers] Conjugate gradient optimization
+</A></li>
+        <LI>Next message: <A HREF="000052.html">[Plearn-developers] new class BoundedMemoryCache
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#50">[ date ]</a>
+              <a href="thread.html#50">[ thread ]</a>
+              <a href="subject.html#50">[ subject ]</a>
+              <a href="author.html#50">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+In case you were a user of linearRegression (defined in 
+TMat_maths_impl.h), please
+note that there was a bug with the following consequence: the correct 
+computation was
+performed only the FIRST time that it was called (hence the bug passed 
+some tests
+I suppose when the function was first written).
+
+This function was used the by the LinearRegressor class.
+
+I have committed the correction and it should work correctly now.
+
+-- 
+Yoshua Bengio 
+Full Professor / Professeur titulaire 
+Canada Research Chair in Statistical Learning Algorithms / 
+titulaire de la chaire de recherche du Canada en algorithmes d'apprentissage statistique
+D&#233;partement d'Informatique et Recherche Op&#233;rationnelle
+Universit&#233; de Montr&#233;al, 
+adresse postale: C.P. 6128 Succ. Centre-Ville, Montr&#233;al, Qu&#233;bec, Canada H3C 3J7
+adresse civique: 2920 Chemin de la Tour, Montr&#233;al, Qu&#233;bec, Canada H3T 1J8, #2194
+Tel: 514-343-6804. Fax: 514-343-5834. Bureau 3339.
+<A HREF="http://www.iro.umontreal.ca/~bengioy">http://www.iro.umontreal.ca/~bengioy</A>
+<A HREF="http://www.iro.umontreal.ca/~lisa">http://www.iro.umontreal.ca/~lisa</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000051.html">[Plearn-developers] Conjugate gradient optimization
+</A></li>
+	<LI>Next message: <A HREF="000052.html">[Plearn-developers] new class BoundedMemoryCache
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#50">[ date ]</a>
+              <a href="thread.html#50">[ thread ]</a>
+              <a href="subject.html#50">[ subject ]</a>
+              <a href="author.html#50">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

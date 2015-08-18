@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Passer un VarArray dans Python
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-April/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Passer%20un%20VarArray%20dans%20Python&In-Reply-To=%3C480CD657.2070406%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000169.html">
+   <LINK REL="Next"  HREF="000172.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Passer un VarArray dans Python</H1>
+    <B>Xavier Saint-Mleux</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Passer%20un%20VarArray%20dans%20Python&In-Reply-To=%3C480CD657.2070406%40apstat.com%3E"
+       TITLE="[Plearn-developers] Passer un VarArray dans Python">saintmlx at apstat.com
+       </A><BR>
+    <I>Mon Apr 21 20:00:55 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000169.html">[Plearn-developers] Passer un VarArray dans Python
+</A></li>
+        <LI>Next message: <A HREF="000172.html">[Plearn-developers] Pymake and recompiling dynamic libraries
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#170">[ date ]</a>
+              <a href="thread.html#170">[ thread ]</a>
+              <a href="subject.html#170">[ subject ]</a>
+              <a href="author.html#170">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&#199;a devrait fonctionner maintenant avec r8843.  Par contre, m&#234;me si les 
+variables sont par r&#233;f&#233;rence, la structure (array) ne d&#233;rive pas de 
+Object et est copi&#233;e, donc &#231;a donne une liste de variables c&#244;t&#233; python 
+et non une vraie VarArray.  Le code de conversion est simplement celui 
+pour TVec&lt;T&gt;, avec casts en plus.
+
+Xavier
+
+Olivier Delalleau wrote:
+&gt;<i> Salut,
+</I>&gt;<i>
+</I>&gt;<i> Si j'ai un objet PLearn qui a une option de type VarArray, comment je
+</I>&gt;<i> fais pour passer cette option dans Python ?
+</I>&gt;<i> Si myvar est une QqueChoseVariable, faire
+</I>&gt;<i>     monobjet.monoption = [ myvar ]
+</I>&gt;<i> ne fonctionne pas :
+</I>&gt;<i>     Exception: Cannot convert this object by value from python (type=VarArray).
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Olivier
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Plearn-developers mailing list
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">Plearn-developers at lists.berlios.de</A>
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">https://lists.berlios.de/mailman/listinfo/plearn-developers</A>
+</I>&gt;<i>   
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000169.html">[Plearn-developers] Passer un VarArray dans Python
+</A></li>
+	<LI>Next message: <A HREF="000172.html">[Plearn-developers] Pymake and recompiling dynamic libraries
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#170">[ date ]</a>
+              <a href="thread.html#170">[ thread ]</a>
+              <a href="subject.html#170">[ subject ]</a>
+              <a href="author.html#170">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

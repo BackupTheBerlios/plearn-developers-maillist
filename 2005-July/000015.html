@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Change in getCovariance() in VecStatsCollector
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Change%20in%20getCovariance%28%29%20in%20VecStatsCollector&In-Reply-To=%3C20050729160019.GA14845%40lsvm.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000012.html">
+   <LINK REL="Next"  HREF="000014.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Change in getCovariance() in VecStatsCollector</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Change%20in%20getCovariance%28%29%20in%20VecStatsCollector&In-Reply-To=%3C20050729160019.GA14845%40lsvm.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] Change in getCovariance() in VecStatsCollector">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Fri Jul 29 18:00:19 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000012.html">[Plearn-developers] Change in getCovariance() in VecStatsCollector
+</A></li>
+        <LI>Next message: <A HREF="000014.html">[Plearn-developers] PDistribution::updateFromConditionalSorting(..) is now const
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15">[ date ]</a>
+              <a href="thread.html#15">[ thread ]</a>
+              <a href="subject.html#15">[ subject ]</a>
+              <a href="author.html#15">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>It turned out the covariance estimator I came up with was unbiased as
+desired, but did not systematically return a positive semi-definite
+matrix when missing values were present.
+This is now the case (and the formula used is actually more coherent
+with what we would expect). How cool is that ?
+
+On 25 Jul 2005, Olivier Delalleau wrote:
+&gt;<i> Hi,
+</I>&gt;<i> Another potentially damaging change in VecStatsCollector::getCovariance:
+</I>&gt;<i> the covariance now returned:
+</I>&gt;<i> - is an unbiased estimator of the covariance (instead of the direct
+</I>&gt;<i>   empirical estimator used previously), so that in particular the
+</I>&gt;<i>   diagonal is coherent with the getVariance() method
+</I>&gt;<i> - correctly handles missing values (which wasn't the case previously)
+</I>&gt;<i> 
+</I>&gt;<i> [...]
+</I>
+&gt;<i> Note that I haven't had time yet to fully test the code, though it seems
+</I>&gt;<i> to work ok. I will do so asap :)
+</I>&gt;<i> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000012.html">[Plearn-developers] Change in getCovariance() in VecStatsCollector
+</A></li>
+	<LI>Next message: <A HREF="000014.html">[Plearn-developers] PDistribution::updateFromConditionalSorting(..) is now const
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#15">[ date ]</a>
+              <a href="thread.html#15">[ thread ]</a>
+              <a href="subject.html#15">[ subject ]</a>
+              <a href="author.html#15">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

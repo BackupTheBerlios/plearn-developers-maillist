@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] PP are not thread safe
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2009-March/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PP%20are%20not%20thread%20safe&In-Reply-To=%3C2d1d7fe70903190756t602c6d4fue9f8bfa0624229ba%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000220.html">
+   <LINK REL="Next"  HREF="000222.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] PP are not thread safe</H1>
+    <B>Fr&#233;d&#233;ric Bastien</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PP%20are%20not%20thread%20safe&In-Reply-To=%3C2d1d7fe70903190756t602c6d4fue9f8bfa0624229ba%40mail.gmail.com%3E"
+       TITLE="[Plearn-developers] PP are not thread safe">nouiz at nouiz.org
+       </A><BR>
+    <I>Thu Mar 19 15:56:59 CET 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000220.html">[Plearn-developers] Plearn installation error due to wrong	arguments in multiplyAcc ?
+</A></li>
+        <LI>Next message: <A HREF="000222.html">[Plearn-developers] plearn vmat diff now compare the field name and	field type
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#221">[ date ]</a>
+              <a href="thread.html#221">[ thread ]</a>
+              <a href="subject.html#221">[ subject ]</a>
+              <a href="author.html#221">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+Will using some new optimisation that used PP, I discovered that PP are not
+thread safe as the count the number of reference. If I put lock around the
+modification of the lock, this is too slow, so I removed their creation
+inside my parallel region.
+
+This is just to let you know.
+
+Fred
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="https://lists.berlios.de/pipermail/plearn-developers/attachments/20090319/296f130c/attachment.html">https://lists.berlios.de/pipermail/plearn-developers/attachments/20090319/296f130c/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000220.html">[Plearn-developers] Plearn installation error due to wrong	arguments in multiplyAcc ?
+</A></li>
+	<LI>Next message: <A HREF="000222.html">[Plearn-developers] plearn vmat diff now compare the field name and	field type
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#221">[ date ]</a>
+              <a href="thread.html#221">[ thread ]</a>
+              <a href="subject.html#221">[ subject ]</a>
+              <a href="author.html#221">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

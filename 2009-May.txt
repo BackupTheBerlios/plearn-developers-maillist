@@ -1,0 +1,21 @@
+From delallea at iro.umontreal.ca  Wed May 27 22:40:44 2009
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Wed, 27 May 2009 16:40:44 -0400
+Subject: [Plearn-developers] New default values for PTester.save_mode and
+	HyperLearner.save_mode
+Message-ID: <20090527204044.GA27574@opale.iro.umontreal.ca>
+
+Just a note that the default value for PTester.save_mode and
+HyperLearner.save_mode has been changed to
+    "plearn_ascii"
+instead of
+    ""
+for the sake of clarity.
+
+It may cause some recently added (not in PLearn) tests to fail, so if it
+happens, you'll know why :)
+
+--
+Olivier
+
+

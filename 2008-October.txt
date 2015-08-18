@@ -1,0 +1,136 @@
+From nouiz at nouiz.org  Fri Oct  3 21:02:35 2008
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Fri, 3 Oct 2008 15:02:35 -0400
+Subject: [Plearn-developers] A new runable object to redirect perr and pout
+Message-ID: <2d1d7fe70810031202k6931e42i7f5a80813705e597@mail.gmail.com>
+
+Hi,
+
+I implemented a new runable object that allow the redirection of perr
+and pout in a .plearn script. I use it to redirect them in the expdir.
+
+example:
+...
+$EVALUATE{expdir}
+
+Redirect(what="pout",filename="${expdir}/stdout")
+Redirect(what="perr",filename="${expdir}/stderr")
+PTester(...)
+
+
+Fred
+
+
+From delallea at iro.umontreal.ca  Wed Oct 15 17:08:10 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Wed, 15 Oct 2008 11:08:10 -0400
+Subject: [Plearn-developers] New sorting keys in vmat view
+Message-ID: <20081015150808.GA27197@opale.iro.umontreal.ca>
+
+I just added in the "vmat view" command a little feature that can be
+useful when reading results tables: pressing < or > will sort rows
+according to the selected column, in respectively increasing or
+decreasing order.
+
+Have fun :)
+
+--
+Olivier
+
+
+From larocheh at iro.umontreal.ca  Mon Oct 20 19:32:07 2008
+From: larocheh at iro.umontreal.ca (Hugo Larochelle)
+Date: Mon, 20 Oct 2008 13:32:07 -0400
+Subject: [Plearn-developers] LIBSVMSparseVMatrix
+Message-ID: <A591D854-0B01-4B57-9CC6-6925B64E1FC3@iro.umontreal.ca>
+
+I just finished implementing, LIBSVMSparseVMatrix, a VMatrix that can  
+directly take its data from a .libsvm file.
+
+The libsvm format file is particularly useful for sparse inputs. In  
+this class, the sparsity information (i.e. indices of non-zero  
+inputs) is provided via the extra fields, and the input given by  
+getExample() only contains the values for the non-zero inputs. Since  
+the sparsity can change from one example to another, getExtra() (and  
+getExample()) will adapt the size of the extra (input) fields vector  
+accordingly. However, since it only works for fixed length inputs,  
+getRow() returns an error when called in sparse mode.
+
+This class can also be used in "coarse" mode (i.e.  
+use_coarse_representation=true), where getRow() and getExample() will  
+then provide inputs in a fixed vector form, with non-zero fields  
+taking their given values and other fields set explicitely to 0.  
+However, in coarse mode, no extra information is given (i.e. extrasize 
+() is 0), since it is implicitly incorporated in the input vector.
+
+Hugo
+
+
+From nouiz at nouiz.org  Mon Oct 20 20:55:55 2008
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Mon, 20 Oct 2008 14:55:55 -0400
+Subject: [Plearn-developers] Fwd: [Plearn-commits] r9586 -
+	trunk/plearn_learners/hyper
+In-Reply-To: <200810201851.m9KIpZrN003585@sheep.berlios.de>
+References: <200810201851.m9KIpZrN003585@sheep.berlios.de>
+Message-ID: <2d1d7fe70810201155x7111bdc6te1335dcdb5636cf8@mail.gmail.com>
+
+Hi,
+
+I did a bug fix in HyperOptimize. It don't break test here, but their
+is some chance that it break some others at apstats. Olivier D. and
+Pascal agree with the fix. So this email is to leat people know what
+changed in case something break.
+
+Fred
+
+
+---------- Forwarded message ----------
+From: nouiz at BerliOS <nouiz at mail.berlios.de>
+Date: Mon, Oct 20, 2008 at 2:51 PM
+Subject: [Plearn-commits] r9586 - trunk/plearn_learners/hyper
+To: plearn-commits at lists.berlios.de
+
+
+Author: nouiz
+Date: 2008-10-20 20:51:34 +0200 (Mon, 20 Oct 2008)
+New Revision: 9586
+
+Modified:
+  trunk/plearn_learners/hyper/HyperOptimize.cc
+Log:
+corrected the option HyperOptimize::min_n_trials so that if it is 10
+do a mininum of 10 trials and not 11 as in the past.
+
+
+Modified: trunk/plearn_learners/hyper/HyperOptimize.cc
+===================================================================
+--- trunk/plearn_learners/hyper/HyperOptimize.cc        2008-10-20
+17:51:15 UTC (rev 9585)
++++ trunk/plearn_learners/hyper/HyperOptimize.cc        2008-10-20
+18:51:34 UTC (rev 9586)
+@@ -436,6 +436,7 @@
+        }
+        option_vals = oracle->generateNextTrial(option_vals,objective);
+
++        ++trialnum;
+        if(!is_missing(objective) &&
+           (objective < best_objective || best_results.length()==0) &&
+(trialnum>=min_n_trials || !option_vals))
+        {
+@@ -452,7 +453,7 @@
+                             best_learner);
+            }
+        }
+-        ++trialnum;
++
+        if(verbosity>1) {
+            perr << "In HyperOptimize::optimize() - cost=" << which_cost
+                 << " nb of trials="<<trialnum
+
+_______________________________________________
+Plearn-commits mailing list
+Plearn-commits at lists.berlios.de
+https://lists.berlios.de/mailman/listinfo/plearn-commits
+
+

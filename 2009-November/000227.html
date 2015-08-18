@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Bug with ParzenWindow.cc (?)
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2009-November/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Bug%20with%20ParzenWindow.cc%20%28%3F%29&In-Reply-To=%3Cdaecc3cb0911270711n4e0df0fcse8e667c0c1a83fe1%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000228.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Bug with ParzenWindow.cc (?)</H1>
+    <B>Guillaume Desjardins</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Bug%20with%20ParzenWindow.cc%20%28%3F%29&In-Reply-To=%3Cdaecc3cb0911270711n4e0df0fcse8e667c0c1a83fe1%40mail.gmail.com%3E"
+       TITLE="[Plearn-developers] Bug with ParzenWindow.cc (?)">guillaume.desjardins at gmail.com
+       </A><BR>
+    <I>Fri Nov 27 16:11:31 CET 2009</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000228.html">[Plearn-developers] Bug with ParzenWindow.cc (?)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#227">[ date ]</a>
+              <a href="thread.html#227">[ thread ]</a>
+              <a href="subject.html#227">[ subject ]</a>
+              <a href="author.html#227">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi everyone,
+
+While reimplementing a Parzen window  density estimator in Theano, I
+noticed a little discrepancy between my results and those returned by
+PLearn...
+Basically, to get the same results, I have to treat the sigma^2
+parameter of the (spherical) Gaussian kernel, as the standard
+deviation.
+
+This seems to be confirmed by looking at the code. ParzenWindow's
+constructor takes as input a sigma_square parameter. ParzenWindow
+extends the GaussMix class however, which computes the likelihood as
+follows:
+
+real stddev = type_id == TYPE_SPHERICAL ? sigma[j] : diag_j[k];
+stddev = max(sigma_min, stddev);
+log_likelihood += gauss_log_density_stddev(y[k], mu_y[k], stddev);
+
+Everything's good so far... except that ParzenWindow initializes the
+sigma[j]'s with sigma_square !
+(plearn_learners/distributions/ParzenWindow.cc:164).
+So it looks like the &quot;sigma_square&quot; parameter to ParzenWindow is
+actually the standard deviation, and should thus be renamed to
+&quot;sigma&quot;.
+
+Before going through with the change I'd like to confirm that I'm not
+missing something. I'm not very familiar with PLearn, so I'd like to
+make sure this change would not have any unintended side-effects.
+
+Thanks in advance,
+
+Guillaume
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000228.html">[Plearn-developers] Bug with ParzenWindow.cc (?)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#227">[ date ]</a>
+              <a href="thread.html#227">[ thread ]</a>
+              <a href="subject.html#227">[ subject ]</a>
+              <a href="author.html#227">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

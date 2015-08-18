@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] erreurs, warnings, logs, etc.
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-November/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20erreurs%2C%20warnings%2C%20logs%2C%20etc.&In-Reply-To=%3C492EF9C1.5030209%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000191.html">
+   <LINK REL="Next"  HREF="000193.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] erreurs, warnings, logs, etc.</H1>
+    <B>Xavier Saint-Mleux</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20erreurs%2C%20warnings%2C%20logs%2C%20etc.&In-Reply-To=%3C492EF9C1.5030209%40apstat.com%3E"
+       TITLE="[Plearn-developers] erreurs, warnings, logs, etc.">saintmlx at apstat.com
+       </A><BR>
+    <I>Thu Nov 27 20:49:21 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000191.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+        <LI>Next message: <A HREF="000193.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#194">[ date ]</a>
+              <a href="thread.html#194">[ thread ]</a>
+              <a href="subject.html#194">[ subject ]</a>
+              <a href="author.html#194">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+&gt;<i> J'avais rajout&#233; ce warning, car il m'aurait &#233;viter quelques heures de
+</I>&gt;<i> d&#233;bugging a un moment donn&#233;e. Je ne me rappele plus la cause. Je ne
+</I>&gt;<i> crois pas qu'il faut l'inclure dans un logging nomm&#233;, mais plutot le
+</I>&gt;<i> mettre en logging niveau debug. Il faudrait aussi que pymake -dbg
+</I>&gt;<i> imprime les log de debug par default. En ce moment il imprime par
+</I>&gt;<i> defaut juste les log de niveau normal.
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>
+Selon moi, la meilleure fa&#231;on d'&#233;viter des heures de d&#233;bug d&#233;sagr&#233;able &#224; 
+tout le monde est justement de le mettre dans un log nomm&#233;, de mani&#232;re &#224; 
+pouvoir facilement l'activer et le d&#233;sactiver.  Ce genre d'information 
+factuelle peut tr&#232;s bien &#234;tre au niveau &quot;normal&quot;, pas seulement &quot;debug&quot;, 
+mais n'&#234;tre activ&#233;e que si l'on veut les logs pour SelectRowsVMatrix (ou 
+&quot;__ALL__&quot;.)  On peut aussi profiter de cette modif pour en faire un 
+message un peu plus parlant, qui s'affiche dans tous les cas (si le log 
+est actif) et donne la taille de la matrice source, la taille de 
+l'index, etc.  On n'a jamais trop de d&#233;tails quand on d&#233;bogue qqch. en 
+particulier, mais quand on utilise du code g&#233;n&#233;rique on ne veut 
+justement pas savoir.
+
+
+Xavier
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000191.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+	<LI>Next message: <A HREF="000193.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#194">[ date ]</a>
+              <a href="thread.html#194">[ thread ]</a>
+              <a href="subject.html#194">[ subject ]</a>
+              <a href="author.html#194">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Drop support of python2.3?
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2009-March/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Drop%20support%20of%20python2.3%3F&In-Reply-To=%3C49AEF333.4080305%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000214.html">
+   <LINK REL="Next"  HREF="000216.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Drop support of python2.3?</H1>
+    <B>Xavier Saint-Mleux</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Drop%20support%20of%20python2.3%3F&In-Reply-To=%3C49AEF333.4080305%40apstat.com%3E"
+       TITLE="[Plearn-developers] Drop support of python2.3?">saintmlx at apstat.com
+       </A><BR>
+    <I>Wed Mar  4 22:31:31 CET 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000214.html">[Plearn-developers] Drop support of python2.3?
+</A></li>
+        <LI>Next message: <A HREF="000216.html">[Plearn-developers] Plearn installation error due to wrong	arguments in multiplyAcc ?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#215">[ date ]</a>
+              <a href="thread.html#215">[ thread ]</a>
+              <a href="subject.html#215">[ subject ]</a>
+              <a href="author.html#215">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I don't mind if we drop support for python 2.3.  I like backward
+compatibility, but I don't think it is necessary to support things that
+were replaced some five years ago.
+
+A stand-alone subprocess module is available here if we need it:
+<A HREF="http://www.lysator.liu.se/~astrand/popen5/">http://www.lysator.liu.se/~astrand/popen5/</A>
+
+There are other ways to make a self-contained toolkit.py that would be
+compatible with as many versions of python as possible...  if it is
+worth the trouble.
+
+
+Xavier
+
+
+Fr&#233;d&#233;ric Bastien wrote:
+&gt;<i> Hi,
+</I>&gt;<i>
+</I>&gt;<i> I have modified PLearn to be able to link again python 2.6. It is
+</I>&gt;<i> work, with one exception that make the test fail. We have this
+</I>&gt;<i> DeprecationWarning that is generated as we use popen2 that is
+</I>&gt;<i> deprecated. We could use the subprocess instead, but it was added in
+</I>&gt;<i> python 2.4. So is their anybody with objection that we don't officialy
+</I>&gt;<i> support python2.3 to allow using python 2.6? Do you know how to use
+</I>&gt;<i> the subprocess package on python 2.3?
+</I>&gt;<i>
+</I>&gt;<i> Here is the warning:
+</I>&gt;<i>
+</I>&gt;<i> /home/bastienf/PLearn/python_modules/plearn/utilities/toolkit.py:8: DeprecationW
+</I>&gt;<i> arning: The popen2 module is deprecated.  Use the subprocess module.
+</I>&gt;<i>   import inspect, os, popen2, shutil, string, sys, time, types
+</I>&gt;<i>
+</I>&gt;<i> We need to use python2.6 the new mammouth serie.
+</I>&gt;<i>
+</I>&gt;<i> thanks
+</I>&gt;<i>
+</I>&gt;<i> Fred
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Plearn-developers mailing list
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">Plearn-developers at lists.berlios.de</A>
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">https://lists.berlios.de/mailman/listinfo/plearn-developers</A>
+</I>&gt;<i>   
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000214.html">[Plearn-developers] Drop support of python2.3?
+</A></li>
+	<LI>Next message: <A HREF="000216.html">[Plearn-developers] Plearn installation error due to wrong	arguments in multiplyAcc ?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#215">[ date ]</a>
+              <a href="thread.html#215">[ thread ]</a>
+              <a href="subject.html#215">[ subject ]</a>
+              <a href="author.html#215">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

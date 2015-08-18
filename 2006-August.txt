@@ -1,0 +1,59 @@
+From chapados at apstat.com  Tue Aug  1 00:05:45 2006
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Mon, 31 Jul 2006 18:05:45 -0400
+Subject: [Plearn-developers] Berlios Full and What We Intend to do About It
+Message-ID: <44CE7EB9.3090109@apstat.com>
+
+Dear fellow PLearners,
+
+As most of you are aware, Berlios has been unable to accept new commits 
+to PLearn since last Thursday July 27th 2006**.  This is due to a disk 
+that has been filled up on Berlios.  The administrators have been 
+notified, and at last count, some 12 messages from a variety of projets 
+hosted on Berlios had been sent to the main Berlios mailing list 
+(including our own messages).  However, no official reply has yet been 
+forthcoming.
+
+Since this unfortunate situation greatly impedes the development of 
+PLearn, the self-appointed Triumvirate (Pascal Vincent, Christian Hudon, 
+Nicolas Chapados) is giving itself until WEDNESDAY AUGUST 2nd for the 
+situation to get back to normal.  Past this date, we will move PLearn 
+back to Sourceforge, which now has Subversion hosting.  At a later 
+point, we may consider moving to Google Code, once their environment 
+becomes more mature (and can import revision histories from existing 
+projects, which is not currently the case).
+
+Don't hesitate to share concerns or observations.
+
+    + Nicolas
+
+** There was a brief period on Sunday were commits were permitted, but 
+the server quickly filled up.
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+
+
+From chrish at apstat.com  Tue Aug  1 17:46:43 2006
+From: chrish at apstat.com (Christian Hudon)
+Date: Tue, 01 Aug 2006 11:46:43 -0400
+Subject: [Plearn-developers] PLearn buildbot is back
+Message-ID: <44CF7763.6060406@apstat.com>
+
+Hi,
+
+some people might have noticed that the PLearn buildbot was rather
+grumpy in the past few days. This was due to an upgrade of the machine
+it is running on from Debian to Ubuntu 6.06. After a little bit of
+reeducation, the PLearn buildbot is now back on duty, fit as a fiddle
+and ready to send people who make the PLearn tests fail threatening emails.
+
+Enjoy, and sorry for the disturbance.
+
+  Christian
+
+
+

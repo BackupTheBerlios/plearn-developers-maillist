@@ -1,0 +1,284 @@
+From nouiz at nouiz.org  Thu Feb  5 17:43:36 2009
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Thu, 5 Feb 2009 11:43:36 -0500
+Subject: [Plearn-developers] PLearn::save and PLearn::tmpsave
+Message-ID: <2d1d7fe70902050843p6a021a09wf574b311a20881ea@mail.gmail.com>
+
+Hi,
+
+I added the fct PLearn::tmpsave, it does the same thing as PLearn::save
+execpt that it write it in a tmp file then move it to the real file. This
+allow do don't have partial file in case of a crash.
+
+Olivier D. was interested that I put this functionality in PLearn::save, is
+their any objection?
+
+Fred
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20090205/7e8b2e4a/attachment.html>
+
+From chrish at apstat.com  Thu Feb  5 23:08:35 2009
+From: chrish at apstat.com (Christian Hudon)
+Date: Thu, 05 Feb 2009 17:08:35 -0500
+Subject: [Plearn-developers] PLearn::save and PLearn::tmpsave
+In-Reply-To: <2d1d7fe70902050843p6a021a09wf574b311a20881ea@mail.gmail.com>
+References: <2d1d7fe70902050843p6a021a09wf574b311a20881ea@mail.gmail.com>
+Message-ID: <498B6363.9020806@apstat.com>
+
+Fr?d?ric Bastien wrote:
+> Hi,
+>
+> I added the fct PLearn::tmpsave, it does the same thing as 
+> PLearn::save execpt that it write it in a tmp file then move it to the 
+> real file. This allow do don't have partial file in case of a crash.
+>
+> Olivier D. was interested that I put this functionality in 
+> PLearn::save, is their any objection?
+Not from me personally. From a Unix perspective, it'd be nice to check 
+the following before replacing something as common as PLearn::save()... 
+I haven't checked the PLearn::tmpsave() code, just some quick thoughts:
+
+1. files should be created with mode 0666 & ~umask(), *not* mode 0600 
+(like some temp files are).
+2. it'd be nice if the temp file was given a random extension (not just 
+a constant suffix) and created with O_EXCL, so things behave nicely and 
+there are no race conditions when many instances of PLearn are working 
+on the same directory (which happens with parallel jobs).
+
+  Christian
+
+
+
+From nouiz at nouiz.org  Fri Feb  6 15:34:08 2009
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Fri, 6 Feb 2009 09:34:08 -0500
+Subject: [Plearn-developers] PLearn::save and PLearn::tmpsave
+In-Reply-To: <498B6363.9020806@apstat.com>
+References: <2d1d7fe70902050843p6a021a09wf574b311a20881ea@mail.gmail.com>
+	<498B6363.9020806@apstat.com>
+Message-ID: <2d1d7fe70902060634o1a9fa48bif93bb8d3ac9f9d78@mail.gmail.com>
+
+Hi,
+
+
+On Thu, Feb 5, 2009 at 5:08 PM, Christian Hudon <chrish at apstat.com> wrote:
+
+> Fr?d?ric Bastien wrote:
+>
+>> Hi,
+>>
+>> I added the fct PLearn::tmpsave, it does the same thing as PLearn::save
+>> execpt that it write it in a tmp file then move it to the real file. This
+>> allow do don't have partial file in case of a crash.
+>>
+>> Olivier D. was interested that I put this functionality in PLearn::save,
+>> is their any objection?
+>>
+> Not from me personally. From a Unix perspective, it'd be nice to check the
+> following before replacing something as common as PLearn::save()... I
+> haven't checked the PLearn::tmpsave() code, just some quick thoughts:
+>
+> 1. files should be created with mode 0666 & ~umask(), *not* mode 0600 (like
+> some temp files are).
+
+
+Currently, they are created the same way the PLearn::save fct do it, which
+use mode 0666
+
+
+
+> 2. it'd be nice if the temp file was given a random extension (not just a
+> constant suffix) and created with O_EXCL, so things behave nicely and there
+> are no race conditions when many instances of PLearn are working on the same
+> directory (which happens with parallel jobs).
+>
+I don't think that is a good idea, as if we create two file with the same
+path at the same time, we have a bigger problem then the tmp file... I don't
+see why O_EXCL would help with this, as if a old jobs failed, their can be
+an old partial file that is not cleaned. So if the file already exist, we
+can't know in which case we are.(parallel writing or old failed jobs). Also
+PLearn is not thread safe. I use parallel code but with only a few class
+that I changed to be thread safe, doing this for the whole PLearn, will be a
+hugh task that is not worth it. What I think is worth it, is doing it case
+by case. In a few case, when I stumble across code that is not thread safe,
+but is easy to modify, I have done the modification.
+
+here is the very simple code:
+
+template<class T>
+inline void tmpsave(const PPath& filepath, const T& x, PStream::mode_t
+io_formatting=PStream::plearn_ascii, bool implicit_storage = true)
+{
+    PPath tmp_file=filepath+".plearn_tmpsave";
+    PLearn::save(tmp_file, x, io_formatting, implicit_storage);
+    mvforce(tmp_file, filepath);
+}
+
+Fred
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20090206/57329245/attachment.html>
+
+From chapados at iro.umontreal.ca  Fri Feb  6 15:55:39 2009
+From: chapados at iro.umontreal.ca (Nicolas Chapados)
+Date: Fri, 6 Feb 2009 09:55:39 -0500
+Subject: [Plearn-developers] PLearn::save and PLearn::tmpsave
+In-Reply-To: <2d1d7fe70902060634o1a9fa48bif93bb8d3ac9f9d78@mail.gmail.com>
+References: <2d1d7fe70902050843p6a021a09wf574b311a20881ea@mail.gmail.com>
+	<498B6363.9020806@apstat.com>
+	<2d1d7fe70902060634o1a9fa48bif93bb8d3ac9f9d78@mail.gmail.com>
+Message-ID: <14E14804-C17B-4935-9580-C0182A299EB5@iro.umontreal.ca>
+
+
+Le 6-Feb-09 ? 9:34 AM, Fr?d?ric Bastien a ?crit :
+
+> 2. it'd be nice if the temp file was given a random extension (not  
+> just a constant suffix) and created with O_EXCL, so things behave  
+> nicely and there are no race conditions when many instances of  
+> PLearn are working on the same directory (which happens with  
+> parallel jobs).
+> I don't think that is a good idea, as if we create two file with  
+> the same path at the same time, we have a bigger problem then the  
+> tmp file... I don't see why O_EXCL would help with this, as if a  
+> old jobs failed, their can be an old partial file that is not  
+> cleaned. So if the file already exist, we can't know in which case  
+> we are.(parallel writing or old failed jobs). Also PLearn is not  
+> thread safe. I use parallel code but with only a few class that I  
+> changed to be thread safe, doing this for the whole PLearn, will be  
+> a hugh task that is not worth it. What I think is worth it, is  
+> doing it case by case. In a few case, when I stumble across code  
+> that is not thread safe, but is easy to modify, I have done the  
+> modification.
+
+Christian is not talking about thread-safety per se, but multiple  
+experiments that execute on the same machine (e.g. one per core).  We  
+want to avoid tmp-file collision in that case.  O_EXCL is the right  
+way to do it in this case; it's precisely why it's there.
+
+	+ Nicolas
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20090206/a95d7bb0/attachment.html>
+
+From delallea at iro.umontreal.ca  Fri Feb  6 16:04:33 2009
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 6 Feb 2009 10:04:33 -0500
+Subject: [Plearn-developers] PLearn::save and PLearn::tmpsave
+In-Reply-To: <14E14804-C17B-4935-9580-C0182A299EB5@iro.umontreal.ca>
+References: <2d1d7fe70902050843p6a021a09wf574b311a20881ea@mail.gmail.com>
+	<498B6363.9020806@apstat.com>
+	<2d1d7fe70902060634o1a9fa48bif93bb8d3ac9f9d78@mail.gmail.com>
+	<14E14804-C17B-4935-9580-C0182A299EB5@iro.umontreal.ca>
+Message-ID: <20090206150433.GA16796@opale.iro.umontreal.ca>
+
+On 06 Feb 2009, Nicolas Chapados wrote:
+>
+> Le 6-Feb-09 ? 9:34 AM, Fr?d?ric Bastien a ?crit :
+>
+>> 2. it'd be nice if the temp file was given a random extension (not just a 
+>> constant suffix) and created with O_EXCL, so things behave nicely and 
+>> there are no race conditions when many instances of PLearn are working on 
+>> the same directory (which happens with parallel jobs).
+>> I don't think that is a good idea, as if we create two file with the same 
+>> path at the same time, we have a bigger problem then the tmp file... I 
+>> don't see why O_EXCL would help with this, as if a old jobs failed, their 
+>> can be an old partial file that is not cleaned. So if the file already 
+>> exist, we can't know in which case we are.(parallel writing or old failed 
+>> jobs). Also PLearn is not thread safe. I use parallel code but with only a 
+>> few class that I changed to be thread safe, doing this for the whole 
+>> PLearn, will be a hugh task that is not worth it. What I think is worth 
+>> it, is doing it case by case. In a few case, when I stumble across code 
+>> that is not thread safe, but is easy to modify, I have done the 
+>> modification.
+>
+> Christian is not talking about thread-safety per se, but multiple 
+> experiments that execute on the same machine (e.g. one per core).  We want 
+> to avoid tmp-file collision in that case.  O_EXCL is the right way to do it 
+> in this case; it's precisely why it's there.
+
+I think Fred's point still stands in that if we have a problem with his
+new implementation, it means we would have also had the same problem
+with the old one (since the name of the tmp file is just the original
+file name with some fancy suffix).
+So if you're saying we should make PLearn more robust to avoid having
+people saving in the same file at the same time, why not, but it would
+be a new feature in this case.
+
+--
+Olivier
+
+
+From nouiz at nouiz.org  Mon Feb  9 17:57:17 2009
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Mon, 9 Feb 2009 11:57:17 -0500
+Subject: [Plearn-developers] PLearn::save and PLearn::tmpsave
+In-Reply-To: <20090206150433.GA16796@opale.iro.umontreal.ca>
+References: <2d1d7fe70902050843p6a021a09wf574b311a20881ea@mail.gmail.com>
+	<498B6363.9020806@apstat.com>
+	<2d1d7fe70902060634o1a9fa48bif93bb8d3ac9f9d78@mail.gmail.com>
+	<14E14804-C17B-4935-9580-C0182A299EB5@iro.umontreal.ca>
+	<20090206150433.GA16796@opale.iro.umontreal.ca>
+Message-ID: <2d1d7fe70902090857w47c39beei6fd53aaba3574254@mail.gmail.com>
+
+So,
+
+Is their any more objection? If I don't have anymore by Wednesday morning, I
+will commit it.
+
+Fred
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20090209/c6e042c5/attachment.html>
+
+From nouiz at nouiz.org  Wed Feb 11 16:42:38 2009
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Wed, 11 Feb 2009 10:42:38 -0500
+Subject: [Plearn-developers] PLearn::save and PLearn::tmpsave
+In-Reply-To: <2d1d7fe70902090857w47c39beei6fd53aaba3574254@mail.gmail.com>
+References: <2d1d7fe70902050843p6a021a09wf574b311a20881ea@mail.gmail.com>
+	<498B6363.9020806@apstat.com>
+	<2d1d7fe70902060634o1a9fa48bif93bb8d3ac9f9d78@mail.gmail.com>
+	<14E14804-C17B-4935-9580-C0182A299EB5@iro.umontreal.ca>
+	<20090206150433.GA16796@opale.iro.umontreal.ca>
+	<2d1d7fe70902090857w47c39beei6fd53aaba3574254@mail.gmail.com>
+Message-ID: <2d1d7fe70902110742y7375d8f8q54ca7034af5b1c2f@mail.gmail.com>
+
+I have commited the change.
+
+Fred
+
+On Mon, Feb 9, 2009 at 11:57 AM, Fr?d?ric Bastien <nouiz at nouiz.org> wrote:
+
+> So,
+>
+> Is their any more objection? If I don't have anymore by Wednesday morning,
+> I will commit it.
+>
+> Fred
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20090211/a5fa739d/attachment.html>
+
+From nouiz at nouiz.org  Thu Feb 26 17:30:35 2009
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Thu, 26 Feb 2009 11:30:35 -0500
+Subject: [Plearn-developers] PTester::save_data_sets will save file with the
+	extension .vmat
+Message-ID: <2d1d7fe70902260830x75d2c481xbad914f1de4db6d4@mail.gmail.com>
+
+Hi,
+
+the option PTester::save_data_sets was saving file with the extension
+.psave. Now They are saved with the extension .vmat. I did this change as
+the comment was telling the file would end with .vmat and they are vmat
+file. With the extension .psave plearn vmat ... are not working.
+
+Fred
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20090226/4bde9b53/attachment.html>
+

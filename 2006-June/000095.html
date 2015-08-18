@@ -1,0 +1,83 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] PCA Missings Imputation
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-June/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PCA%20Missings%20Imputation&In-Reply-To=%3C20060610145753.GA21973%40frontal21.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000094.html">
+   <LINK REL="Next"  HREF="000096.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] PCA Missings Imputation</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PCA%20Missings%20Imputation&In-Reply-To=%3C20060610145753.GA21973%40frontal21.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] PCA Missings Imputation">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Sat Jun 10 16:57:55 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000094.html">[Plearn-developers] PCA Missings Imputation
+</A></li>
+        <LI>Next message: <A HREF="000096.html">[Plearn-developers] PCA Missings Imputation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#95">[ date ]</a>
+              <a href="thread.html#95">[ thread ]</a>
+              <a href="subject.html#95">[ subject ]</a>
+              <a href="author.html#95">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Personally, it seems to me it would make more sense to put this in the
+VMatrices (this can be done for instance with the
+MeanImputationVMatrix), rather than add the same code in all learners.
+
+--
+Olivier
+
+On 10 Jun 2006, Nicolas Chapados wrote:
+&gt;<i> Hello all,
+</I>&gt;<i> 
+</I>&gt;<i> Just a quick note: I added an &quot;impute_missings&quot; option to PCA.  If true, 
+</I>&gt;<i> and a missing value is encountered on a computeOutput(), then it is 
+</I>&gt;<i> replaced by the mean.  Note that this applies only to computeOutput, not 
+</I>&gt;<i> train().  [To filter out train-time missing values, you can still rely 
+</I>&gt;<i> on DisregardRowsVMatrix.]
+</I>&gt;<i> 
+</I>&gt;<i> I hereby make a suggestion: to use the same option name 
+</I>&gt;<i> &quot;impute_missings&quot; when a learner is capable of doing just so.  Does it 
+</I>&gt;<i> make sense to include this in PLearner?
+</I>&gt;<i> 
+</I>&gt;<i>     + Nicolas
+</I>&gt;<i> 
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000094.html">[Plearn-developers] PCA Missings Imputation
+</A></li>
+	<LI>Next message: <A HREF="000096.html">[Plearn-developers] PCA Missings Imputation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#95">[ date ]</a>
+              <a href="thread.html#95">[ thread ]</a>
+              <a href="subject.html#95">[ subject ]</a>
+              <a href="author.html#95">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

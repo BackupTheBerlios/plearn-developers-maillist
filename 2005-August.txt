@@ -1,0 +1,733 @@
+From delallea at iro.umontreal.ca  Mon Aug  1 03:40:30 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Sun, 31 Jul 2005 21:40:30 -0400
+Subject: [Plearn-developers] -fno-coalesce
+In-Reply-To: <513CC6A3-AEC3-4434-A809-3BD0F8BF44D4@iro.umontreal.ca>
+References: <513CC6A3-AEC3-4434-A809-3BD0F8BF44D4@iro.umontreal.ca>
+Message-ID: <20050801014030.GA21254@lsvm.iro.umontreal.ca>
+
+On 31 Jul 2005, Jasmin Lapalme wrote:
+> Bonjour ? tous,
+>     J'essaie toujours de compiler PLearn sur MacOS X et beaucoup de  
+> probl?mes surgissent depuis le d?placement vers berlios.  
+> Premi?rement, il y a l'option -fno-coalesce qui est ajout? par pymake  
+> (ligne 77 de pymake.confif.model de PLearn) lorsque l'on est sur une  
+> platforme darwin. Cette option n'est pas reconnu par le g++ de MacOS  
+> X. ? quoi sert cette option? Pourquoi est-elle ajout?e seulement pour  
+> Darwin, soit Mac OS X.
+
+Demander ? Pascal:
+
+------------------------------------------------------------------------
+r3653 | plearner | 2005-06-23 12:12:47 -0400 (Thu, 23 Jun 2005) | 2 lines
+Necessary changes for porting to OS X
+
+svn diff -r3652:3653 pymake.config.model
+Index: pymake.config.model
+===================================================================
+--- pymake.config.model (revision 3652)
++++ pymake.config.model (revision 3653)
+@@ -72,7 +72,7 @@
+ elif platform=='win32' :
+     compileflags = '-DWIN32 -D_MINGW_ -DLITTLEENDIAN'
+ elif platform=='darwin' :
+-    compileflags = '-DDARWIN -DBIGENDIAN'
++    compileflags = '-DDARWIN -DBIGENDIAN -fno-coalesce'
+ else:
+     print 'Unknown platform: ' + platform
+     sys.exit()
+
+
+
+>     Si j'enl?ve cette option (-fno-coalesce), j'obtiens  ,...entre  
+> autre..., l'erreur suivante dans Option.h :
+> 
+> /Users/lapalmej/LISA/PLearn/plearn/base/Option.h:132: error: 'ptr'  
+> was not declared in this scope
+> /Users/lapalmej/LISA/PLearn/plearn/base/Option.h: In member function  
+> `virtual void PLearn::TVecOption<ObjectType,  
+> VecElementType>::writeAtIndex(const PLearn::Object*,  
+> PLearn::PStream&, const std::string&) const':
+> /Users/lapalmej/LISA/PLearn/plearn/base/Option.h:138: error: 'ptr'  
+> was not declared in this scope
+> 
+>     Est-ce que quelqu'un peut m'aider?
+> 
+
+Il me semble que c'est l'erreur que rencontrait Hugo r?cemment, et que
+Nicolas devrait avoir corrig? dans la version 3933 d'il y a deux jours.
+
+--
+Olivier
+
+
+From lapalmej at iro.umontreal.ca  Mon Aug  1 20:42:07 2005
+From: lapalmej at iro.umontreal.ca (Jasmin Lapalme)
+Date: Mon, 1 Aug 2005 14:42:07 -0400
+Subject: [Plearn-developers] Valeur INFINITY
+Message-ID: <B5AE724C-4221-407F-BE8E-9134D98C1C50@iro.umontreal.ca>
+
+Bonjour,
+     J'ai encore des probl?mes ? la compilation sous Mac OS X (10.4,  
+gcc 4.0.0). Dans PStream.cc:537, une constante INFINITY est donn? ?  
+un double et ceci cause l'erreur suivante :
+
+error: floating constant exceeds tange of 'float'
+
+     Que repr?sente la constante INFINITY? lorsque que je la remplace  
+DBL_MAX le fichier compile bien. Va-t-il y avoir un probl?me si je  
+met DBL_MAX ? la place?
+
+Merci
+
+Jasmin
+
+
+
+From pascal at apstat.com  Mon Aug  1 22:23:43 2005
+From: pascal at apstat.com (Pascal Vincent)
+Date: Mon, 01 Aug 2005 16:23:43 -0400
+Subject: [Plearn-developers] Valeur INFINITY
+In-Reply-To: <B5AE724C-4221-407F-BE8E-9134D98C1C50@iro.umontreal.ca>
+References: <B5AE724C-4221-407F-BE8E-9134D98C1C50@iro.umontreal.ca>
+Message-ID: <42EE84CF.5050604@apstat.com>
+
+Jasmin Lapalme wrote:
+
+> Bonjour,
+>     J'ai encore des probl?mes ? la compilation sous Mac OS X (10.4,  
+> gcc 4.0.0). Dans PStream.cc:537, une constante INFINITY est donn? ?  
+> un double et ceci cause l'erreur suivante :
+>
+> error: floating constant exceeds tange of 'float'
+>
+>     Que repr?sente la constante INFINITY? lorsque que je la remplace  
+> DBL_MAX le fichier compile bien. Va-t-il y avoir un probl?me si je  
+> met DBL_MAX ? la place?
+>
+> Merci
+>
+> Jasmin
+
+Il y a un standard IEEE qui d?finit le format (bit-patern) pour les 
+float et double, et qui d?finit aussi un certain nombre de 'valeurs 
+sp?ciales' qui incluent si je ne m'abuse plusieurs sortes de NaN (not a 
+number) et plusieurs sortes d'infinis (plus l'infini, moins l'infini, 
+etc...). Je ne sais pas si il y a une fa?on portable et/ou officielle 
+d'attribuer ces valeurs sp?ciales ? un float ou double. Si c'est 
+vraiment crucial pour son usage, peut-?tre la personne qui a cod? ce cas 
+sp?cial pourra mettre a jour le code. En attendant je sugg?re plut?t de 
+le remplacer par MISSING_VALUE (pour lesquels on utilise NaN) plut?t que 
+par DBL_MAX.
+
+-- 
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+http://www.apstat.com
+
+
+
+From chapados at apstat.com  Mon Aug  1 23:29:54 2005
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Mon, 01 Aug 2005 17:29:54 -0400
+Subject: [Plearn-developers] Valeur INFINITY
+In-Reply-To: <42EE84CF.5050604@apstat.com>
+References: <B5AE724C-4221-407F-BE8E-9134D98C1C50@iro.umontreal.ca> <42EE84CF.5050604@apstat.com>
+Message-ID: <42EE9452.8050500@apstat.com>
+
+NON!  ? mon avis, c'est une tr?s mauvaise id?e de remplacer INFINITY par 
+MISSING_VALUE.  Premi?rement, INFINITY est une constante d?finie par ISO 
+C99 (le nouveau C) et va de pair la repr?sentation d'infinit? dans IEEE 
+754 (le standard floating-point).  La diff?rence fondamentale entre 
+INFINITY et NaN est que les op?rateurs relationnels fonctionnent 
+correctement avec INFINITY ::
+
+    INFINITY >= x, pour tout x (sauf NaN),
+
+alors que tout op?rateur relationnel retourne FAUX lorsqu'un des 
+arguments est NaN (incluant ==).
+
+Choses ? essayer:
+
+1) regarde si tu peux d?finir une constante de compilation qui 
+activerait l'inclusion des symboles ISO C99.  Je crois que ces derniers 
+sont inclus automatiquement avec g++ sous Linux, mais peut-?tre que les 
+settings sous OS X sont diff?rents.
+
+2) si ?a ne marche pas, tu peux effectivement remplacer INFINITY par 
+DBL_MAX, qui est je crois un meilleur choix que MISSING_VALUE.
+
+    + Nicolas
+
+
+Pascal Vincent wrote:
+
+> Jasmin Lapalme wrote:
+>
+>> Bonjour,
+>>     J'ai encore des probl?mes ? la compilation sous Mac OS X (10.4,  
+>> gcc 4.0.0). Dans PStream.cc:537, une constante INFINITY est donn? ?  
+>> un double et ceci cause l'erreur suivante :
+>>
+>> error: floating constant exceeds tange of 'float'
+>>
+>>     Que repr?sente la constante INFINITY? lorsque que je la remplace  
+>> DBL_MAX le fichier compile bien. Va-t-il y avoir un probl?me si je  
+>> met DBL_MAX ? la place?
+>>
+>> Merci
+>>
+>> Jasmin
+>
+>
+> Il y a un standard IEEE qui d?finit le format (bit-patern) pour les 
+> float et double, et qui d?finit aussi un certain nombre de 'valeurs 
+> sp?ciales' qui incluent si je ne m'abuse plusieurs sortes de NaN (not 
+> a number) et plusieurs sortes d'infinis (plus l'infini, moins 
+> l'infini, etc...). Je ne sais pas si il y a une fa?on portable et/ou 
+> officielle d'attribuer ces valeurs sp?ciales ? un float ou double. Si 
+> c'est vraiment crucial pour son usage, peut-?tre la personne qui a 
+> cod? ce cas sp?cial pourra mettre a jour le code. En attendant je 
+> sugg?re plut?t de le remplacer par MISSING_VALUE (pour lesquels on 
+> utilise NaN) plut?t que par DBL_MAX.
+>
+
+-- 
+Nicolas Chapados, Ph.D. candidate
+D?partement d'informatique et recherche op?rationnelle
+Universit? de Montr?al
+http://www.iro.umontreal.ca/~chapados
+
+
+
+
+From pascal at apstat.com  Mon Aug  1 23:53:23 2005
+From: pascal at apstat.com (Pascal Vincent)
+Date: Mon, 01 Aug 2005 17:53:23 -0400
+Subject: [Plearn-developers] Valeur INFINITY
+In-Reply-To: <42EE9452.8050500@apstat.com>
+References: <B5AE724C-4221-407F-BE8E-9134D98C1C50@iro.umontreal.ca> <42EE84CF.5050604@apstat.com> <42EE9452.8050500@apstat.com>
+Message-ID: <42EE99D3.40205@apstat.com>
+
+> NON!  ? mon avis, c'est une tr?s mauvaise id?e de remplacer INFINITY 
+> par MISSING_VALUE.  Premi?rement, INFINITY est une constante d?finie 
+> par ISO C99 (le nouveau C) et va de pair la repr?sentation d'infinit? 
+> dans IEEE 754 (le standard floating-point).  La diff?rence 
+> fondamentale entre INFINITY et NaN est que les op?rateurs relationnels 
+> fonctionnent correctement avec INFINITY ::
+>
+>    INFINITY >= x, pour tout x (sauf NaN),
+>
+> alors que tout op?rateur relationnel retourne FAUX lorsqu'un des 
+> arguments est NaN (incluant ==).
+>
+> Choses ? essayer:
+>
+> 1) regarde si tu peux d?finir une constante de compilation qui 
+> activerait l'inclusion des symboles ISO C99.  Je crois que ces 
+> derniers sont inclus automatiquement avec g++ sous Linux, mais 
+> peut-?tre que les settings sous OS X sont diff?rents.
+>
+> 2) si ?a ne marche pas, tu peux effectivement remplacer INFINITY par 
+> DBL_MAX, qui est je crois un meilleur choix que MISSING_VALUE.
+
+Je maintiens qu'il vaut mieux remplacer par NaN, car les NaN ont la 
+propri?t? fort utile de se "propager" (tout comme les infinis). Et 
+puisque tr?s probablement un infini est le r?sultat d'un bug ou d'une 
+instabilit? num?rique, on ne veut pas qu'il passe inapper?u trop 
+facilement en se retrouvant travesti en un nombre ordinaire (aussi grand 
+soit-il...). Evidemment l'id?al serait qu'il demeure un infini...
+
+Maintenant si certaines personnes ont d?cid? de faire des comparaisons 
+avec des choses infinies de fa?on explicite dans leur code, c'est une 
+autre histoire...
+
+-- Pascal
+
+
+-- 
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+http://www.apstat.com
+
+
+
+From chapados at apstat.com  Tue Aug  2 00:23:56 2005
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Mon, 01 Aug 2005 18:23:56 -0400
+Subject: [Plearn-developers] Valeur INFINITY
+In-Reply-To: <42EE99D3.40205@apstat.com>
+References: <B5AE724C-4221-407F-BE8E-9134D98C1C50@iro.umontreal.ca> <42EE84CF.5050604@apstat.com> <42EE9452.8050500@apstat.com> <42EE99D3.40205@apstat.com>
+Message-ID: <42EEA0FC.9000602@apstat.com>
+
+Honn?tement, ce n'est franchement pas clair que NaN est le bon choix 
+pour remplacer INFINITY.  L'arithm?tique sur INFINITY est bien d?finie 
+dans le standard IEEE-754 depuis plus de 20 ans, et c'est une valeur 
+d'initialisation naturelle pour des algorithmes de min/max it?ratifs.  
+De plus, toutes les op?rations du genre exp(-INFINITY), 1/INFINITY, 
+etc., donnent les r?sultats auxquels on s'attend.
+
+Je crois qu'on ferait beaucoup plus de dommages en rempla?ant du code 
+bien d?fini par une erreur, sous pr?texte de prendre par la main un 
+programmeur qui a explicitement ?crit INFINITY en pr?sumant:
+
+    1) en conna?tre la s?mantique, et
+    2) s'attendre ? un comportement standard.
+
+Le seul ?cart fonctionnel de remplacer INFINITY par DBL_MAX est que 
+l'op?ration INFINITY/INFINITY donne par d?finition NaN, alors que 
+DBL_MAX/DBL_MAX donne bien s?r 1.  Mais cette diff?rence est sans doute  
+minime par rapport au changement radical de comportement qui serait 
+entra?n? par un remplacement de INFINITY par NaN.  Il est important de 
+comprendre que l'?mergence de INFINITY dans le code ne SIGNALE PAS UNE 
+ERREUR, loin de l?!
+
+Ce serait, ? mon sens, une erreur majeure que certaines parties ou 
+plate-formes cibles de PLearn soient soumises ? une s?mantique 
+RADICALEMENT DIFF?RENTE du reste.  Ce serait comme d'avoir quelque part:
+
+    #define private public
+
+Dans un tel contexte, je jugerai irrecevables les plaintes pour calvitie.
+
+    + Nicolas
+
+
+Pascal Vincent wrote:
+
+>
+>> NON!  ? mon avis, c'est une tr?s mauvaise id?e de remplacer INFINITY 
+>> par MISSING_VALUE.  Premi?rement, INFINITY est une constante d?finie 
+>> par ISO C99 (le nouveau C) et va de pair la repr?sentation d'infinit? 
+>> dans IEEE 754 (le standard floating-point).  La diff?rence 
+>> fondamentale entre INFINITY et NaN est que les op?rateurs 
+>> relationnels fonctionnent correctement avec INFINITY ::
+>>
+>>    INFINITY >= x, pour tout x (sauf NaN),
+>>
+>> alors que tout op?rateur relationnel retourne FAUX lorsqu'un des 
+>> arguments est NaN (incluant ==).
+>>
+>> Choses ? essayer:
+>>
+>> 1) regarde si tu peux d?finir une constante de compilation qui 
+>> activerait l'inclusion des symboles ISO C99.  Je crois que ces 
+>> derniers sont inclus automatiquement avec g++ sous Linux, mais 
+>> peut-?tre que les settings sous OS X sont diff?rents.
+>>
+>> 2) si ?a ne marche pas, tu peux effectivement remplacer INFINITY par 
+>> DBL_MAX, qui est je crois un meilleur choix que MISSING_VALUE.
+>
+>
+> Je maintiens qu'il vaut mieux remplacer par NaN, car les NaN ont la 
+> propri?t? fort utile de se "propager" (tout comme les infinis). Et 
+> puisque tr?s probablement un infini est le r?sultat d'un bug ou d'une 
+> instabilit? num?rique, on ne veut pas qu'il passe inapper?u trop 
+> facilement en se retrouvant travesti en un nombre ordinaire (aussi 
+> grand soit-il...). Evidemment l'id?al serait qu'il demeure un infini...
+>
+> Maintenant si certaines personnes ont d?cid? de faire des comparaisons 
+> avec des choses infinies de fa?on explicite dans leur code, c'est une 
+> autre histoire...
+>
+> -- Pascal
+>
+>
+
+-- 
+Nicolas Chapados, Ph.D. candidate
+D?partement d'informatique et recherche op?rationnelle
+Universit? de Montr?al
+http://www.iro.umontreal.ca/~chapados
+
+
+
+
+From delallea at iro.umontreal.ca  Tue Aug  2 03:05:48 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Mon, 1 Aug 2005 21:05:48 -0400
+Subject: [Plearn-developers] Valeur INFINITY
+In-Reply-To: <B5AE724C-4221-407F-BE8E-9134D98C1C50@iro.umontreal.ca>
+References: <B5AE724C-4221-407F-BE8E-9134D98C1C50@iro.umontreal.ca>
+Message-ID: <20050802010548.GA16060@lsvm.iro.umontreal.ca>
+
+Apparemment, INFINITY est cens? ?tre d?fini dans math.h. Tu pourrais
+regarder l?-dedans pour voir comment c'est fait.
+
+On 01 Aug 2005, Jasmin Lapalme wrote:
+> Bonjour,
+>     J'ai encore des probl?mes ? la compilation sous Mac OS X (10.4,  
+> gcc 4.0.0). Dans PStream.cc:537, une constante INFINITY est donn? ?  
+> un double et ceci cause l'erreur suivante :
+> 
+> error: floating constant exceeds tange of 'float'
+> 
+>     Que repr?sente la constante INFINITY? lorsque que je la remplace  
+> DBL_MAX le fichier compile bien. Va-t-il y avoir un probl?me si je  
+> met DBL_MAX ? la place?
+> 
+> Merci
+> 
+> Jasmin
+> 
+
+
+From pascal at apstat.com  Tue Aug  2 17:40:24 2005
+From: pascal at apstat.com (Pascal Vincent)
+Date: Tue, 02 Aug 2005 11:40:24 -0400
+Subject: [Plearn-developers] Valeur INFINITY
+In-Reply-To: <42EEA0FC.9000602@apstat.com>
+References: <B5AE724C-4221-407F-BE8E-9134D98C1C50@iro.umontreal.ca> <42EE84CF.5050604@apstat.com> <42EE9452.8050500@apstat.com> <42EE99D3.40205@apstat.com> <42EEA0FC.9000602@apstat.com>
+Message-ID: <42EF93E8.7020701@apstat.com>
+
+Nicolas Chapados wrote:
+
+> Honn?tement, ce n'est franchement pas clair que NaN est le bon choix 
+> pour remplacer INFINITY.  L'arithm?tique sur INFINITY est bien d?finie 
+> dans le standard IEEE-754 depuis plus de 20 ans, et c'est une valeur 
+> d'initialisation naturelle pour des algorithmes de min/max it?ratifs.  
+> De plus, toutes les op?rations du genre exp(-INFINITY), 1/INFINITY, 
+> etc., donnent les r?sultats auxquels on s'attend.
+> Je crois qu'on ferait beaucoup plus de dommages en rempla?ant du code 
+> bien d?fini par une erreur, sous pr?texte de prendre par la main un 
+> programmeur qui a explicitement ?crit INFINITY en pr?sumant [...]
+
+Je n'ai jamais sugg?r? de red?finir INFINITY partout, mais de d?cider 
+quoi faire lors de la d?s?rialisation de "Inf" sur une machine et un 
+compilo qui semble ne pas accepter que l'on ?crive x=INFINITY ...   Le 
+remplacer par x=DBL_MAX c'est pr?sumer beaucoup aussi, et en plus 
+risquer que le probl?me passe davantage inaper?u.
+
+Jasmin, apr?s avoir jet? un oeil aux includes standards sous linux, il 
+semble que HUGE_VAL correspond ? un IEEE infinity sur les machines qui 
+en sont capables, et ?a semble aussi ?tre d?fini sous Windows car une 
+bonne ?me (probablement Normand) a jug? n?cessaire de mettre le code 
+suivant dans general.h:
+
+//! INFINITY is not defined under Windows
+#ifdef _MSC_VER
+#define INFINITY HUGE_VAL
+#endif
+
+Donc je me demandais ? tout hasard, si tu remplace x=INFINITY par 
+x=HUGE_VAL est-ce que le compilateur est toujours insatisfait?
+
+Voil? ce que dit math.h concernant HUGE_VAL:
+/* Get machine-dependent HUGE_VAL value (returned on overflow).
+   On all IEEE754 machines, this is +Infinity.  */
+
+
+-- 
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+http://www.apstat.com
+
+
+
+From lapalmej at iro.umontreal.ca  Wed Aug  3 01:19:15 2005
+From: lapalmej at iro.umontreal.ca (Jasmin Lapalme)
+Date: Tue, 2 Aug 2005 19:19:15 -0400
+Subject: [Plearn-developers] Valeur INFINITY
+In-Reply-To: <42EF93E8.7020701@apstat.com>
+References: <B5AE724C-4221-407F-BE8E-9134D98C1C50@iro.umontreal.ca> <42EE84CF.5050604@apstat.com> <42EE9452.8050500@apstat.com> <42EE99D3.40205@apstat.com> <42EEA0FC.9000602@apstat.com> <42EF93E8.7020701@apstat.com>
+Message-ID: <1C0ACEB2-95AD-4820-9045-555DDF3AC0DF@iro.umontreal.ca>
+
+Bonjour,
+     Je ne croyais pas d?clencher une discussion vive comme celle-l?.
+     Apr?s recherche intensive dans les .h de gcc 4.0 de Mac OS X.  
+Voici comment ?a se passe. Dans math.h il y un #define INFINITY  
+HUGE_VALF . (? remarquer le F de HUGE_VALF) Juste avant il y a les  
+defines suivant :
+
+#define HUGE_VAL        1e500
+#define HUGE_VALF       1e50f
+#define HUGE_VALL       1e500L
+
+     J'ai fait des test avec un tr?s simple programme comme suit :
+===== test.cpp =====
+#include <cmath>
+#include <iostream>
+
+using namespace std;
+
+void test_inf(double &x) {
+   x = INFINITY; // mapp? vers 1e50f
+}
+
+int main() {
+   double x;
+   test_inf(x);
+   cout << x << endl;
+}
+=================
+
+     Si je compile le programme avec "g++ test.cpp" pas de probl?me,  
+mais d?s que je mets l'option -pedantic comme dans PLearn j'obtiens  
+l'erreur : test.cpp:7: error: floating constant exceeds range of 'float'
+
+     Donc l'option -pedantic est ce qui cause l'erreur, mais je ne  
+vois pas pourquoi 1e50f est refus?.
+     Quelqu'un pourrait tester avec gcc 4.0 de linux ce mini-programme?
+
+Jasmin
+
+
+
+
+From delallea at iro.umontreal.ca  Wed Aug  3 15:57:13 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Wed, 3 Aug 2005 09:57:13 -0400
+Subject: [Plearn-developers] Valeur INFINITY
+In-Reply-To: <1C0ACEB2-95AD-4820-9045-555DDF3AC0DF@iro.umontreal.ca>
+References: <B5AE724C-4221-407F-BE8E-9134D98C1C50@iro.umontreal.ca> <42EE84CF.5050604@apstat.com> <42EE9452.8050500@apstat.com> <42EE99D3.40205@apstat.com> <42EEA0FC.9000602@apstat.com> <42EF93E8.7020701@apstat.com> <1C0ACEB2-95AD-4820-9045-555DDF3AC0DF@iro.umontreal.ca>
+Message-ID: <20050803135713.GA10027@lsvm.iro.umontreal.ca>
+
+Avec le gcc (3.3.3) install? au LISA, ?a ne fonctionne pas pareil: il
+utilise soit directement un 'pattern' particulier, soit une fonction
+interne __builtin_inff() (je pense que c'est plut?t ce dernier cas).
+Par contre si on fait:
+
+double x = 1e50f;
+cout << x << endl;
+
+On voit que 'x' est bien 'inf' (d'ailleurs isinf(x) est bien 'true').
+Seulement, ?a compile sans probl?me sans -pedantic, et ?a donne un
+warning (pas une erreur) avec -pedantic.
+
+J'ai fouill? un peu dans le code de gcc 4.0.0 et j'ai trouv? ?a:
+
+  /* Both C and C++ require a diagnostic for a floating constant
+     outside the range of representable values of its type.  Since we
+     have __builtin_inf* to produce an infinity, it might now be
+     appropriate for this to be a mandatory pedwarn rather than
+     conditioned on -pedantic.  */
+  if (REAL_VALUE_ISINF (real) && pedantic)
+    pedwarn ("floating constant exceeds range of %<%s%>", type_name);
+
+C'est sans doute ce qui d?clenche le warning (ou l'erreur sous Mac OS).
+A priori il s'attend ? utiliser __builtin_inf pour INFINITY, donc
+utiliser ? la place un grand float (sorte de 'hack' qui produit un
+overflow car 1e50 > FLT_MAX) est consid?r? comme une erreur.
+Conclusion:
+1. Il faudrait voir pourquoi INFINITY est d?fini comme 1e50f et pas
+__builtin_inf()
+2. Un hack temporaire pourrait ?tre de remplacer x = INFINITY par
+x = (FLT_MAX * 2), en tout cas ?a semble marcher avec gcc 3.3.3 (?a
+d?clenche un overflow ? l'ex?cution, pas ? la compilation, donc pas
+d'erreur). Le code suivant devrait permettre de voir si ?a marche:
+double x = FLT_MAX * 2;
+cout << x << endl; // Devrait ?tre 'inf'
+cout << isinf(x) << endl; // Devrait ?tre '1'.
+
+Ca m'int?resserait de regarder sur ton ordi pour investiguer le point 1.
+
+--
+Olivier
+
+On 02 Aug 2005, Jasmin Lapalme wrote:
+> Bonjour,
+>     Je ne croyais pas d?clencher une discussion vive comme celle-l?.
+>     Apr?s recherche intensive dans les .h de gcc 4.0 de Mac OS X.  
+> Voici comment ?a se passe. Dans math.h il y un #define INFINITY  
+> HUGE_VALF . (? remarquer le F de HUGE_VALF) Juste avant il y a les  
+> defines suivant :
+> 
+> #define HUGE_VAL        1e500
+> #define HUGE_VALF       1e50f
+> #define HUGE_VALL       1e500L
+> 
+>     Si je compile le programme avec "g++ test.cpp" pas de probl?me,  
+> mais d?s que je mets l'option -pedantic comme dans PLearn j'obtiens  
+> l'erreur : test.cpp:7: error: floating constant exceeds range of 'float'
+> 
+
+
+From lapalmej at iro.umontreal.ca  Fri Aug  5 20:34:19 2005
+From: lapalmej at iro.umontreal.ca (Jasmin Lapalme)
+Date: Fri, 5 Aug 2005 14:34:19 -0400
+Subject: [Plearn-developers] Valeur INFINITY, la solution
+Message-ID: <B7C13A1B-DDD3-412D-A335-74C7A72341A9@iro.umontreal.ca>
+
+Bonjour,
+     Apr?s toutes ces discussions, recherches et participations ? des  
+forums de discussions, je crois que je viens de trouver une  
+excellente solution.
+     Il existe maintenant dans la librairie <limits> de c++, une  
+classe qui s'appelle numeric_limits<> qui d?finit plusieurs valeurs  
+limites pour tous les types de valeurs. Entre autre, la valeur  
+infinity pour double.
+     Ce qui est magnifique, on peut commencer maintenant ? changer  
+les INFINITY par les infinity de numeric_limits et si on en oublie  
+les deux valeurs on la m?me valeurs. (ie INFINITY ==  
+numeric_limits<double>::infinity() ).
+     L'avantage de tout ?a! ?a compile sur OS X avec -pedantic sans  
+warning, ni erreur.
+
+Jasmin
+
+
+
+
+
+From chapados at apstat.com  Fri Aug 19 00:08:21 2005
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Thu, 18 Aug 2005 18:08:21 -0400
+Subject: [Plearn-developers] PLearn Code Reformatting
+Message-ID: <430506D5.1020801@apstat.com>
+
+Hello all,
+
+Several parts of PLearn currently suffer from badly-formatted code, most 
+usually in the form of inconsistent or wrong indentation. This makes the 
+code often hard to understand for all but the original creator. I 
+recently added a script called "append_style_and_reformat.py" to 
+PLearn/scripts to carry out the delicate task of reindenting the code to 
+make it more palatable.
+
+The script also adds "style notes" at the end of the file to let emacs 
+and vim know what should be the proper indentation for the file.  Note 
+that these "style notes" are LOCAL TO THE FILE and do not otherwise 
+affect your own emacs/vim settings.  In this way, everybody who edits 
+the file gets consistent indentation.
+
+I also encourage you to use Doxygen-style comments in all your future 
+code.  You should have a look at my new version of 
+PLearn/plearn/base/Object.{h,cc} for examples of how the comments are 
+laid out.
+
+With the consent of Pascal Vincent, great and wise PLearn Master, I will 
+automatically pass all of PLearn source files through the 
+"append_style_and_reformat.py" script at Monday August 22nd, around 
+5pm.  PLEASE COMMIT ALL YOUR CHANGES BY THIS DATE.  Otherwise you will 
+get merge errors when you carry out your next svn update.
+
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+
+
+From chapados at apstat.com  Thu Aug 25 15:41:35 2005
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Thu, 25 Aug 2005 09:41:35 -0400
+Subject: [Plearn-developers] Code reindentation :: changes committed in PL3994
+Message-ID: <430DCA8F.4080504@apstat.com>
+
+Hello all PLearners,
+
+Just a quick note to let you know that I committed the PLearn code 
+re-indentation announced last week.  I also:
+
+    * Verified that all non-deprecated code still compiles. In
+      particular, plearn.cc and plearn_full.cc still compile and link
+      just fine.  Unfortunately, I could not ensure that the code
+      depending on Torch and WordNet still compiles properly as I don't
+      have those libraries installed. (Could a user of that code confirm
+      this and post a note to this list? Thanks.)
+    * Before the commit, I created a tag called
+      "before_code_indentation" just so that somebody does not get a
+      heart attack should something critical suddenly stops working.
+
+I highly encourage everybody to perform a svn update right away before 
+working on new code.
+
+Suggestions welcome.
+
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+
+
+From delallea at iro.umontreal.ca  Fri Aug 26 22:22:58 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 26 Aug 2005 16:22:58 -0400
+Subject: [Plearn-developers] Code reindentation :: changes committed in PL3994
+In-Reply-To: <430DCA8F.4080504@apstat.com>
+References: <430DCA8F.4080504@apstat.com>
+Message-ID: <20050826202257.GA5729@lsvm.iro.umontreal.ca>
+
+>    * Verified that all non-deprecated code still compiles. In
+>      particular, plearn.cc and plearn_full.cc still compile and link
+>      just fine.  Unfortunately, I could not ensure that the code
+>      depending on Torch and WordNet still compiles properly as I don't
+>      have those libraries installed. (Could a user of that code confirm
+>      this and post a note to this list? Thanks.)
+
+The Torch code is still compiling, congratulations.
+
+--
+Olivier
+
+
+
+From delallea at iro.umontreal.ca  Mon Aug 29 20:56:18 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Mon, 29 Aug 2005 14:56:18 -0400
+Subject: [Plearn-developers] Change in 'vmat diff' command
+Message-ID: <20050829185617.GA28782@lsvm.iro.umontreal.ca>
+
+The 'vmat diff' command tolerance is now taken as relative tolerance
+when the numbers compared are higher than 1 (in magnitude), while
+previously it was systematically taken as an absolute tolerance.
+
+More precisely, the line comparing two numbers is now using
+
+    is_equal(x1, x2, absolute_tolerance_threshold = 1.0,
+                     absolute_tolerance = tol,
+                     relative_tolerance = tol)
+
+with 'tol' the tolerance (default = 1e-6), where 'is_equal' is defined
+in pl_math.
+
+Previously, it was using the simpler test
+
+    fabs(x1 - x2) > tol
+
+This means the 'vmat diff' command may not anymore give the same results
+as before. If you want me to add an option to specify the
+'absolute_tolerance_threshold' (which could be used to get the same
+results as before), feel free to ask me.
+
+--
+Olivier
+
+
+
+From delallea at iro.umontreal.ca  Wed Aug 31 17:24:52 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Wed, 31 Aug 2005 11:24:52 -0400
+Subject: [Plearn-developers] UTF-8 at LISA lab
+Message-ID: <20050831152452.GA4788@lsvm.iro.umontreal.ca>
+
+Heya,
+
+Now that the LISA lab has switched the Linux machines to UTF-8, one must
+be careful with special characters in PLearn.
+Until someone decides to convert the source code in UTF-8 (and adapt the
+code to UTF-8 strings and characters), it is better to stick with the
+good old ISO-Latin1 encoding.
+
+For PLearn, it means you should NOT commit UTF-8 files (source or data)
+containing some special characters (e.g. ? ? ? ? ...) as they may not work
+properly.
+The old ISO-Latin1 encoding should still work fine even if it is not
+displayed correctly on your LISA computer (see the support page on how
+to fix this: http://support.iro.umontreal.ca/utf8.shtml)
+
+More mess is always more fun in PLearn!
+
+--
+Olivier
+
+
+

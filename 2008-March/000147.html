@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Changement a la syntaxe	python	pour	vmat.getFieldIndex
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Changement%20a%20la%20syntaxe%0A%09python%09pour%09vmat.getFieldIndex&In-Reply-To=%3C47D19B1C.5010805%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000149.html">
+   <LINK REL="Next"  HREF="000148.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Changement a la syntaxe	python	pour	vmat.getFieldIndex</H1>
+    <B>Xavier Saint-Mleux</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Changement%20a%20la%20syntaxe%0A%09python%09pour%09vmat.getFieldIndex&In-Reply-To=%3C47D19B1C.5010805%40apstat.com%3E"
+       TITLE="[Plearn-developers] Changement a la syntaxe	python	pour	vmat.getFieldIndex">saintmlx at apstat.com
+       </A><BR>
+    <I>Fri Mar  7 20:44:28 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000149.html">[Plearn-developers] Changement a la syntaxe python	pour	vmat.getFieldIndex
+</A></li>
+        <LI>Next message: <A HREF="000148.html">[Plearn-developers] Changement a la syntaxe python	pour	vmat.getFieldIndex
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#147">[ date ]</a>
+              <a href="thread.html#147">[ thread ]</a>
+              <a href="subject.html#147">[ subject ]</a>
+              <a href="author.html#147">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&#192; titre d'exemple, pour les strings python la m&#233;thode find renvoie -1 
+pour les caract&#232;res non pr&#233;sents alors que la m&#233;thode index l&#232;ve une 
+ValueError (<A HREF="http://docs.python.org/lib/string-methods.html">http://docs.python.org/lib/string-methods.html</A>).  Pour la 
+STL, il n'y a que des find qui renvoient end() ou string::npos.  Si on 
+veut suivre cette &quot;convention&quot;, &#231;a nous fait e.g. findField --&gt; -1 et 
+fieldIndex --&gt; PLERROR; par contre, &#231;a foutrait encore plus le bordel 
+par rapport &#224; ce qu'on a d&#233;j&#224; dans PLearn...
+
+Je n'ai pas vraiment de meilleure id&#233;e, alors je te laisse d&#233;cider 
+quelle option est la &quot;moins pire&quot;. 
+
+Xavier
+
+Olivier Delalleau wrote:
+&gt;<i> En fait j'esperais que les valeurs par defaut allaient etre arrangees
+</I>&gt;<i> plus tot que ca, ce qui aurait regle le probleme du booleen en plus ;)
+</I>&gt;<i> J'esperais aussi que + ou - personne n'utilisait vraiment getFieldIndex,
+</I>&gt;<i> mais je voulais justement verifier. Je n'aime pas trop le try/except
+</I>&gt;<i> car je pense que le comportement &quot;sans erreur&quot; est suffisamment utile
+</I>&gt;<i> pour meriter une syntaxe plus lisible.
+</I>&gt;<i>
+</I>&gt;<i> Je serais ok pour revenir au comportement precedent et avoir fieldIndex
+</I>&gt;<i> et getFieldIndex, mais est-ce que ce ne serait pas une bonne occasion
+</I>&gt;<i> pour trouver un meilleur nom ? (la difference entre les deux n'est
+</I>&gt;<i> vraiment pas evidente a premiere vue...).
+</I>&gt;<i> Peut-etre qu'on pourrait avoir :
+</I>&gt;<i>     - getFieldIndex(name/num): comme avant, avec PLERROR potentiel
+</I>&gt;<i>     - checkFieldIndex(name) &lt;--&gt; fieldIndex (i.e -1 si n'existe pas)
+</I>&gt;<i>
+</I>&gt;<i> Qqun a une objection / une meilleure idee ?
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Olivier
+</I>&gt;<i>
+</I>&gt;<i> On 07 Mar 2008, Xavier Saint-Mleux wrote:
+</I>&gt;<i>   
+</I>&gt;&gt;<i> Pour ce qui est des valeurs par d&#233;faut, ce n'est pas trivial et &#231;a risque 
+</I>&gt;&gt;<i> de ne pas &#234;tre fait avant longtemps.  Sinon, pourquoi ne pas simplement 
+</I>&gt;&gt;<i> d&#233;crarer fieldIndex remote? &#231;a renvoie d&#233;j&#224; -1 pour les champs qui 
+</I>&gt;&gt;<i> n'existent pas (et getFieldIndex l'utilise.)  Autrement, il me semble qu'un 
+</I>&gt;&gt;<i> try/except serait appropri&#233; au lieu de toujours avoir &#224; passer un 
+</I>&gt;&gt;<i> bool&#233;en en plus, non?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Xavier
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> PS: m&#234;me si c'est r&#233;cent, j'utilise d&#233;j&#224; beaucoup getFieldIndex...
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Olivier Delalleau wrote:
+</I>&gt;&gt;<i>     
+</I>&gt;&gt;&gt;<i> Salut,
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Juste pour vous dire que si vous utilisez la (remote-declared) methode
+</I>&gt;&gt;&gt;<i> VMatrix.getFieldIndex(field) dans un script Python, il faut maintenant
+</I>&gt;&gt;&gt;<i> rajouter un second argument pour indiquer si on veut lancer une erreur
+</I>&gt;&gt;&gt;<i> quand le champ 'field' n'existe pas :
+</I>&gt;&gt;&gt;<i>     - True =&gt; erreur
+</I>&gt;&gt;&gt;<i>     - False =&gt; pas d'erreur (retourne -1)
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Vu que cette methode n'a ete declaree remote que recemment (par
+</I>&gt;&gt;&gt;<i> moi-meme), je me suis permis de le faire en esperant que ca ne cassera
+</I>&gt;&gt;&gt;<i> pas grand-chose :)
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> --
+</I>&gt;&gt;&gt;<i> Olivier
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> PS: a quand les valeurs par defaut ?
+</I>&gt;&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;&gt;<i> Plearn-developers mailing list
+</I>&gt;&gt;&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">Plearn-developers at lists.berlios.de</A>
+</I>&gt;&gt;&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">https://lists.berlios.de/mailman/listinfo/plearn-developers</A>
+</I>&gt;&gt;&gt;<i>   
+</I>&gt;&gt;&gt;<i>       
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Plearn-developers mailing list
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">Plearn-developers at lists.berlios.de</A>
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">https://lists.berlios.de/mailman/listinfo/plearn-developers</A>
+</I>&gt;<i>   
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000149.html">[Plearn-developers] Changement a la syntaxe python	pour	vmat.getFieldIndex
+</A></li>
+	<LI>Next message: <A HREF="000148.html">[Plearn-developers] Changement a la syntaxe python	pour	vmat.getFieldIndex
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#147">[ date ]</a>
+              <a href="thread.html#147">[ thread ]</a>
+              <a href="subject.html#147">[ subject ]</a>
+              <a href="author.html#147">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

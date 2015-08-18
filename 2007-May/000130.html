@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] New OnlineLearningModule interface and	ModuleLearner
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2007-May/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20New%20OnlineLearningModule%20interface%20and%0A%09ModuleLearner&In-Reply-To=%3C20070518164732.GA20521%40opale.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000131.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] New OnlineLearningModule interface and	ModuleLearner</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20New%20OnlineLearningModule%20interface%20and%0A%09ModuleLearner&In-Reply-To=%3C20070518164732.GA20521%40opale.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] New OnlineLearningModule interface and	ModuleLearner">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Fri May 18 18:47:35 CEST 2007</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000131.html">[Plearn-developers] New OnlineLearningModule interface and	ModuleLearner
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#130">[ date ]</a>
+              <a href="thread.html#130">[ thread ]</a>
+              <a href="subject.html#130">[ subject ]</a>
+              <a href="author.html#130">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Here is a brief summary on how to use the new OnlineLearningModule
+features in a ModuleLearner to learn some complex networks:
+
+- There is no explicit notion of 'input' and 'output' anymore. Instead,
+an OnlineLearningModule has some 'ports' you can use to send/retrieve
+data (it's up to the module to crash if a port is meant to be only read
+or written). Each port takes a value (represented by a matrix), and can
+be provided with some gradient (or asked to compute some gradient).
+
+- The fprop method thus takes as input a list of matrices. More
+precisely, it is a TVec&lt;Mat*&gt;. A full matrix indicates a value
+provided as input. An empty matrix indicates a value we want to retrieve
+(so the matrix will be resized within the module), and a NULL matrix is
+a port whose value is of no interest to the caller.
+
+- Similarly, the brop method takes a list of matrices (the gradients),
+where a full matrix is a provided gradient, an empty matrix is a
+gradient we wish to compute, and a NULL pointer a gradient that we do
+not care about. Note that the bprop method is actually named
+bpropAccUpdate, ie:
+    (i) it systematically ACCUMULATES the gradient: an empty matrix we
+want to accumulate into must have its width set to the correct witdth,
+and length 0 (we use the fact that PLearn does not erase previous data
+when resizing)
+    (2) it also updates the module's internal parameters (usually using
+the gradient provided as input)
+
+- You can still use most old OnlineLearningModules as there are default
+mechanisms to define two ports (&quot;input&quot; and &quot;output&quot;), forwarding the
+fprop and bpropAccUpdate methods to the corresponding mini-batch
+existing implementations (and hopefully crashing if you try to use the
+&quot;input&quot; port as an output).
+
+- Remember to always run your experiments first in debug mode, there are
+  a lot of safety checks that are skipped in optimized mode.
+
+- Each OnlineLearningModule can now be given a name (see below for its
+  use)
+
+- There is a new module called NetworkModule that you can use to plug
+OnlineLearningModules together. It takes mainly 3 options:
+    (1) a list of modules
+    (2) a list of connections between modules (each connection is
+defined by its source and destination, as a string whose format is
+&quot;module_name.port_name&quot;).
+    (3) a list of ports that can be accessed from the outside, and which
+redirect towards ports of some modules in the network. For instance:
+ports = [ &quot;input&quot;  &quot;rbm.visible&quot;
+          &quot;target&quot; &quot;nll.target&quot;
+          &quot;output&quot; &quot;rbm.hidden&quot;
+          &quot;cost&quot;   &quot;nll.cost&quot;
+        ]
+means the NetworkModule has four ports (named input, target, output and
+cost).
+
+- You can optimize an OnlineLearningModule thanks to a ModuleLearner.
+Note the similarity with the ModulesLearner class (I only noticed it
+afterwards, so don't mix them up, even though they do very similar
+things). A ModuleLearner basically takes an OnlineLearningModule that
+has ports named input, target, output and cost, and optimize them.
+Typically, you want this OnlineLearningModule to be a NetworkModule that
+describes the fancy network architecture originally issued from
+Yoshua's brain.
+
+- Look into PLearn/plearn_learners/online/test/ModuleLearner for two
+  examples of using a ModuleLearner
+
+- Some random stuff to finish with:
+    (1) Use connections with propagate_gradient = 0 if you want for
+instance to compute a cost but not optimize on it
+    (2) I haven't written yet the class that concatenates various
+modules, so you probably can't compute various costs easily, sorry!
+(this will probably be my priority this afternoon)
+    (3) Due to the flexibility of what you can do, some error messages
+may seem cryptic (I need to add some warnings in a few places). In
+particular, check that you have properly defined the ports of the
+NetworkModule, that there is no missing connection, that you're not
+trying to propagate the gradient of a cost to the target, and that
+you're not using two modules with the same name (be aware the default
+name is the class name)
+    (4) There is still a lot to improve in the code. Feel free to mess
+with it or email me about your issues/suggestions.
+    (5) Only the online mode is supported right now. A way to perform
+greedy learning will be added soon (TM)
+    (6) Use the RBMModule instead of manually connecting layers (and
+keep in mind the ports of a RBMModule are visible and hidden, not input
+and output)
+    (7) the default ports for a cost are 'prediction', 'target' and
+'cost', while the default port for a module are 'input' and 'output'.
+
+Have fun :)
+
+--
+Olivier
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000131.html">[Plearn-developers] New OnlineLearningModule interface and	ModuleLearner
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#130">[ date ]</a>
+              <a href="thread.html#130">[ thread ]</a>
+              <a href="subject.html#130">[ subject ]</a>
+              <a href="author.html#130">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

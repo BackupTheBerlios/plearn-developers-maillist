@@ -1,0 +1,1187 @@
+From saintmlx at apstat.com  Wed Nov 26 21:57:18 2008
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Wed, 26 Nov 2008 15:57:18 -0500
+Subject: [Plearn-developers] erreurs, warnings, logs, etc.
+Message-ID: <492DB82E.5060206@apstat.com>
+
+Salut ? tous,
+
+Je crois qu'il serait temps de [re]faire la lumi?re sur les m?canismes
+pr?sents dans PLearn pour l'envoi de diff?rents types de messages.  *En
+particulier, j'aimerais rendre "deprecated" les PLWARNINGS, alors
+s.v.p. lisez attentivement!*
+
+Il y a deux cat?gories de cas pr?visibles pour lesquels on veut faire
+planter PLearn:
+
+- Ajout de code qui ne respecte pas la s?mantique: Les PLASSERTs devraient
+  servir ? s'assurer que le code est "robuste sous ?volution", c'est-?-dire
+  ? s'assurer que le nouveau code respecte la s?mantique pr?vue par le code
+  d?j? existant.  Les PLASSERTs s'adressent aux d?veloppeurs et indiquent
+  ce que le nouveau code a bris?.
+
+- Utilisation erronn?e de code existant: Les PLERRORs devraient servir aux
+  cas d'inputs invalides fournis ? PLearn et ? indiquer ? l'usager ce qui
+  ne va pas et (si possible) comment le corriger.
+
+Il y a ensuite une multitude d'autres cas pour lesquels on voudrait donner
+de l'information ? l'usager et/ou au d?veloppeur, et pour chacun de ces cas
+il peut exister des conditions dans lesquelles on veut avoir l'information
+et d'autres o? on ne la veut pas.  Il y a aussi une multitude de mani?res
+de fournir ce genre d'information ? l'usager, et justement il commence
+peut-?tre ? y en avoir un peu trop...
+
+- Il y a toujours eu les streams de base, pout, perr, etc., mais ces
+  streams ne devraient [presque] jamais ?tre utilis?es directement (trop
+  bas niveau.)
+
+- Il y a depuis longtemps les PLWARNINGS (et depuis peu les PLWARN_ERR) qui
+  servent ? "avertir" l'usager au besoin, mais:
+
+  - Tous les PLWARNINGs font partie de la m?me cat?gorie: PLWARNING.  Ce
+    n'est pas tr?s pr?cis.
+
+  - On n'a aucun contr?le sur l'affichage de diff?rents messages (ou de
+    diff?rents types de messages): tout est toujours affich? dans tous les
+    cas (sauf si on s'arrange pour qu'absolument rien ne soit affich?.)
+
+  - Il n'existe pas une r?gle g?n?rale universelle pour d?cider dans quel
+    cas un avertissement est justifi? et dans quel cas il est superflu.
+
+  - ?a utilise une syntaxe qui rappelle plus le langage C que le C++; ?a ne
+    s'utilise absolument pas de la m?me mani?re que les streams (tout comme
+    PLERROR, je sais...)
+
+Pour les messages qui ne requi?rent pas n?cessairement d'intervention
+de la part de l'usager, on a besoin de pouvoir cat?goriser ces messages et
+de pouvoir activer ou non l'affichage ce certains de ces messages.
+
+e.g. en ce moment, lorsqu'on fait du bagging, on a le message suivant qui
+s'affiche ? r?p?tition (une fois par bag): "In SelectRowsVMatrix::build_()
+- All rows have been selected!".  Comment se fait-il que chacun des bags
+soit en fait le dataset original? c'est inqui?tant!  En r?alit?, ce n'est
+pas le cas, tout va bien, il n'y a aucun probl?me et les bags sont tous
+diff?rents... mais j'ai perdu un temps fou ? m'en assurer.  C'est donc un
+tr?s bon exemple de PLWARNING superflu (pourquoi un message dans un des cas
+d'utilisation les plus fr?quents? c'est la m?me chose pour Shuffle, mais
+dans ce cas ?a a ?t? patch? sp?cialement pour ?a -- oui, oui, la
+super-classe doit ?tre consciente de la sous-classe!!!) en plus d'?tre un
+message trompeur (autant de rang?es ne veut pas n?cessairement dire toutes
+les rang?es.)  Par contre ce genre message peut ?tre tr?s int?ressant quand
+on est en train de d?boguer, alors on ne veut pas n?cessairement l'?liminer
+dans tous les cas (seulement dans la tr?s grande majorit? des cas; il ne
+faut pas crier "au loup" et noyer l'information la plus pertinente en
+avertissant l'usager de tout ce qui se passe, sinon les gens vont ignorer
+tous les messages.)
+
+HEUREUSEMENT, on a (depuis 2004) le module pl_log qui fait tout ce dont on
+a besoin!  Ce module d?finit un ensemble de streams pour du "logging".  Ces
+streams sont class?es par importance et par module, et on peut donc
+cat?goriser les messages en: 'mandatory', 'important', 'normal', 'debug' ou
+'extreme' (le cas de SelectRows est un bon exemple de 'debug' selon moi.)
+On peut ensuite d?cider du niveau de verbosit? que l'on d?sire quand on
+roule PLearn, e.g. pas de messages 'debug' quand on n'est pas en train de
+d?boguer.  La "bonne" mani?re d'utiliser pl_log est aussi d'avoir des logs
+nomm?s pour chaque module (.cc) plut?t que d'utiliser les logs globaux.  On
+peut ensuite d?cider de faire afficher les messages seulement pour les
+modules qui nous int?ressent, en plus de choisir le niveau de verbosit?.
+En plus de ces avantages, les logs permettent de beaucoup plus facilement
+rediriger les diff?rents messages de diff?rentes mani?res.  Finalement, les
+logs sont des streams C++ comme les autres et s'utilisent donc de mani?re
+naturelle pour un programmeur C++.
+
+Si personne n'?met d'objection d'ici peu, je vais commencer par convertir
+certains PLWARNINGS, question de donner l'exemple, et ?ventuellement
+?liminer de plerror tout ce qui a trait ? des warnings.
+
+En attendant, j'encourage tout le monde ? se familiariser avec:
+- $PLEARNDIR/plearn/io/pl_log.{h,cc}
+
+Tout feedback est bienvenu,
+
+Xavier
+
+
+
+From nouiz at nouiz.org  Wed Nov 26 22:39:13 2008
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Wed, 26 Nov 2008 16:39:13 -0500
+Subject: [Plearn-developers] erreurs, warnings, logs, etc.
+In-Reply-To: <492DB82E.5060206@apstat.com>
+References: <492DB82E.5060206@apstat.com>
+Message-ID: <2d1d7fe70811261339q30c81cado429d8ab865b8e4f9@mail.gmail.com>
+
+Salut,
+
+Une chose que je croit important c'est qu'il soit facile et que cela
+soit clair dans la documentation comment avoir tout les messages de
+debug. Ceci est la raison pourquoi personnelement je n'utilise pas
+pl_log, la doc est perdu dans un email et c'est moi qui par hazard a
+rejout? de l'info dans "plearn help" sur sa syntaxe si je me rappele
+bien. Par example "pymake -dbg ..." devrait continuer a donner tous
+les messages de debug par default. Si on ne garde pas cela, on risque
+de perdre des messages quand on debogue.
+
+En ce moment, on a tous les messages de debug en compilant avec -dbg
+car tous les PLWARNINGS sont toujours imprim?. Il faut juste ne pas
+perdre cette simplicit? pour tout logger. On pourrait perdre des
+messages de debug si on se mets a envoyer plusieurs PLWARNING en mode
+DEBUG, car ce niveau de log n'est pas imprim? par default. Pour les
+imprimers il faudrait faire: "plearn --verbosity VLEVEL_DBG", ce qui
+complique un peu les choses et risque que nous oublions de le faire
+une fois de temps en temps. Ceci est comme le build bot qui nous
+rappelle a l'ordre de temps en temps.
+
+Dans le cas particulier des messages d'erreur que tu as eu, je crois
+que c'est la classe BootstrapVMatrix(qui h?rite de SelectRowsVMatrix)
+qui devrait mettre warn_if_all_rows_selected a faut quand on l'utilise
+juste pour un shuffle.(Je crois que c'est bien cette class qui est
+utiliser dans ton cas, mais je peux me tromper). Autre choses
+possible, Dans SelectRowsVMatrix, on peut  generer le message d'erreur
+seulement si on selectionne toutes les lignes et qu'elles sont dans
+l'ordre de 0 a n-1(utilisation inutile de la classe).
+
+la classe SortRowsVMatrix herite aussi de SelectRowsVMatrix, si on
+modifie BootstrapVMatrix pour ne pas reneger le message d'erreur il
+faudrait aussi modifier SortRowsVMatrix. Donc modifier
+SelectRowsVMatrix semble la meilleur solution.
+
+Qu'est-ce que vous en pens??
+
+Fred
+
+
+2008/11/26 Xavier Saint-Mleux <saintmlx at apstat.com>:
+> Salut ? tous,
+>
+> Je crois qu'il serait temps de [re]faire la lumi?re sur les m?canismes
+> pr?sents dans PLearn pour l'envoi de diff?rents types de messages.  *En
+> particulier, j'aimerais rendre "deprecated" les PLWARNINGS, alors
+> s.v.p. lisez attentivement!*
+>
+> Il y a deux cat?gories de cas pr?visibles pour lesquels on veut faire
+> planter PLearn:
+>
+> - Ajout de code qui ne respecte pas la s?mantique: Les PLASSERTs devraient
+>  servir ? s'assurer que le code est "robuste sous ?volution", c'est-?-dire
+>  ? s'assurer que le nouveau code respecte la s?mantique pr?vue par le code
+>  d?j? existant.  Les PLASSERTs s'adressent aux d?veloppeurs et indiquent
+>  ce que le nouveau code a bris?.
+>
+> - Utilisation erronn?e de code existant: Les PLERRORs devraient servir aux
+>  cas d'inputs invalides fournis ? PLearn et ? indiquer ? l'usager ce qui
+>  ne va pas et (si possible) comment le corriger.
+>
+> Il y a ensuite une multitude d'autres cas pour lesquels on voudrait donner
+> de l'information ? l'usager et/ou au d?veloppeur, et pour chacun de ces cas
+> il peut exister des conditions dans lesquelles on veut avoir l'information
+> et d'autres o? on ne la veut pas.  Il y a aussi une multitude de mani?res
+> de fournir ce genre d'information ? l'usager, et justement il commence
+> peut-?tre ? y en avoir un peu trop...
+>
+> - Il y a toujours eu les streams de base, pout, perr, etc., mais ces
+>  streams ne devraient [presque] jamais ?tre utilis?es directement (trop
+>  bas niveau.)
+>
+> - Il y a depuis longtemps les PLWARNINGS (et depuis peu les PLWARN_ERR) qui
+>  servent ? "avertir" l'usager au besoin, mais:
+>
+>  - Tous les PLWARNINGs font partie de la m?me cat?gorie: PLWARNING.  Ce
+>   n'est pas tr?s pr?cis.
+>
+>  - On n'a aucun contr?le sur l'affichage de diff?rents messages (ou de
+>   diff?rents types de messages): tout est toujours affich? dans tous les
+>   cas (sauf si on s'arrange pour qu'absolument rien ne soit affich?.)
+>
+>  - Il n'existe pas une r?gle g?n?rale universelle pour d?cider dans quel
+>   cas un avertissement est justifi? et dans quel cas il est superflu.
+>
+>  - ?a utilise une syntaxe qui rappelle plus le langage C que le C++; ?a ne
+>   s'utilise absolument pas de la m?me mani?re que les streams (tout comme
+>   PLERROR, je sais...)
+>
+> Pour les messages qui ne requi?rent pas n?cessairement d'intervention
+> de la part de l'usager, on a besoin de pouvoir cat?goriser ces messages et
+> de pouvoir activer ou non l'affichage ce certains de ces messages.
+>
+> e.g. en ce moment, lorsqu'on fait du bagging, on a le message suivant qui
+> s'affiche ? r?p?tition (une fois par bag): "In SelectRowsVMatrix::build_()
+> - All rows have been selected!".  Comment se fait-il que chacun des bags
+> soit en fait le dataset original? c'est inqui?tant!  En r?alit?, ce n'est
+> pas le cas, tout va bien, il n'y a aucun probl?me et les bags sont tous
+> diff?rents... mais j'ai perdu un temps fou ? m'en assurer.  C'est donc un
+> tr?s bon exemple de PLWARNING superflu (pourquoi un message dans un des cas
+> d'utilisation les plus fr?quents? c'est la m?me chose pour Shuffle, mais
+> dans ce cas ?a a ?t? patch? sp?cialement pour ?a -- oui, oui, la
+> super-classe doit ?tre consciente de la sous-classe!!!) en plus d'?tre un
+> message trompeur (autant de rang?es ne veut pas n?cessairement dire toutes
+> les rang?es.)  Par contre ce genre message peut ?tre tr?s int?ressant quand
+> on est en train de d?boguer, alors on ne veut pas n?cessairement l'?liminer
+> dans tous les cas (seulement dans la tr?s grande majorit? des cas; il ne
+> faut pas crier "au loup" et noyer l'information la plus pertinente en
+> avertissant l'usager de tout ce qui se passe, sinon les gens vont ignorer
+> tous les messages.)
+>
+> HEUREUSEMENT, on a (depuis 2004) le module pl_log qui fait tout ce dont on
+> a besoin!  Ce module d?finit un ensemble de streams pour du "logging".  Ces
+> streams sont class?es par importance et par module, et on peut donc
+> cat?goriser les messages en: 'mandatory', 'important', 'normal', 'debug' ou
+> 'extreme' (le cas de SelectRows est un bon exemple de 'debug' selon moi.)
+> On peut ensuite d?cider du niveau de verbosit? que l'on d?sire quand on
+> roule PLearn, e.g. pas de messages 'debug' quand on n'est pas en train de
+> d?boguer.  La "bonne" mani?re d'utiliser pl_log est aussi d'avoir des logs
+> nomm?s pour chaque module (.cc) plut?t que d'utiliser les logs globaux.  On
+> peut ensuite d?cider de faire afficher les messages seulement pour les
+> modules qui nous int?ressent, en plus de choisir le niveau de verbosit?.
+> En plus de ces avantages, les logs permettent de beaucoup plus facilement
+> rediriger les diff?rents messages de diff?rentes mani?res.  Finalement, les
+> logs sont des streams C++ comme les autres et s'utilisent donc de mani?re
+> naturelle pour un programmeur C++.
+>
+> Si personne n'?met d'objection d'ici peu, je vais commencer par convertir
+> certains PLWARNINGS, question de donner l'exemple, et ?ventuellement
+> ?liminer de plerror tout ce qui a trait ? des warnings.
+>
+> En attendant, j'encourage tout le monde ? se familiariser avec:
+> - $PLEARNDIR/plearn/io/pl_log.{h,cc}
+>
+> Tout feedback est bienvenu,
+>
+> Xavier
+>
+>
+
+
+From delallea at iro.umontreal.ca  Wed Nov 26 22:25:17 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Wed, 26 Nov 2008 16:25:17 -0500
+Subject: [Plearn-developers] erreurs, warnings, logs, etc.
+In-Reply-To: <492DB82E.5060206@apstat.com>
+References: <492DB82E.5060206@apstat.com>
+Message-ID: <20081126212517.GB7914@opale.iro.umontreal.ca>
+
+On 26 Nov 2008, Xavier Saint-Mleux wrote:
+> e.g. en ce moment, lorsqu'on fait du bagging, on a le message suivant qui
+> s'affiche ? r?p?tition (une fois par bag): "In SelectRowsVMatrix::build_()
+> - All rows have been selected!".  Comment se fait-il que chacun des bags
+> soit en fait le dataset original? c'est inqui?tant!  En r?alit?, ce n'est
+> pas le cas, tout va bien, il n'y a aucun probl?me et les bags sont tous
+> diff?rents... mais j'ai perdu un temps fou ? m'en assurer.  C'est donc un
+> tr?s bon exemple de PLWARNING superflu
+
+Je ne comprends pas trop cet exemple. Il me semble que si tes bags sont
+diff?rents, alors ce PLWARNING n'est pas superflu, mais erron?, et c'est
+un bug ? corriger. Mais je soup?onne qu'il y a une subtilit? derri?re
+tout ?a ?
+
+> HEUREUSEMENT, on a (depuis 2004) le module pl_log qui fait tout ce dont on
+> a besoin!
+> (..)
+> Si personne n'?met d'objection d'ici peu, je vais commencer par convertir
+> certains PLWARNINGS, question de donner l'exemple, et ?ventuellement
+> ?liminer de plerror tout ce qui a trait ? des warnings.
+
+La raison pour laquelle je n'utilise pas pl_log moi-m?me (? de rares
+exceptions pr?s quand je suis en train de d?bugguer mon code), c'est que
+par d?faut le log pour le module va ?tre d?sactiv?.
+Si je veux avertir l'usager que quelque chose risque de mal se passer,
+il faut que ?a soit actif par d?faut. D'o? l'utilisation de PLWARNING.
+
+--
+Olivier
+
+
+From saintmlx at apstat.com  Thu Nov 27 18:40:09 2008
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Thu, 27 Nov 2008 12:40:09 -0500
+Subject: [Plearn-developers] erreurs, warnings, logs, etc.
+In-Reply-To: <20081126212517.GB7914@opale.iro.umontreal.ca>
+References: <492DB82E.5060206@apstat.com>
+	<20081126212517.GB7914@opale.iro.umontreal.ca>
+Message-ID: <492EDB79.1000909@apstat.com>
+
+
+> Je ne comprends pas trop cet exemple. Il me semble que si tes bags sont
+> diff?rents, alors ce PLWARNING n'est pas superflu, mais erron?, et c'est
+> un bug ? corriger. Mais je soup?onne qu'il y a une subtilit? derri?re
+> tout ?a ?
+>   
+Je ne connais aucun autre syst?me o? le fait de s?lectionner 
+explicitement tout donne un warning.  Quand on ?crit du code g?n?rique, 
+c'est tr?s normal de se retrouver avec des cas o? l'on choisit tous les 
+?l?ments d'un ensemble; ce n'est que tr?s rarement un signe de probl?me, 
+et c'est seulement pour ces cas particuliers qu'on devrait v?rifier.  Si 
+on veut s'assurer, par exemple, que chaque bag est diff?rent, c'est au 
+code qui s'occupe du bagging de le v?rifier et non au code qui sert dans 
+tous les cas o? on choisit des lignes dans une vmat.  Je crois donc que 
+ce warning est superflu car il g?n?re de l'output qui n'est pas voulu 
+dans la plupart des cas et ?a dilue l'information importante.
+
+e.g. imaginez ce que ce serait si python se comportait comme ?a:
+ >>> x= [1,2,3]
+ >>> x[0:3]
+ WARNING: In list.__getitem__ : All elements have been selected!
+[1, 2, 3]
+ >>>
+
+et qu'on n'avait aucun moyen simple d'emp?cher ?a de s'afficher, sauf 
+qqch. du genre:
+ >>> x= list([1,2,3], warn_if_all_elements_selected= False)
+
+> La raison pour laquelle je n'utilise pas pl_log moi-m?me (? de rares
+> exceptions pr?s quand je suis en train de d?bugguer mon code), c'est que
+> par d?faut le log pour le module va ?tre d?sactiv?.
+> Si je veux avertir l'usager que quelque chose risque de mal se passer,
+> il faut que ?a soit actif par d?faut. D'o? l'utilisation de PLWARNING.
+>
+>   
+Il y a des logs qui sont actifs par d?faut, mais dans ce cas particulier 
+je crois qu'il n'y a pas de mani?re g?n?rique de s'assurer qu'un choix 
+quelconque de rang?es correspond effectivement ? ce que l'usager 
+pourrait avoir en t?te, peu importe le cas d'utilisation.  Par contre, 
+pour faire du debugging, ?a peut ?tre int?ressant de savoir ce genre de 
+choses (ou le nombre de lignes choisies, la taille de la vmat source, 
+etc.) alors il est tout-?-fait appropri? d'utiliser les logs nomm?s pour 
+?a... qu'on peut tr?s facilement activer au besoin, mais qui ne 
+devraient pas l'?tre par d?faut selon moi.
+
+
+Xavier
+
+
+
+
+
+From delallea at iro.umontreal.ca  Thu Nov 27 18:51:58 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Thu, 27 Nov 2008 12:51:58 -0500
+Subject: [Plearn-developers] erreurs, warnings, logs, etc.
+In-Reply-To: <492EDB79.1000909@apstat.com>
+References: <492DB82E.5060206@apstat.com>
+	<20081126212517.GB7914@opale.iro.umontreal.ca>
+	<492EDB79.1000909@apstat.com>
+Message-ID: <20081127175157.GA17622@opale.iro.umontreal.ca>
+
+Je comprends mieux, je pensais que tu disais en g?n?ral que les
+PLWARNING c'?tait mauvais et qu'il fallait plus ou moins tous les
+?liminer.
+Pour ce cas particulier je suis plut?t d'accord avec toi. Mais je pense
+que c'est une question d'interpr?tation personnelle, pour savoir quand
+on d?cide qu'une situation est suffisamment dangereuse pour m?riter
+d'avoir un warning par d?faut. Je ne sais plus pour quelle raison exacte
+Fred l'avait rajout?...
+
+Perso, je m'en fous un peu qu'il y ait un warning ou pas dans cete
+classe, du moment qu'on puisse le d?sactiver ? volont? (ce qui est le
+cas). Il ne devrait certainement pas y avoir de warning par contre quand
+on fait du bagging et que ?a fonctionne (=> soit on d?cide d'?liminer ce
+warning d?finitivement, soit on patche le bagging pour le d?sactiver
+dans ce cas).
+
+-
+Olivier
+
+On 27 Nov 2008, Xavier Saint-Mleux wrote:
+> 
+> > Je ne comprends pas trop cet exemple. Il me semble que si tes bags sont
+> > diff?rents, alors ce PLWARNING n'est pas superflu, mais erron?, et c'est
+> > un bug ? corriger. Mais je soup?onne qu'il y a une subtilit? derri?re
+> > tout ?a ?
+> >   
+> Je ne connais aucun autre syst?me o? le fait de s?lectionner 
+> explicitement tout donne un warning.  Quand on ?crit du code g?n?rique, 
+> c'est tr?s normal de se retrouver avec des cas o? l'on choisit tous les 
+> ?l?ments d'un ensemble; ce n'est que tr?s rarement un signe de probl?me, 
+> et c'est seulement pour ces cas particuliers qu'on devrait v?rifier.  Si 
+> on veut s'assurer, par exemple, que chaque bag est diff?rent, c'est au 
+> code qui s'occupe du bagging de le v?rifier et non au code qui sert dans 
+> tous les cas o? on choisit des lignes dans une vmat.  Je crois donc que 
+> ce warning est superflu car il g?n?re de l'output qui n'est pas voulu 
+> dans la plupart des cas et ?a dilue l'information importante.
+> 
+> e.g. imaginez ce que ce serait si python se comportait comme ?a:
+>  >>> x= [1,2,3]
+>  >>> x[0:3]
+>  WARNING: In list.__getitem__ : All elements have been selected!
+> [1, 2, 3]
+>  >>>
+> 
+> et qu'on n'avait aucun moyen simple d'emp?cher ?a de s'afficher, sauf 
+> qqch. du genre:
+>  >>> x= list([1,2,3], warn_if_all_elements_selected= False)
+> 
+> > La raison pour laquelle je n'utilise pas pl_log moi-m?me (? de rares
+> > exceptions pr?s quand je suis en train de d?bugguer mon code), c'est que
+> > par d?faut le log pour le module va ?tre d?sactiv?.
+> > Si je veux avertir l'usager que quelque chose risque de mal se passer,
+> > il faut que ?a soit actif par d?faut. D'o? l'utilisation de PLWARNING.
+> >
+> >   
+> Il y a des logs qui sont actifs par d?faut, mais dans ce cas particulier 
+> je crois qu'il n'y a pas de mani?re g?n?rique de s'assurer qu'un choix 
+> quelconque de rang?es correspond effectivement ? ce que l'usager 
+> pourrait avoir en t?te, peu importe le cas d'utilisation.  Par contre, 
+> pour faire du debugging, ?a peut ?tre int?ressant de savoir ce genre de 
+> choses (ou le nombre de lignes choisies, la taille de la vmat source, 
+> etc.) alors il est tout-?-fait appropri? d'utiliser les logs nomm?s pour 
+> ?a... qu'on peut tr?s facilement activer au besoin, mais qui ne 
+> devraient pas l'?tre par d?faut selon moi.
+> 
+> 
+> Xavier
+> 
+> 
+> 
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+
+
+From nouiz at nouiz.org  Thu Nov 27 19:00:54 2008
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Thu, 27 Nov 2008 13:00:54 -0500
+Subject: [Plearn-developers] erreurs, warnings, logs, etc.
+In-Reply-To: <20081127175157.GA17622@opale.iro.umontreal.ca>
+References: <492DB82E.5060206@apstat.com>
+	<20081126212517.GB7914@opale.iro.umontreal.ca>
+	<492EDB79.1000909@apstat.com>
+	<20081127175157.GA17622@opale.iro.umontreal.ca>
+Message-ID: <2d1d7fe70811271000q45b47bf2h8cc3165ae429aeb3@mail.gmail.com>
+
+Salut,
+
+J'avais rajout? ce warning, car il m'aurait ?viter quelques heures de
+d?bugging a un moment donn?e. Je ne me rappele plus la cause. Je ne
+crois pas qu'il faut l'inclure dans un logging nomm?, mais plutot le
+mettre en logging niveau debug. Il faudrait aussi que pymake -dbg
+imprime les log de debug par default. En ce moment il imprime par
+defaut juste les log de niveau normal.
+
+Fred
+
+2008/11/27 Olivier Delalleau <delallea at iro.umontreal.ca>:
+> Je comprends mieux, je pensais que tu disais en g?n?ral que les
+> PLWARNING c'?tait mauvais et qu'il fallait plus ou moins tous les
+> ?liminer.
+> Pour ce cas particulier je suis plut?t d'accord avec toi. Mais je pense
+> que c'est une question d'interpr?tation personnelle, pour savoir quand
+> on d?cide qu'une situation est suffisamment dangereuse pour m?riter
+> d'avoir un warning par d?faut. Je ne sais plus pour quelle raison exacte
+> Fred l'avait rajout?...
+>
+> Perso, je m'en fous un peu qu'il y ait un warning ou pas dans cete
+> classe, du moment qu'on puisse le d?sactiver ? volont? (ce qui est le
+> cas). Il ne devrait certainement pas y avoir de warning par contre quand
+> on fait du bagging et que ?a fonctionne (=> soit on d?cide d'?liminer ce
+> warning d?finitivement, soit on patche le bagging pour le d?sactiver
+> dans ce cas).
+>
+> -
+> Olivier
+>
+> On 27 Nov 2008, Xavier Saint-Mleux wrote:
+>>
+>> > Je ne comprends pas trop cet exemple. Il me semble que si tes bags sont
+>> > diff?rents, alors ce PLWARNING n'est pas superflu, mais erron?, et c'est
+>> > un bug ? corriger. Mais je soup?onne qu'il y a une subtilit? derri?re
+>> > tout ?a ?
+>> >
+>> Je ne connais aucun autre syst?me o? le fait de s?lectionner
+>> explicitement tout donne un warning.  Quand on ?crit du code g?n?rique,
+>> c'est tr?s normal de se retrouver avec des cas o? l'on choisit tous les
+>> ?l?ments d'un ensemble; ce n'est que tr?s rarement un signe de probl?me,
+>> et c'est seulement pour ces cas particuliers qu'on devrait v?rifier.  Si
+>> on veut s'assurer, par exemple, que chaque bag est diff?rent, c'est au
+>> code qui s'occupe du bagging de le v?rifier et non au code qui sert dans
+>> tous les cas o? on choisit des lignes dans une vmat.  Je crois donc que
+>> ce warning est superflu car il g?n?re de l'output qui n'est pas voulu
+>> dans la plupart des cas et ?a dilue l'information importante.
+>>
+>> e.g. imaginez ce que ce serait si python se comportait comme ?a:
+>>  >>> x= [1,2,3]
+>>  >>> x[0:3]
+>>  WARNING: In list.__getitem__ : All elements have been selected!
+>> [1, 2, 3]
+>>  >>>
+>>
+>> et qu'on n'avait aucun moyen simple d'emp?cher ?a de s'afficher, sauf
+>> qqch. du genre:
+>>  >>> x= list([1,2,3], warn_if_all_elements_selected= False)
+>>
+>> > La raison pour laquelle je n'utilise pas pl_log moi-m?me (? de rares
+>> > exceptions pr?s quand je suis en train de d?bugguer mon code), c'est que
+>> > par d?faut le log pour le module va ?tre d?sactiv?.
+>> > Si je veux avertir l'usager que quelque chose risque de mal se passer,
+>> > il faut que ?a soit actif par d?faut. D'o? l'utilisation de PLWARNING.
+>> >
+>> >
+>> Il y a des logs qui sont actifs par d?faut, mais dans ce cas particulier
+>> je crois qu'il n'y a pas de mani?re g?n?rique de s'assurer qu'un choix
+>> quelconque de rang?es correspond effectivement ? ce que l'usager
+>> pourrait avoir en t?te, peu importe le cas d'utilisation.  Par contre,
+>> pour faire du debugging, ?a peut ?tre int?ressant de savoir ce genre de
+>> choses (ou le nombre de lignes choisies, la taille de la vmat source,
+>> etc.) alors il est tout-?-fait appropri? d'utiliser les logs nomm?s pour
+>> ?a... qu'on peut tr?s facilement activer au besoin, mais qui ne
+>> devraient pas l'?tre par d?faut selon moi.
+>>
+>>
+>> Xavier
+>>
+>>
+>>
+>> _______________________________________________
+>> Plearn-developers mailing list
+>> Plearn-developers at lists.berlios.de
+>> https://lists.berlios.de/mailman/listinfo/plearn-developers
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>
+
+
+From saintmlx at apstat.com  Thu Nov 27 19:35:11 2008
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Thu, 27 Nov 2008 13:35:11 -0500
+Subject: [Plearn-developers] erreurs, warnings, logs, etc.
+In-Reply-To: <2d1d7fe70811261339q30c81cado429d8ab865b8e4f9@mail.gmail.com>
+References: <492DB82E.5060206@apstat.com>
+	<2d1d7fe70811261339q30c81cado429d8ab865b8e4f9@mail.gmail.com>
+Message-ID: <492EE85F.6060406@apstat.com>
+
+
+> Une chose que je croit important c'est qu'il soit facile et que cela
+> soit clair dans la documentation comment avoir tout les messages de
+> debug. Ceci est la raison pourquoi personnelement je n'utilise pas
+> pl_log, la doc est perdu dans un email et c'est moi qui par hazard a
+> rejout? de l'info dans "plearn help" sur sa syntaxe si je me rappele
+> bien. Par example "pymake -dbg ..." devrait continuer a donner tous
+> les messages de debug par default. Si on ne garde pas cela, on risque
+> de perdre des messages quand on debogue.
+>   
+
+Le code est assez bien doccument?.  S'il y a d'autres endroits o? il 
+doit y avoir du help-text ? ce sujet, je crois qu'on devrait les 
+identifier et corriger la situation en donnant toute l'aide n?cessaire 
+aux bons endroits, comme tu l'as fait pour "plearn help", qui donne 
+maintenant:
+
+"""
+                 [...]
+                 --verbosity LEVEL: The level of log to print.
+                     Must have been compiled with the same level of more
+                     Available level:
+                             VLEVEL_MAND    // Mandatory
+                             VLEVEL_IMP     // Important
+                             VLEVEL_NORMAL  // Normal (Default)
+                             VLEVEL_DBG     // Debug Info
+                             VLEVEL_EXTREME // Extreme Verbosity
+                 --enable-logging module1,module2,module3,...:
+                     Option to enable logging for the specified modules,
+                     specified a comma-separated list of modules 
+(without spaces).
+                     Special keywords __ALL__ and __NONE__ can be 
+specified to log
+                     for all modules or no modules respectively.
+                 [...]
+"""
+
+
+Extrait de pl_log.h:
+"""
+    /**
+     *  Named logging support.  Enable logging for the specified list
+     *  of modules.  If the special "__ALL__" keyword is used, then all
+     *  named logging is enabled.  If the special "__NONE__" keyword is
+     *  used, then no named logging is enabled.  (Default = "__NONE__")
+     */
+    void enableNamedLogging(const vector<string>& module_names);
+"""
+
+Et il y a une raison pour que la valeur par d?faut soit "__NONE__"...
+
+
+> En ce moment, on a tous les messages de debug en compilant avec -dbg
+> car tous les PLWARNINGS sont toujours imprim?. Il faut juste ne pas
+> perdre cette simplicit? pour tout logger. On pourrait perdre des
+> messages de debug si on se mets a envoyer plusieurs PLWARNING en mode
+> DEBUG, car ce niveau de log n'est pas imprim? par default. Pour les
+> imprimers il faudrait faire: "plearn --verbosity VLEVEL_DBG", ce qui
+> complique un peu les choses et risque que nous oublions de le faire
+> une fois de temps en temps. Ceci est comme le build bot qui nous
+> rappelle a l'ordre de temps en temps.
+>   
+L'option -dbg ne change rien aux warnings ? ce que je sache... ils sont 
+aussi imprim?s en mode optimis?, ce qui est d?finitivement un probl?me.  
+Je pense aussi que ce n'est pas la meilleure chose que d'avoir ? 
+recompiler pour activer ou d?sactiver des messages.  L'option 
+--verbosity est justement une r?ponse ce genre de probl?mes.  Aussi, de 
+mani?re g?n?rale, les usagers ne devraient pas voir de messages de 
+debug; c'est aux programmeurs de d?cider quand ils veulent tester et 
+d?boguer, et quoi en particulier (on ne peut pas tout d?boguer en m?me 
+temps.)  Quand il y a trop de messages, les gens les ignorent tous.
+
+> Dans le cas particulier des messages d'erreur que tu as eu, je crois
+> que c'est la classe BootstrapVMatrix(qui h?rite de SelectRowsVMatrix)
+> qui devrait mettre warn_if_all_rows_selected a faut quand on l'utilise
+> juste pour un shuffle.(Je crois que c'est bien cette class qui est
+> utiliser dans ton cas, mais je peux me tromper). Autre choses
+> possible, Dans SelectRowsVMatrix, on peut  generer le message d'erreur
+> seulement si on selectionne toutes les lignes et qu'elles sont dans
+> l'ordre de 0 a n-1(utilisation inutile de la classe).
+>   
+Je ne pourrais ?tre moins d'accord avec ces deux suggestions: 
+
+1) on fait des classes d?riv?es pour isoler la sp?cialisation et ne 
+partager que ce qui est vraiment g?n?rique dans la super-classe...  on 
+ne devrait pas adapter la super-classe aux particularit?s de certaines 
+de ses sous-classes.  BootstrapVMatrix devrait v?rifier elle-m?me ce qui 
+est pertinent pour un bootstrap; il n'y a pas grand chose qu'une 
+SelectRowsVMatrix peut v?rifier et qui soit valable dans tous les cas 
+(filtre, bootstrap, shuffle, tri, etc.)
+
+2) Si on v?rifie toutes les lignes, on ne peut plus rien faire en O(1) 
+sur une SelectRowsVMatrix: m?me dans les cas o? on ne veut que, par ex., 
+le metadatadir, ?a va prendre un temps O(n).  Encore une fois, ce test 
+n'est pas valable dans le cas g?n?ral (e.g. filtre qui conserve tout, 
+tri d'une vmat d?j? tri?e, etc.), ni tellement mieux pour du bagging, 
+car on peut quand-m?me avoir exactement les m?mes ?l?ments, mais dans un 
+ordre diff?rent.
+
+Une SelectRowsVMatrix peut avoir moins, plus ou autant de lignes que sa 
+sous-matrice, et que de ces trois cas, le plus fr?quent est probablement 
+celui o? on a autant de lignes!  ?a n'arrive pas que pour du "shuffle": 
+dans le cas du bagging, l'id?e est que chacun des bags peut contenir des 
+r?p?titions et omettre d'autres lignes, et on veut habituellement que le 
+total reste le m?me; il y a aussi beaucoup d'autres cas o? la taille est 
+la m?me car le SelectRows ne change rien par rapport ? la vmat source 
+(voir plus haut.)
+
+
+
+Xavier
+
+
+
+
+
+
+From saintmlx at apstat.com  Thu Nov 27 20:24:15 2008
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Thu, 27 Nov 2008 14:24:15 -0500
+Subject: [Plearn-developers] erreurs, warnings, logs, etc.
+In-Reply-To: <20081127175157.GA17622@opale.iro.umontreal.ca>
+References: <492DB82E.5060206@apstat.com>
+	<20081126212517.GB7914@opale.iro.umontreal.ca>
+	<492EDB79.1000909@apstat.com>
+	<20081127175157.GA17622@opale.iro.umontreal.ca>
+Message-ID: <492EF3DF.8050201@apstat.com>
+
+
+> Je comprends mieux, je pensais que tu disais en g?n?ral que les
+> PLWARNING c'?tait mauvais et qu'il fallait plus ou moins tous les
+> ?liminer.
+>   
+
+Je veux effectivement me *d?barasser de tous les PLWARNINGs* et il me 
+semble que c'?tait assez clair dans mon premier message.  Les logs 
+permettent de faire tout ce que les warnings font et beaucoup plus et 
+n'ont pas les pires d?fauts des warnings.  Le cas particulier est d?crit 
+dans un paragraphe qui commence par "e.g.".
+
+> Pour ce cas particulier je suis plut?t d'accord avec toi. Mais je pense
+> que c'est une question d'interpr?tation personnelle, pour savoir quand
+> on d?cide qu'une situation est suffisamment dangereuse pour m?riter
+> d'avoir un warning par d?faut. Je ne sais plus pour quelle raison exacte
+> Fred l'avait rajout?...
+>   
+Avertir l'usager dans une situation dangereuse, d'accord, mais "avertir" 
+n'est pas n?cessairement synonyme de PLWARNING.  Je crois qu'il faut 
+penser de la mani?re la plus g?n?rale possible:  on n'est pas toujours 
+en train de faire du d?bug intensif, mais il y a un moyen tr?s simple 
+d'ativer tous les logs quand c'est le cas; par contre, avec PLWARNING, 
+ce n'est pas tr?s simple de d?sactiver les diff?rents messages 
+informatifs envoy?s ? l'usager quand on ne les veut pas.  Avec les logs, 
+on peut faire tout ?a et on peut aussi d?cider le niveau de d?tail qu'on 
+veut et ce sur quoi on veut des d?tails, entre autres.
+
+> Perso, je m'en fous un peu qu'il y ait un warning ou pas dans cete
+> classe, du moment qu'on puisse le d?sactiver ? volont? (ce qui est le
+> cas). 
+Non, ce n'est pas le cas.  On doit modifier du code pour y arriver, ce 
+qui ne correspond pas ? ma d?finition de "? volont?".  De plus, ce 
+warning est apparu il y a quelques mois et a donc modifi? le 
+comportement de tout ce qui l'utilisait d?j?.  Quand j'ai ?crit le 
+BaggingLearner, je n'avais pas ces messages et c'?tait parfait comme 
+?a.  Si on veut d?boguer un cas particulier, ?a ne doit pas nous obliger 
+? tout modifier ce qui existait d?j? avant...
+
+
+> Il ne devrait certainement pas y avoir de warning par contre quand
+> on fait du bagging et que ?a fonctionne (=> soit on d?cide d'?liminer ce
+> warning d?finitivement, soit on patche le bagging pour le d?sactiver
+> dans ce cas).
+>   
+Justement, depuis quand est-ce qu'on doit indiquer explicitement quels 
+avertissements on ne veut pas avoir?.. c'est le monde ? l'envers.  On 
+met des warnings o? on en veut, pas le contraire!
+
+
+Xavier
+
+
+
+From saintmlx at apstat.com  Thu Nov 27 20:49:21 2008
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Thu, 27 Nov 2008 14:49:21 -0500
+Subject: [Plearn-developers] erreurs, warnings, logs, etc.
+In-Reply-To: <2d1d7fe70811271000q45b47bf2h8cc3165ae429aeb3@mail.gmail.com>
+References: <492DB82E.5060206@apstat.com>	
+	<20081126212517.GB7914@opale.iro.umontreal.ca>	
+	<492EDB79.1000909@apstat.com>	
+	<20081127175157.GA17622@opale.iro.umontreal.ca>
+	<2d1d7fe70811271000q45b47bf2h8cc3165ae429aeb3@mail.gmail.com>
+Message-ID: <492EF9C1.5030209@apstat.com>
+
+
+> J'avais rajout? ce warning, car il m'aurait ?viter quelques heures de
+> d?bugging a un moment donn?e. Je ne me rappele plus la cause. Je ne
+> crois pas qu'il faut l'inclure dans un logging nomm?, mais plutot le
+> mettre en logging niveau debug. Il faudrait aussi que pymake -dbg
+> imprime les log de debug par default. En ce moment il imprime par
+> defaut juste les log de niveau normal.
+>
+>   
+
+Selon moi, la meilleure fa?on d'?viter des heures de d?bug d?sagr?able ? 
+tout le monde est justement de le mettre dans un log nomm?, de mani?re ? 
+pouvoir facilement l'activer et le d?sactiver.  Ce genre d'information 
+factuelle peut tr?s bien ?tre au niveau "normal", pas seulement "debug", 
+mais n'?tre activ?e que si l'on veut les logs pour SelectRowsVMatrix (ou 
+"__ALL__".)  On peut aussi profiter de cette modif pour en faire un 
+message un peu plus parlant, qui s'affiche dans tous les cas (si le log 
+est actif) et donne la taille de la matrice source, la taille de 
+l'index, etc.  On n'a jamais trop de d?tails quand on d?bogue qqch. en 
+particulier, mais quand on utilise du code g?n?rique on ne veut 
+justement pas savoir.
+
+
+Xavier
+
+
+
+From chapados at iro.umontreal.ca  Thu Nov 27 21:37:00 2008
+From: chapados at iro.umontreal.ca (Nicolas Chapados)
+Date: Thu, 27 Nov 2008 15:37:00 -0500
+Subject: [Plearn-developers] erreurs, warnings, logs, etc.
+In-Reply-To: <2d1d7fe70811261339q30c81cado429d8ab865b8e4f9@mail.gmail.com>
+References: <492DB82E.5060206@apstat.com>
+	<2d1d7fe70811261339q30c81cado429d8ab865b8e4f9@mail.gmail.com>
+Message-ID: <B83833B0-6F55-4340-850C-729FB3025760@iro.umontreal.ca>
+
+Si je peux ajouter mon grain de sel, voici quelques remarques:
+
+1) Quand on ?crit du code g?n?rique, il y a souvent des cas de base  
+"qui ne semblent rien faire", qui ne devraient rien faire, ET QUI NE  
+SONT PAS DES ERREURS. Un exemple est l'?l?ment nul dans une addition:  
+si on fait a+0, ?a donne a.  C'est con, l'addition n'est pas utile  
+dans ce cas, mais ce n'est pas une erreur.  L? o? ?a devient utile  
+est que si par ailleurs, nous avions une expression de la forme "a 
++b", et que b s'adonne ? ?tre 0, eh bien l'addition n'a rien fait l?  
+non plus.  Non, ce n'est pas une erreur, ?a ne m?rite m?me pas un  
+warning, et il ne faudrait pas avoir ? "d?sactiver" un ?ventuel  
+warning dans ce cas. S'il fallait que l'addition donne un warning  
+toutes les fois "o? elle est inutile", nous serions ensevelis par une  
+avalanche, et LES VRAIS WARNINGS seraient perdus dans le bruit.  En  
+particulier, l'addition n'a pas ? regarder quelles sont ses  
+op?randes :: si ceux-ci sont valides, m?me des cas qui font que  
+l'op?ration soit l'identit?, elle doit passer.
+
+2) Nous avons amplement fait usage des logs nomm?s dans la conception  
+de FinLearn chez ApSTAT, et ceux-ci se pr?tent extr?mement bien ? la  
+maintenance ? grande ?chelle.  Le probl?me avec les PLWARNINGS est  
+que ceux-ci limitent l'esprit et pensent "petit": ils ?mettent  
+toujours le message sur la console, et ignorent la possibilit? que la  
+composante fasse partie d'un plus gros amalgame qui ?mettra lui-m?me  
+des messages, sera peut-?tre roul? dans une GUI, etc.  Le but des  
+logs est de permettre l'introspection profonde et contr?l?e du code,  
+sans ?tre noy? dans le bruit et le "chatter" g?n?r? par ce qui ne  
+nous int?resse pas.  De plus, ils ont l'avantage de "laisser l?" le  
+code de d?buggage qu'on voudrait autrement mettre en commentaires, et  
+fournissent un m?canisme UNIQUE et SYST?MATIQUE pour activer et  
+d?sactiver les messages. Et finalement, ils se pr?tent tr?s bien ? la  
+redirection dans des fen?tres de GUI pour examiner et filtrer les  
+messages de mani?re interactive.
+
+Je ne suis pas contre l'id?e que pymake change par d?faut (selon  
+l'option -dbg, -safeopt, etc) les logs qui seront imprim?s ?  
+l'?cran.  Et je suis bien s?r favorable ? ce qu'on en documente  
+davantage l'utilisation.
+
+Par contre, je supporte enti?rement l'id?e de Xavier de rendre  
+PLWARNING "deprecated", et de virer compl?tement PL_WARN_ERR, qui ne  
+me semble absolument pas robuste comme principe de g?nie logiciel  
+dans le cadre d'un d?veloppement ? grande ?chelle.  Nous avons d?j?  
+un m?canisme syst?matique de logging qui a d?montr? son utilit?  
+(c'est vachement pratique de pouvoir dire ? un utilisateur ? distance  
+"roule ce code avec tous les logs et envoie-moi le r?sultat"),  
+am?liorons-le au besoin, et servons-nous en.
+
+	+ Nicolas
+
+
+Le 26-Nov-08 ? 4:39 PM, Fr?d?ric Bastien a ?crit :
+
+> Dans le cas particulier des messages d'erreur que tu as eu, je crois
+> que c'est la classe BootstrapVMatrix(qui h?rite de SelectRowsVMatrix)
+> qui devrait mettre warn_if_all_rows_selected a faut quand on l'utilise
+> juste pour un shuffle.(Je crois que c'est bien cette class qui est
+> utiliser dans ton cas, mais je peux me tromper). Autre choses
+> possible, Dans SelectRowsVMatrix, on peut  generer le message d'erreur
+> seulement si on selectionne toutes les lignes et qu'elles sont dans
+> l'ordre de 0 a n-1(utilisation inutile de la classe).
+>
+> la classe SortRowsVMatrix herite aussi de SelectRowsVMatrix, si on
+> modifie BootstrapVMatrix pour ne pas reneger le message d'erreur il
+> faudrait aussi modifier SortRowsVMatrix. Donc modifier
+> SelectRowsVMatrix semble la meilleur solution.
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20081127/6b6d3458/attachment.html>
+
+From delallea at iro.umontreal.ca  Thu Nov 27 22:40:51 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Thu, 27 Nov 2008 16:40:51 -0500
+Subject: [Plearn-developers] erreurs, warnings, logs, etc.
+In-Reply-To: <492EF3DF.8050201@apstat.com>
+References: <492DB82E.5060206@apstat.com>
+	<20081126212517.GB7914@opale.iro.umontreal.ca>
+	<492EDB79.1000909@apstat.com>
+	<20081127175157.GA17622@opale.iro.umontreal.ca>
+	<492EF3DF.8050201@apstat.com>
+Message-ID: <20081127214050.GA22325@opale.iro.umontreal.ca>
+
+On 27 Nov 2008, Xavier Saint-Mleux wrote:
+>
+>> Je comprends mieux, je pensais que tu disais en g?n?ral que les
+>> PLWARNING c'?tait mauvais et qu'il fallait plus ou moins tous les
+>> ?liminer.
+>>   
+>
+> Je veux effectivement me *d?barasser de tous les PLWARNINGs* et il me 
+> semble que c'?tait assez clair dans mon premier message.  Les logs 
+> permettent de faire tout ce que les warnings font et beaucoup plus et n'ont 
+> pas les pires d?fauts des warnings.  Le cas particulier est d?crit dans 
+> un paragraphe qui commence par "e.g.".
+
+Alors je suis tout ? fait oppos? ? cette id?e. Comme je l'ai dit, les
+logs ne s'affichent que si on le demande, et je ne peux pas deviner ?
+l'avance de quels logs j'ai besoin pour ?tre s?r d'avoir des warnings
+potentiellement importants. Et je ne veux pas activer TOUS les logs et
+avoir des tas de messages dont je n'ai rien ? faire.
+
+P-? qu'on peut adapter le syst?me pour obtenir les m?mes fonctionalit?s
+avec pl_log. Tant mieux. Mais dire qu'on supprime tous les warnings, je
+ne trouve pas ?a une bonne id?e.
+
+Cela dit, je n'ai pas vraiment envie de m'obstiner l?-dessus non plus,
+donc faites ce que vous voulez. PLearn est en train de passer en mode
+deprecated de tte mani?re.
+
+--
+Olivier
+
+
+From nouiz at nouiz.org  Thu Nov 27 22:52:37 2008
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Thu, 27 Nov 2008 16:52:37 -0500
+Subject: [Plearn-developers] erreurs, warnings, logs, etc.
+In-Reply-To: <492EF3DF.8050201@apstat.com>
+References: <492DB82E.5060206@apstat.com>
+	<20081126212517.GB7914@opale.iro.umontreal.ca>
+	<492EDB79.1000909@apstat.com>
+	<20081127175157.GA17622@opale.iro.umontreal.ca>
+	<492EF3DF.8050201@apstat.com>
+Message-ID: <2d1d7fe70811271352o472e3b22o9d7baea09b7138fd@mail.gmail.com>
+
+Salut,
+
+il y a deux problemes dans cette discutions, un generic(PLWARNING vs
+log g?n?ric vs log nomm?) et un specifique(SelectRowsVMatrix)
+
+le generic:
+Je ne suis pas contre de changer les PLWARNINGS pour des log, mais je
+suggere fortement de changer l'option de default pour pymake -dbg pour
+imprimet le niveau de log debug.
+
+Changer tous les PLWARNINGS pour des log non-nomm? de niveau NORMAL,
+je n'ai aucune objection, mais cela ne change pas grand chose a ce qui
+est fait actuellement sauf qu'on peut tous les desactiver sur la ligne
+de commande. Il faut faire attention si on change le niveau d'un
+warning pour debug ou si on le mets dans des log nomm?. Je propose de
+les changer automatiquement pour les log de niveau normal et
+non-nomm?. Quand on rencontre un probleme avec un message qui arrive
+trop souvent ou vraiment inutilement, on l'imprime moins souvent.
+Comme cela on ne risque pas d'en perdre par erreur.
+
+Quand pensez-vous?
+
+Pour les PL_WARN_ERR(), ceci a ?t? ajout? pour transform? des erreur
+en warning. Pas pour transform? des warning en erreur...
+
+Pour la partie sp?cifique, je reponds dans un message a plusieurs
+messages de Xavier:
+
+>2) Si on v?rifie toutes les lignes, on ne peut plus rien faire en O(1) sur une SelectRowsVMatrix: m?me dans les cas o? on ne veut >que, par ex., le metadatadir, ?a va prendre un temps O(n).  Encore une fois, ce test n'est pas valable dans le cas g?n?ral (e.g. >filtre qui conserve tout, tri d'une vmat d?j? tri?e, etc.), ni tellement mieux pour du bagging, car on peut quand-m?me avoir >exactement les m?mes ?l?ments, mais dans un ordre diff?rent.
+
+Je ne vois pas le raisonnement de ne pas rajout? cette v?rification
+meme si on deplace le message vers les log nomm?.
+La fonction SelectRowsVMatrix::build_() sans cette v?rification
+suppl?mentaire est en O(selected rows), cette v?rification est en
+O(sources->length()). Donc je ne vois pas de probleme a rajout? un
+check dans le cas special si sources->length() == new_rows en O(n).
+Cela devien O(sources->length()*2 + d'autre choses). De plus ceci
+c'est en O(n) sur un vecteur d'indices, par sur la matrices donc pas
+de problemes d'acces memoire et c'est tres loin d'une section
+critique...
+
+>Une SelectRowsVMatrix peut avoir moins, plus ou autant de lignes que sa sous-matrice, et que de ces trois cas, le plus fr?quent >est probablement celui o? on a autant de lignes!  ?a n'arrive pas que pour du "shuffle": dans le cas du bagging, l'id?e est que >chacun des bags peut contenir des r?p?titions et omettre d'autres lignes, et on veut habituellement que le total reste le m?me; il >y a aussi beaucoup d'autres cas o? la taille est la m?me car le SelectRows ne change rien par rapport ? la vmat source (voir plus >haut.)
+
+Dans tes utilisations, une SelectRowsVMatrix ne change pas la taille
+de la matrice source souvent... dans mon utilisation c'est toujours le
+cas sauf en cas d'erreur... Alors log nomm? ou non-nomm?? Cela d?pend
+de l'utilisation. Si on rajoute la v?rification, je pense qu'elle
+n'arrivera pas souvent quand elle n'est pas necessaire et qu'elle va
+etre la seulement quand c'est une erreur. Donc j'opterait pour log
+non-nomm? as moins que vous me dites que cela arrivera plus souvent
+que je le pense.
+
+>> Perso, je m'en fous un peu qu'il y ait un warning ou pas dans cete
+>> classe, du moment qu'on puisse le d?sactiver ? volont? (ce qui est le
+>> cas).
+> Non, ce n'est pas le cas.  On doit modifier du code pour y arriver, ce
+> qui ne correspond pas ? ma d?finition de "? volont?".  De plus, ce
+> warning est apparu il y a quelques mois et a donc modifi? le
+> comportement de tout ce qui l'utilisait d?j?.  Quand j'ai ?crit le
+> BaggingLearner, je n'avais pas ces messages et c'?tait parfait comme
+> ?a.  Si on veut d?boguer un cas particulier, ?a ne doit pas nous obliger
+> ? tout modifier ce qui existait d?j? avant...
+
+Ce n'est pas du code qu'il faut modifier, mais un script plearn...
+mais je comprend que c'est plus compliquer que sur la ligne de
+commande...
+
+Aussi, comme Olivier a dit, je n'ai pas l'intension de m'obstiner. Je
+ne mettrais pas de temps a tout changer non plus. Si vous le faite, je
+vais juste modifier pymake -dbg pour qu'il imprime le niveau debug par
+default.
+
+Fred
+
+
+From saintmlx at apstat.com  Thu Nov 27 23:28:57 2008
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Thu, 27 Nov 2008 17:28:57 -0500
+Subject: [Plearn-developers] erreurs, warnings, logs, etc.
+In-Reply-To: <20081127214050.GA22325@opale.iro.umontreal.ca>
+References: <492DB82E.5060206@apstat.com>
+	<20081126212517.GB7914@opale.iro.umontreal.ca>
+	<492EDB79.1000909@apstat.com>
+	<20081127175157.GA17622@opale.iro.umontreal.ca>
+	<492EF3DF.8050201@apstat.com>
+	<20081127214050.GA22325@opale.iro.umontreal.ca>
+Message-ID: <492F1F29.5030607@apstat.com>
+
+Olivier Delalleau wrote:
+> On 27 Nov 2008, Xavier Saint-Mleux wrote:
+>   
+>>> Je comprends mieux, je pensais que tu disais en g?n?ral que les
+>>> PLWARNING c'?tait mauvais et qu'il fallait plus ou moins tous les
+>>> ?liminer.
+>>>   
+>>>       
+>> Je veux effectivement me *d?barasser de tous les PLWARNINGs* et il me 
+>> semble que c'?tait assez clair dans mon premier message.  Les logs 
+>> permettent de faire tout ce que les warnings font et beaucoup plus et n'ont 
+>> pas les pires d?fauts des warnings.  Le cas particulier est d?crit dans 
+>> un paragraphe qui commence par "e.g.".
+>>     
+>
+> Alors je suis tout ? fait oppos? ? cette id?e. Comme je l'ai dit, les
+> logs ne s'affichent que si on le demande, et je ne peux pas deviner ?
+> l'avance de quels logs j'ai besoin pour ?tre s?r d'avoir des warnings
+> potentiellement importants. Et je ne veux pas activer TOUS les logs et
+> avoir des tas de messages dont je n'ai rien ? faire.
+>   
+
+Tu peux activer tous les logs *et* mettre le bon niveau de verbosity, 
+c'est exactement ? ?a que ?a sert et les warnings n'ont justement pas 
+cette souplesse.  S'il existe des messages de logs qui sont ? un niveau 
+de verbosity trop bas (ou trop haut), on peut les modifier.  Si tu ne 
+veux pas de tas de messages dont tu n'as rien ? faire, tu peux activer 
+les logs seulement pour ce qui t'int?resse, ou simplement les laisser 
+tous d?sactiv?s.  C'est justement fait pour ?a, et de cette mani?re, tu 
+n'as pas ? endurer les messages des autres dont tu te fous ET les autres 
+n'ont pas ? endurer tes messages dont ils se foutent.  Je te ferais 
+remarquer qu'il est tr?s fr?quent que des messages que tu trouves 
+absolument n?cessaires soient inutiles et m?me irritants ? mes yeux car 
+je sais comment v?rifier sans ?a et ils m'emp?chent de voir facilement 
+ce qui m'int?resse vraiment.  C'est un probl?me qui aurait pu ne jamais 
+exister car la solution ?tait d?j? l? d'avance, mais elle n'est pas 
+utilis?e.  C'est un peu pour ?a que j'insiste sur les logs, plut?t que 
+de laisser le probl?me s'aggraver.
+
+
+> P-? qu'on peut adapter le syst?me pour obtenir les m?mes fonctionalit?s
+> avec pl_log. Tant mieux. Mais dire qu'on supprime tous les warnings, je
+> ne trouve pas ?a une bonne id?e.
+>   
+C'est d?j? fait: les logs font tout ce que les warnings font, et plus.  
+Quand je dis qu'il faut rendre les warnings "deprecated" car les logs 
+permettent d?j? de faire tout ce que les warnings font et beaucoup plus, 
+?a veut justement dire de remplacer les warnings par des logs.
+
+> Cela dit, je n'ai pas vraiment envie de m'obstiner l?-dessus non plus,
+> donc faites ce que vous voulez. PLearn est en train de passer en mode
+> deprecated de tte mani?re.
+>   
+C'est en train de se faire, mais je ne retiens pas mon souffle... j'ai 
+l'impression que certains morceaux de PLearn vont survivre encore un 
+certain temps.  ? mes yeux, le fait que ce soit moins utilis? n'est pas 
+une raison pour abandonner de bonnes habitudes.
+
+
+Xavier
+
+
+
+
+
+From saintmlx at apstat.com  Fri Nov 28 01:02:46 2008
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Thu, 27 Nov 2008 19:02:46 -0500
+Subject: [Plearn-developers] erreurs, warnings, logs, etc.
+In-Reply-To: <2d1d7fe70811271352o472e3b22o9d7baea09b7138fd@mail.gmail.com>
+References: <492DB82E.5060206@apstat.com>	<20081126212517.GB7914@opale.iro.umontreal.ca>	<492EDB79.1000909@apstat.com>	<20081127175157.GA17622@opale.iro.umontreal.ca>	<492EF3DF.8050201@apstat.com>
+	<2d1d7fe70811271352o472e3b22o9d7baea09b7138fd@mail.gmail.com>
+Message-ID: <492F3526.2030801@apstat.com>
+
+Fr?d?ric Bastien wrote:
+> Salut,
+>
+> il y a deux problemes dans cette discutions, un generic(PLWARNING vs
+> log g?n?ric vs log nomm?) et un specifique(SelectRowsVMatrix)
+>
+> le generic:
+> Je ne suis pas contre de changer les PLWARNINGS pour des log, mais je
+> suggere fortement de changer l'option de default pour pymake -dbg pour
+> imprimet le niveau de log debug.
+>   
+Je n'ai aucun probl?me avec ?a, c'est peut-?tre le "best of both 
+worlds".  Ce qui est le plus important ? mes yeux est que le niveau de 
+verbosity puisse ?tre chang? au run-time.
+
+> Changer tous les PLWARNINGS pour des log non-nomm? de niveau NORMAL,
+> je n'ai aucune objection, mais cela ne change pas grand chose a ce qui
+> est fait actuellement sauf qu'on peut tous les desactiver sur la ligne
+> de commande. Il faut faire attention si on change le niveau d'un
+> warning pour debug ou si on le mets dans des log nomm?. Je propose de
+> les changer automatiquement pour les log de niveau normal et
+> non-nomm?. Quand on rencontre un probleme avec un message qui arrive
+> trop souvent ou vraiment inutilement, on l'imprime moins souvent.
+> Comme cela on ne risque pas d'en perdre par erreur.
+>
+> Quand pensez-vous?
+>   
+
+?a a l'air d'avoir du sens, mais je pensais y aller vraiment cas-par-cas 
+pour ce qui est des warnings d?j? existants et prendre le temps 
+n?cessaire pour ?a...  dans l'imm?diat, ce que je trouve le plus 
+important est de ne pas cr?er de nouveaux warnings et de prendre 
+l'habitude d'utiliser les logs ? la place.
+
+> Pour les PL_WARN_ERR(), ceci a ?t? ajout? pour transform? des erreur
+> en warning. Pas pour transform? des warning en erreur...
+>
+> Pour la partie sp?cifique, je reponds dans un message a plusieurs
+> messages de Xavier:
+>
+>   
+>> 2) Si on v?rifie toutes les lignes, on ne peut plus rien faire en O(1) sur une SelectRowsVMatrix: m?me dans les cas o? on ne veut >que, par ex., le metadatadir, ?a va prendre un temps O(n).  Encore une fois, ce test n'est pas valable dans le cas g?n?ral (e.g. >filtre qui conserve tout, tri d'une vmat d?j? tri?e, etc.), ni tellement mieux pour du bagging, car on peut quand-m?me avoir >exactement les m?mes ?l?ments, mais dans un ordre diff?rent.
+>>     
+>
+> Je ne vois pas le raisonnement de ne pas rajout? cette v?rification
+> meme si on deplace le message vers les log nomm?.
+> La fonction SelectRowsVMatrix::build_() sans cette v?rification
+> suppl?mentaire est en O(selected rows), cette v?rification est en
+> O(sources->length()). Donc je ne vois pas de probleme a rajout? un
+> check dans le cas special si sources->length() == new_rows en O(n).
+> Cela devien O(sources->length()*2 + d'autre choses). De plus ceci
+> c'est en O(n) sur un vecteur d'indices, par sur la matrices donc pas
+> de problemes d'acces memoire et c'est tres loin d'une section
+> critique...
+>   
+
+C'est vrai qu'il y a d?j? des trucs qui ne se font pas en O(1) dans 
+build_... j'avais mal regard?.  Ce qui est certain est que de remplacer 
+le warning actuel par un autre n'est pas la solution, mais c'est vrai 
+que ?a ne co?te pas tr?s cher de v?rifier ?a et le loguer si on pense en 
+avoir vraiment besoin un jour (on peut peut-?tre attendre ce jour-l? 
+pour s'en occuper.)
+
+>   
+>> Une SelectRowsVMatrix peut avoir moins, plus ou autant de lignes que sa sous-matrice, et que de ces trois cas, le plus fr?quent >est probablement celui o? on a autant de lignes!  ?a n'arrive pas que pour du "shuffle": dans le cas du bagging, l'id?e est que >chacun des bags peut contenir des r?p?titions et omettre d'autres lignes, et on veut habituellement que le total reste le m?me; il >y a aussi beaucoup d'autres cas o? la taille est la m?me car le SelectRows ne change rien par rapport ? la vmat source (voir plus >haut.)
+>>     
+>
+> Dans tes utilisations, une SelectRowsVMatrix ne change pas la taille
+> de la matrice source souvent... dans mon utilisation c'est toujours le
+> cas sauf en cas d'erreur... 
+Si tu as des cas pour lesquels avoir le m?me nombre de lignes est une 
+erreur, alors il faudrait peut-?tre mettre carr?ment une PLERROR, mais 
+la mettre dans la composante sp?cialis?e pour qui c'est une erreur et 
+non dans SelectRowsVMatrix.
+
+> Alors log nomm? ou non-nomm?? Cela d?pend
+> de l'utilisation. 
+Si ce n'est pas une vraie erreur, alors je dis un log nomm?, comme ?a on 
+peut facilement le d?sactiver quand on veut d?boguer quelquechose d'autre.
+
+> Si on rajoute la v?rification, je pense qu'elle
+> n'arrivera pas souvent quand elle n'est pas necessaire et qu'elle va
+> etre la seulement quand c'est une erreur. Donc j'opterait pour log
+> non-nomm? as moins que vous me dites que cela arrivera plus souvent
+> que je le pense.
+>   
+Je ne suis pas d'accord.  Des cas tels un filtre qui n'enl?ve rien ou un 
+tri sur qqch. de d?j? tri? sont communs et ce n'est pas une erreur, et 
+donc ?a risque d'arriver souvent.  Pour ce qui est de nomm? vs. 
+non-nomm?, je ne vois pas beaucoup de cas o? le non-nomm? est 
+appropri?... ce qui est sp?cifique ? une composante devrait toujours 
+?tre nomm? pour qu'on puisse facilement l'inclure ou l'exclure sans 
+avoir ? inclure ou exclure tout le reste.  Un des buts est justement 
+d'?viter le "tout-ou-rien", d'avoir plus de souplesse que ?a.
+
+>
+> Aussi, comme Olivier a dit, je n'ai pas l'intension de m'obstiner. Je
+> ne mettrais pas de temps a tout changer non plus. Si vous le faite, je
+> vais juste modifier pymake -dbg pour qu'il imprime le niveau debug par
+> default.
+>
+>   
+
+Je n'aime pas m'obstiner non plus, mais on a d?j? les outils n?cessaires 
+pour permettre aux uns d'afficher tout ce qu'ils veulent et aux autres 
+de ne pas s'en occuper.  C'est d?j? utilis? ? beaucoup d'endroits et ?a 
+fonctionne tr?s bien.  ?a r?gle justement le genre de probl?me qui est ? 
+l'origine de cette discussion.  Ce que je ne comprends pas, c'est 
+l'obstination ? ne pas utiliser les outils qu'on a et qui r?glent les 
+probl?mes qu'on a.
+
+
+Xavier
+
+
+

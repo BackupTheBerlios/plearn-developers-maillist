@@ -1,0 +1,238 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Tight bridge between Python and C++/PLearn (experimental)
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Tight%20bridge%20between%20Python%20and%20C%2B%2B/PLearn%20%28experimental%29&In-Reply-To=%3C433ACC25.90807%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000036.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Tight bridge between Python and C++/PLearn (experimental)</H1>
+    <B>Nicolas Chapados</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Tight%20bridge%20between%20Python%20and%20C%2B%2B/PLearn%20%28experimental%29&In-Reply-To=%3C433ACC25.90807%40apstat.com%3E"
+       TITLE="[Plearn-developers] Tight bridge between Python and C++/PLearn (experimental)">chapados at apstat.com
+       </A><BR>
+    <I>Wed Sep 28 19:00:21 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000036.html">[Plearn-developers] PLearn compilation @ LISA
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#37">[ date ]</a>
+              <a href="thread.html#37">[ thread ]</a>
+              <a href="subject.html#37">[ subject ]</a>
+              <a href="author.html#37">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello all PLearners,
+
+Please answer, in complete honesty and privacy, the following questions:
+
+    * /*When writing a PLearn script, have you ever been faced with a
+      data matrix in a &quot;slightly wrong&quot; format, and wished there were a
+      VMatrix type that could do &quot;just this tiny little thing&quot;?*/
+    * /*Ever faced the prospect of trying to understand SOMEONE ELSE's
+      VPL (VMatrix Processing Language) code?*/
+    * /*Ever wished to write a PLearn class that you could INHERIT FROM
+      IN PYTHON?*/
+
+
+*  *  *  *  *  *
+
+/*Today, m*//*y friend, your wishes have come true.*/
+
+*  *  *  *  *  *
+
+I just committed to SVN a set of (still-experimental) classes that 
+constitute the elements of a tight bridge between Python and 
+C++/PLearn.  By &quot;tight bridge&quot;, I mean that both PLearn and the Python 
+interpreter are linked together and live in the same process.  With this 
+bridge, you can write Python code in the form of &quot;code snippets&quot; that 
+implement pieces of functionality that are integrated at runtime into 
+PLearn.  An example of this is the new PythonProcessedVMatrix, which 
+provides the same functionality as ProcessingVMatrix (and more!), but 
+using Python code instead of VPL.  An example of a very simple .pymat 
+script is as follows (see 
+PLearn/plearn/python/test/test_python_vmatrix.pymat) ::
+
+    from plearn.pyplearn import *
+
+    source_mat = pl.MemoryVMatrix(
+        data = TMat(4, 2, [ 2, 3,
+                            5, 7,
+                            11,13,
+                            17,19 ]),
+        inputsize = 1, targetsize = 1, weightsize = 0)
+
+    processing_code = &quot;&quot;&quot;
+    from numarray import *
+
+    def getRow(row_no, source_row):
+        return concatenate((10*row_no, 2*source_row))
+
+    def getFieldNames(source_field_names):
+        return ['tricky_rownum', 'field1', 'field2']
+    &quot;&quot;&quot;
+                   
+    processed_mat = pl.PythonProcessedVMatrix(
+        source = source_mat,
+        code = processing_code)
+       
+
+    def main():
+        return processed_mat
+
+This script operates as follows:
+
+   1. It starts by defining a source VMatrix that contains the
+      underlying data to transform (just a simple inline matrix in this
+      example)
+   2. Then it defines the Python code snippet that will be used to
+      process the source VMatrix rows.  This is the code &quot;injected&quot; into
+      the running PLearn process.  The snippet must define at least two
+      functions (more can be defined by the interface -- see the
+      documentation for PythonProcessedVMatrix) ::
+          * getRow() returns a processed row given a source row
+          * getFieldNames returns the NEW fieldnames given the source
+            field names
+   3. Finally, everything is wrapped into the PythonProcessedVMatrix,
+      which links all pieces and provides the VMatrix interface.
+   4. You now just have to do a &quot;plearn vmat view&quot; on this file to see
+      the result!
+
+NOTE: do not confuse the &quot;outer Python&quot; with the &quot;inner Python&quot;!  The 
+outer-level .pymat script is itself Python code, but is used strictly as 
+a preprocessor to generate a .plearn script for the PLearn program.  The 
+inner-level processing_code is Python code that is injected into the 
+running PLearn process through the PythonProcessedVMatrix.
+
+*  *  *  *  *  *
+
+If you peek under the hood, you will discover a set of new classes, the 
+most important being PythonObjectWrapper and PythonCodeSnippet.  The 
+first one is a lightweight C++ wrapper around the fundamental Python 
+objects, the PyObject*.  It provides such niceties as automatic and 
+type-safe conversion between (some) C++ and Python types, as well as 
+managing the Python reference counts.
+
+The second one, PythonCodeSnippet, actually handles the calling of 
+Python code from C++.  This object is designed to be *embedded* within 
+client C++ code (in the example above, PythonProcessedVMatrix) and 
+handles the compilation of the snippet, the translation between C++ 
+function calls and Python calls (arguments and return values).  It also 
+support the *injection of C++ callbacks into Python*, in order to 
+provide the PythonCodeSnippet with a well-defined interface to the main 
+PLearn C++ core. Finally, it provides an optional mapping between Python 
+Exceptions and C++ Exceptions.
+
+The class PythonProcessedVMatrix is but one example of what is 
+possible.  We can imagine pre/post-processing functionality for 
+PLearner, PLearners themselves written in Python, etc.  I also envision 
+a more complete eventual bridge, wherein Python snippets will be able to 
+instantiate, manipulate and return /bona fide/ PLearn objects.
+
+*  *  *  *  *  *
+
+*Frequently Asked Questions*
+
+Q1: /&quot;I tried your example but it doesn't work.&quot;  (Bob, Louisiana)/
+A1: You need to perform the following steps:
+
+    * svn update of PLearn
+    * Uncomment two lines in the &quot;plearn_inc.h&quot; file.  These lines are
+      the #include directives for PythonCodeSnippet.h and
+      PythonProcessedVMatrix.h.  *(I left them commented out at the
+      moment since I consider this bridge to be still-experimental)*
+    * Ensure that the Python settings in the PLearn/python.config.model
+      file are adequate for your environment.
+    * Recompile PLearn
+    * Try again &quot;plearn vmat view test_python_vmatrix.pymat&quot;
+
+
+Q2: /&quot;I'm trying to instantiate a PythonCodeSnippet from a script. Now 
+what?&quot;  (Rick, Michigan)/
+A2: The PythonCodeSnippet is not designed to be instantiated directly 
+from a script, but to be contained within an embedding PLearn class, for 
+instance PythonProcessedVMatrix.  It is the embedding class that defines 
+its own requirements for what the snippet looks like (i.e. what 
+functions must the snippet define) and in turn what API the snippet has 
+access to (in the form of global variables and injected C++ callbacks).
+
+Q3: /&quot;PLearn does not compile anymore with that Python stuff enabled!&quot; 
+(Bill, Missouri)/
+A3: You must have the following libraries properly installed:
+
+    * The Python core libraries and include files (libpython)
+    * The Numarray library (it's a Python package; PLearn's Vec and Mat
+      are mapped to numarray objects) and include files
+    * The Boost library (probably at least 1.32)
+
+The version of Python to use (2.3 or 2.4) can be specifed with a 
+compile-time define.  See the file &lt;plearn/python/PythonIncludes.h&gt;
+
+Q4: /&quot;Can the Python snippet keep state between function calls?&quot; 
+(George, Texas)/
+A4: Yes, each snippet operates in its own private environment with its 
+own set of global variables.  Just declare &quot;global xyz&quot; at the start of 
+a function, and the variable xyz will be maintained across calls to 
+functions within the snippet and can be used by all the functions of the 
+snippet.
+
+Q5: /&quot;Can several Python snippets communicate with one another?&quot; (Patty, 
+California)/
+A5: Not directly. Each snippet operates in its own environment, with its 
+own set of functions and global variables.  This means that two snippet 
+cannot accidentally interfere (define two functions of the same name but 
+with different purposes).  But it also means that communication between 
+snippets is more difficult.  One possibility is to make use of 
+mechanisms that are SHARED across the snippets, such as Python modules.  
+For example, two snippets could communicate using a common module known 
+to those two only.  (This has not been tested yet).
+
+*  *  *  *  *  *
+
+As always, comments and suggestions welcome!
+
+    Enjoy!
+    Nicolas (Montr&#233;al, Qu&#233;bec)
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="https://lists.berlios.de/pipermail/plearn-developers/attachments/20050928/dcdf2605/attachment.html">https://lists.berlios.de/pipermail/plearn-developers/attachments/20050928/dcdf2605/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000036.html">[Plearn-developers] PLearn compilation @ LISA
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#37">[ date ]</a>
+              <a href="thread.html#37">[ thread ]</a>
+              <a href="subject.html#37">[ subject ]</a>
+              <a href="author.html#37">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

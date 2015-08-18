@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Plearn installation error due to wrong	arguments in multiplyAcc ?
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2009-March/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Plearn%20installation%20error%20due%20to%20wrong%0A%09arguments%20in%20multiplyAcc%20%3F&In-Reply-To=%3C38dc1cea0903120834l7d27d52byee57c582139b784c%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000218.html">
+   <LINK REL="Next"  HREF="000220.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Plearn installation error due to wrong	arguments in multiplyAcc ?</H1>
+    <B>Olivier Temam</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Plearn%20installation%20error%20due%20to%20wrong%0A%09arguments%20in%20multiplyAcc%20%3F&In-Reply-To=%3C38dc1cea0903120834l7d27d52byee57c582139b784c%40mail.gmail.com%3E"
+       TITLE="[Plearn-developers] Plearn installation error due to wrong	arguments in multiplyAcc ?">olivier.temam at inria.fr
+       </A><BR>
+    <I>Thu Mar 12 16:34:42 CET 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000218.html">[Plearn-developers] Plearn installation error due to wrong	arguments in multiplyAcc ?
+</A></li>
+        <LI>Next message: <A HREF="000220.html">[Plearn-developers] Plearn installation error due to wrong	arguments in multiplyAcc ?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#219">[ date ]</a>
+              <a href="thread.html#219">[ thread ]</a>
+              <a href="subject.html#219">[ subject ]</a>
+              <a href="author.html#219">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi Frederic &amp; Pascal,
+
+  Many thanks for your quick reply. It did solve this compilation problem. I
+am still struggling with some link time issues but I will first try to
+resolve them by myself before further bothering you.
+
+Take care,
+Olivier
+
+On Wed, Mar 11, 2009 at 7:19 PM, Fr&#233;d&#233;ric Bastien &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">nouiz at nouiz.org</A>&gt; wrote:
+
+&gt;<i> Hi,
+</I>&gt;<i>
+</I>&gt;<i> I have commited a fix update plearn to have it. The trouble is that the fct
+</I>&gt;<i> that exist is
+</I>&gt;<i> multiplyAcc(PLearn::Mat&amp;, PLearn::Mat&amp;, real)
+</I>&gt;<i> and it is
+</I>&gt;<i> multiplyAcc(PLearn::Mat&amp;, PLearn::Mat&amp;, int)
+</I>&gt;<i>
+</I>&gt;<i> that is called. Here the compiler cast the int to real(float or double,
+</I>&gt;<i> that is selected at compile time) automaticly.
+</I>&gt;<i> What is the compiler that you used and which version?
+</I>&gt;<i>
+</I>&gt;<i> thanks
+</I>&gt;<i>
+</I>&gt;<i> Fred
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On Wed, Mar 11, 2009 at 2:13 PM, Fr&#233;d&#233;ric Bastien &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">nouiz at nouiz.org</A>&gt; wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> Hi,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> a fast fix is to don't include this file if you don't need it. To do this
+</I>&gt;&gt;<i> comment the line 257 in the file commands/plearn_noblas_inc.h
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> here is this line to comment.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> #include &lt;plearn_learners/online/ShuntingNNetLayerModule.h&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Fred
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On Wed, Mar 11, 2009 at 1:44 PM, Pascal Vincent &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">pascal at apstat.com</A>&gt;wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Bonjour Olivier,
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Je fais suivre votre message &#224; la liste plearn-developers.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Le 09-03-11 &#224; 12:51, Olivier Temam a &#233;crit :
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> &gt; Hi,
+</I>&gt;&gt;&gt;<i> &gt;
+</I>&gt;&gt;&gt;<i> &gt;   I am really not sure I am mailing this to the proper address, so
+</I>&gt;&gt;&gt;<i> &gt; thanks in advance for redirecting me to the right one, though I
+</I>&gt;&gt;&gt;<i> &gt; could not find any &quot;users list&quot; for Plearn.
+</I>&gt;&gt;&gt;<i> &gt; I have an installation problem which does not seem to be related to
+</I>&gt;&gt;&gt;<i> &gt; library dependence issues, but rather to a coding issue. It is in
+</I>&gt;&gt;&gt;<i> &gt; file ShuntingNNetLayerModule.cc, and the problem seems to be that
+</I>&gt;&gt;&gt;<i> &gt; method multiplyAcc is called with &lt;TMat, TMat&gt; arguments while I
+</I>&gt;&gt;&gt;<i> &gt; could only find methods with TVec arguments in TMat_maths_impl.h.
+</I>&gt;&gt;&gt;<i> &gt; The full error is shown below (I have no other compilation error).
+</I>&gt;&gt;&gt;<i> &gt;
+</I>&gt;&gt;&gt;<i> &gt; Thanks in advance for your help,
+</I>&gt;&gt;&gt;<i> &gt; Olivier
+</I>&gt;&gt;&gt;<i> &gt;
+</I>&gt;&gt;&gt;<i> &gt;  /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+</I>&gt;&gt;&gt;<i> &gt; online/ShuntingNNetLayerModule.cc: In member function &#8216;virtual void
+</I>&gt;&gt;&gt;<i> &gt; PLearn::ShuntingNNetLayerModule::bpropUpdate(const PLearn::Mat&amp;,
+</I>&gt;&gt;&gt;<i> &gt; const PLearn::Mat&amp;, PLearn::Mat&amp;, const PLearn::Mat&amp;, bool)&#8217;:
+</I>&gt;&gt;&gt;<i> &gt; /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+</I>&gt;&gt;&gt;<i> &gt; online/ShuntingNNetLayerModule.cc:414: error: no matching function
+</I>&gt;&gt;&gt;<i> &gt; for call to &#8216;multiplyAcc(PLearn::Mat&amp;, PLearn::Mat&amp;, int)&#8217;
+</I>&gt;&gt;&gt;<i> &gt; /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+</I>&gt;&gt;&gt;<i> &gt; online/ShuntingNNetLayerModule.cc:415: error: no matching function
+</I>&gt;&gt;&gt;<i> &gt; for call to &#8216;multiplyAcc(PLearn::Mat&amp;, PLearn::Mat&amp;, int)&#8217;
+</I>&gt;&gt;&gt;<i> &gt;
+</I>&gt;&gt;&gt;<i> &gt;
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;&gt;<i> Plearn-developers mailing list
+</I>&gt;&gt;&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">Plearn-developers at lists.berlios.de</A>
+</I>&gt;&gt;&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">https://lists.berlios.de/mailman/listinfo/plearn-developers</A>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="https://lists.berlios.de/pipermail/plearn-developers/attachments/20090312/8fa19543/attachment.html">https://lists.berlios.de/pipermail/plearn-developers/attachments/20090312/8fa19543/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000218.html">[Plearn-developers] Plearn installation error due to wrong	arguments in multiplyAcc ?
+</A></li>
+	<LI>Next message: <A HREF="000220.html">[Plearn-developers] Plearn installation error due to wrong	arguments in multiplyAcc ?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#219">[ date ]</a>
+              <a href="thread.html#219">[ thread ]</a>
+              <a href="subject.html#219">[ subject ]</a>
+              <a href="author.html#219">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

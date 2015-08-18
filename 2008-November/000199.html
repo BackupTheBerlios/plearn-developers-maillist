@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] erreurs, warnings, logs, etc.
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-November/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20erreurs%2C%20warnings%2C%20logs%2C%20etc.&In-Reply-To=%3C492F3526.2030801%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000197.html">
+   <LINK REL="Next"  HREF="000187.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] erreurs, warnings, logs, etc.</H1>
+    <B>Xavier Saint-Mleux</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20erreurs%2C%20warnings%2C%20logs%2C%20etc.&In-Reply-To=%3C492F3526.2030801%40apstat.com%3E"
+       TITLE="[Plearn-developers] erreurs, warnings, logs, etc.">saintmlx at apstat.com
+       </A><BR>
+    <I>Fri Nov 28 01:02:46 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000197.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+        <LI>Next message: <A HREF="000187.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#199">[ date ]</a>
+              <a href="thread.html#199">[ thread ]</a>
+              <a href="subject.html#199">[ subject ]</a>
+              <a href="author.html#199">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Fr&#233;d&#233;ric Bastien wrote:
+&gt;<i> Salut,
+</I>&gt;<i>
+</I>&gt;<i> il y a deux problemes dans cette discutions, un generic(PLWARNING vs
+</I>&gt;<i> log g&#233;n&#233;ric vs log nomm&#233;) et un specifique(SelectRowsVMatrix)
+</I>&gt;<i>
+</I>&gt;<i> le generic:
+</I>&gt;<i> Je ne suis pas contre de changer les PLWARNINGS pour des log, mais je
+</I>&gt;<i> suggere fortement de changer l'option de default pour pymake -dbg pour
+</I>&gt;<i> imprimet le niveau de log debug.
+</I>&gt;<i>   
+</I>Je n'ai aucun probl&#232;me avec &#231;a, c'est peut-&#234;tre le &quot;best of both 
+worlds&quot;.  Ce qui est le plus important &#224; mes yeux est que le niveau de 
+verbosity puisse &#234;tre chang&#233; au run-time.
+
+&gt;<i> Changer tous les PLWARNINGS pour des log non-nomm&#233; de niveau NORMAL,
+</I>&gt;<i> je n'ai aucune objection, mais cela ne change pas grand chose a ce qui
+</I>&gt;<i> est fait actuellement sauf qu'on peut tous les desactiver sur la ligne
+</I>&gt;<i> de commande. Il faut faire attention si on change le niveau d'un
+</I>&gt;<i> warning pour debug ou si on le mets dans des log nomm&#233;. Je propose de
+</I>&gt;<i> les changer automatiquement pour les log de niveau normal et
+</I>&gt;<i> non-nomm&#233;. Quand on rencontre un probleme avec un message qui arrive
+</I>&gt;<i> trop souvent ou vraiment inutilement, on l'imprime moins souvent.
+</I>&gt;<i> Comme cela on ne risque pas d'en perdre par erreur.
+</I>&gt;<i>
+</I>&gt;<i> Quand pensez-vous?
+</I>&gt;<i>   
+</I>
+&#199;a a l'air d'avoir du sens, mais je pensais y aller vraiment cas-par-cas 
+pour ce qui est des warnings d&#233;j&#224; existants et prendre le temps 
+n&#233;cessaire pour &#231;a...  dans l'imm&#233;diat, ce que je trouve le plus 
+important est de ne pas cr&#233;er de nouveaux warnings et de prendre 
+l'habitude d'utiliser les logs &#224; la place.
+
+&gt;<i> Pour les PL_WARN_ERR(), ceci a &#233;t&#233; ajout&#233; pour transform&#233; des erreur
+</I>&gt;<i> en warning. Pas pour transform&#233; des warning en erreur...
+</I>&gt;<i>
+</I>&gt;<i> Pour la partie sp&#233;cifique, je reponds dans un message a plusieurs
+</I>&gt;<i> messages de Xavier:
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>&gt;&gt;<i> 2) Si on v&#233;rifie toutes les lignes, on ne peut plus rien faire en O(1) sur une SelectRowsVMatrix: m&#234;me dans les cas o&#249; on ne veut &gt;que, par ex., le metadatadir, &#231;a va prendre un temps O(n).  Encore une fois, ce test n'est pas valable dans le cas g&#233;n&#233;ral (e.g. &gt;filtre qui conserve tout, tri d'une vmat d&#233;j&#224; tri&#233;e, etc.), ni tellement mieux pour du bagging, car on peut quand-m&#234;me avoir &gt;exactement les m&#234;mes &#233;l&#233;ments, mais dans un ordre diff&#233;rent.
+</I>&gt;&gt;<i>     
+</I>&gt;<i>
+</I>&gt;<i> Je ne vois pas le raisonnement de ne pas rajout&#233; cette v&#233;rification
+</I>&gt;<i> meme si on deplace le message vers les log nomm&#233;.
+</I>&gt;<i> La fonction SelectRowsVMatrix::build_() sans cette v&#233;rification
+</I>&gt;<i> suppl&#233;mentaire est en O(selected rows), cette v&#233;rification est en
+</I>&gt;<i> O(sources-&gt;length()). Donc je ne vois pas de probleme a rajout&#233; un
+</I>&gt;<i> check dans le cas special si sources-&gt;length() == new_rows en O(n).
+</I>&gt;<i> Cela devien O(sources-&gt;length()*2 + d'autre choses). De plus ceci
+</I>&gt;<i> c'est en O(n) sur un vecteur d'indices, par sur la matrices donc pas
+</I>&gt;<i> de problemes d'acces memoire et c'est tres loin d'une section
+</I>&gt;<i> critique...
+</I>&gt;<i>   
+</I>
+C'est vrai qu'il y a d&#233;j&#224; des trucs qui ne se font pas en O(1) dans 
+build_... j'avais mal regard&#233;.  Ce qui est certain est que de remplacer 
+le warning actuel par un autre n'est pas la solution, mais c'est vrai 
+que &#231;a ne co&#251;te pas tr&#232;s cher de v&#233;rifier &#231;a et le loguer si on pense en 
+avoir vraiment besoin un jour (on peut peut-&#234;tre attendre ce jour-l&#224; 
+pour s'en occuper.)
+
+&gt;<i>   
+</I>&gt;&gt;<i> Une SelectRowsVMatrix peut avoir moins, plus ou autant de lignes que sa sous-matrice, et que de ces trois cas, le plus fr&#233;quent &gt;est probablement celui o&#249; on a autant de lignes!  &#199;a n'arrive pas que pour du &quot;shuffle&quot;: dans le cas du bagging, l'id&#233;e est que &gt;chacun des bags peut contenir des r&#233;p&#233;titions et omettre d'autres lignes, et on veut habituellement que le total reste le m&#234;me; il &gt;y a aussi beaucoup d'autres cas o&#249; la taille est la m&#234;me car le SelectRows ne change rien par rapport &#224; la vmat source (voir plus &gt;haut.)
+</I>&gt;&gt;<i>     
+</I>&gt;<i>
+</I>&gt;<i> Dans tes utilisations, une SelectRowsVMatrix ne change pas la taille
+</I>&gt;<i> de la matrice source souvent... dans mon utilisation c'est toujours le
+</I>&gt;<i> cas sauf en cas d'erreur... 
+</I>Si tu as des cas pour lesquels avoir le m&#234;me nombre de lignes est une 
+erreur, alors il faudrait peut-&#234;tre mettre carr&#233;ment une PLERROR, mais 
+la mettre dans la composante sp&#233;cialis&#233;e pour qui c'est une erreur et 
+non dans SelectRowsVMatrix.
+
+&gt;<i> Alors log nomm&#233; ou non-nomm&#233;? Cela d&#233;pend
+</I>&gt;<i> de l'utilisation. 
+</I>Si ce n'est pas une vraie erreur, alors je dis un log nomm&#233;, comme &#231;a on 
+peut facilement le d&#233;sactiver quand on veut d&#233;boguer quelquechose d'autre.
+
+&gt;<i> Si on rajoute la v&#233;rification, je pense qu'elle
+</I>&gt;<i> n'arrivera pas souvent quand elle n'est pas necessaire et qu'elle va
+</I>&gt;<i> etre la seulement quand c'est une erreur. Donc j'opterait pour log
+</I>&gt;<i> non-nomm&#233; as moins que vous me dites que cela arrivera plus souvent
+</I>&gt;<i> que je le pense.
+</I>&gt;<i>   
+</I>Je ne suis pas d'accord.  Des cas tels un filtre qui n'enl&#232;ve rien ou un 
+tri sur qqch. de d&#233;j&#224; tri&#233; sont communs et ce n'est pas une erreur, et 
+donc &#231;a risque d'arriver souvent.  Pour ce qui est de nomm&#233; vs. 
+non-nomm&#233;, je ne vois pas beaucoup de cas o&#249; le non-nomm&#233; est 
+appropri&#233;... ce qui est sp&#233;cifique &#224; une composante devrait toujours 
+&#234;tre nomm&#233; pour qu'on puisse facilement l'inclure ou l'exclure sans 
+avoir &#224; inclure ou exclure tout le reste.  Un des buts est justement 
+d'&#233;viter le &quot;tout-ou-rien&quot;, d'avoir plus de souplesse que &#231;a.
+
+&gt;<i>
+</I>&gt;<i> Aussi, comme Olivier a dit, je n'ai pas l'intension de m'obstiner. Je
+</I>&gt;<i> ne mettrais pas de temps a tout changer non plus. Si vous le faite, je
+</I>&gt;<i> vais juste modifier pymake -dbg pour qu'il imprime le niveau debug par
+</I>&gt;<i> default.
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>
+Je n'aime pas m'obstiner non plus, mais on a d&#233;j&#224; les outils n&#233;cessaires 
+pour permettre aux uns d'afficher tout ce qu'ils veulent et aux autres 
+de ne pas s'en occuper.  C'est d&#233;j&#224; utilis&#233; &#224; beaucoup d'endroits et &#231;a 
+fonctionne tr&#232;s bien.  &#199;a r&#232;gle justement le genre de probl&#232;me qui est &#224; 
+l'origine de cette discussion.  Ce que je ne comprends pas, c'est 
+l'obstination &#224; ne pas utiliser les outils qu'on a et qui r&#232;glent les 
+probl&#232;mes qu'on a.
+
+
+Xavier
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000197.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+	<LI>Next message: <A HREF="000187.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#199">[ date ]</a>
+              <a href="thread.html#199">[ thread ]</a>
+              <a href="subject.html#199">[ subject ]</a>
+              <a href="author.html#199">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,25 @@
+From chapados at apstat.com  Tue Oct 11 18:05:16 2005
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Tue, 11 Oct 2005 12:05:16 -0400
+Subject: [Plearn-developers] PythonCodeSnippet :: change in method names
+Message-ID: <434BE2BC.60000@apstat.com>
+
+Hello all,
+
+At Olivier's request and Christian Dorion's suggestion, I changed the 
+method name to call Python functions in PythonCodeSnippet from 'call' to 
+'invoke', and 'isCallable' to 'isInvokable'.  All test cases have been 
+updated to reflect the change.  However, YOUR client code will have to 
+be updated (if you use PythonCodeSnippet at all).  This change was made 
+to minimize conflict with PLearn::Object, which already defines a method 
+'call' for the remote method invokation mechanism.
+
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+
+

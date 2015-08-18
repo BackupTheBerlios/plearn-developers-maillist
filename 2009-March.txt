@@ -1,0 +1,553 @@
+From nouiz at nouiz.org  Wed Mar  4 20:32:18 2009
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Wed, 4 Mar 2009 14:32:18 -0500
+Subject: [Plearn-developers] Drop support of python2.3?
+Message-ID: <2d1d7fe70903041132g3cb52256wd7156a32eb8e3e0b@mail.gmail.com>
+
+Hi,
+
+I have modified PLearn to be able to link again python 2.6. It is
+work, with one exception that make the test fail. We have this
+DeprecationWarning that is generated as we use popen2 that is
+deprecated. We could use the subprocess instead, but it was added in
+python 2.4. So is their anybody with objection that we don't officialy
+support python2.3 to allow using python 2.6? Do you know how to use
+the subprocess package on python 2.3?
+
+Here is the warning:
+
+/home/bastienf/PLearn/python_modules/plearn/utilities/toolkit.py:8: DeprecationW
+arning: The popen2 module is deprecated.  Use the subprocess module.
+  import inspect, os, popen2, shutil, string, sys, time, types
+
+We need to use python2.6 the new mammouth serie.
+
+thanks
+
+Fred
+
+
+From saintmlx at apstat.com  Wed Mar  4 22:31:31 2009
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Wed, 04 Mar 2009 16:31:31 -0500
+Subject: [Plearn-developers] Drop support of python2.3?
+In-Reply-To: <2d1d7fe70903041132g3cb52256wd7156a32eb8e3e0b@mail.gmail.com>
+References: <2d1d7fe70903041132g3cb52256wd7156a32eb8e3e0b@mail.gmail.com>
+Message-ID: <49AEF333.4080305@apstat.com>
+
+I don't mind if we drop support for python 2.3.  I like backward
+compatibility, but I don't think it is necessary to support things that
+were replaced some five years ago.
+
+A stand-alone subprocess module is available here if we need it:
+http://www.lysator.liu.se/~astrand/popen5/
+
+There are other ways to make a self-contained toolkit.py that would be
+compatible with as many versions of python as possible...  if it is
+worth the trouble.
+
+
+Xavier
+
+
+Fr?d?ric Bastien wrote:
+> Hi,
+>
+> I have modified PLearn to be able to link again python 2.6. It is
+> work, with one exception that make the test fail. We have this
+> DeprecationWarning that is generated as we use popen2 that is
+> deprecated. We could use the subprocess instead, but it was added in
+> python 2.4. So is their anybody with objection that we don't officialy
+> support python2.3 to allow using python 2.6? Do you know how to use
+> the subprocess package on python 2.3?
+>
+> Here is the warning:
+>
+> /home/bastienf/PLearn/python_modules/plearn/utilities/toolkit.py:8: DeprecationW
+> arning: The popen2 module is deprecated.  Use the subprocess module.
+>   import inspect, os, popen2, shutil, string, sys, time, types
+>
+> We need to use python2.6 the new mammouth serie.
+>
+> thanks
+>
+> Fred
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>   
+
+
+
+From pascal at apstat.com  Wed Mar 11 18:44:00 2009
+From: pascal at apstat.com (Pascal Vincent)
+Date: Wed, 11 Mar 2009 13:44:00 -0400
+Subject: [Plearn-developers] Plearn installation error due to wrong
+	arguments in multiplyAcc ?
+In-Reply-To: <38dc1cea0903110951k13e3964vdd8c6e65aa8f90f6@mail.gmail.com>
+References: <38dc1cea0903110951k13e3964vdd8c6e65aa8f90f6@mail.gmail.com>
+Message-ID: <030357F3-C71F-48C4-B687-E319D3E0C9AC@apstat.com>
+
+Bonjour Olivier,
+
+Je fais suivre votre message ? la liste plearn-developers.
+
+Le 09-03-11 ? 12:51, Olivier Temam a ?crit :
+
+> Hi,
+>
+>   I am really not sure I am mailing this to the proper address, so  
+> thanks in advance for redirecting me to the right one, though I  
+> could not find any "users list" for Plearn.
+> I have an installation problem which does not seem to be related to  
+> library dependence issues, but rather to a coding issue. It is in  
+> file ShuntingNNetLayerModule.cc, and the problem seems to be that  
+> method multiplyAcc is called with <TMat, TMat> arguments while I  
+> could only find methods with TVec arguments in TMat_maths_impl.h.  
+> The full error is shown below (I have no other compilation error).
+>
+> Thanks in advance for your help,
+> Olivier
+>
+>  /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/ 
+> online/ShuntingNNetLayerModule.cc: In member function ?virtual void  
+> PLearn::ShuntingNNetLayerModule::bpropUpdate(const PLearn::Mat&,  
+> const PLearn::Mat&, PLearn::Mat&, const PLearn::Mat&, bool)?:
+> /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/ 
+> online/ShuntingNNetLayerModule.cc:414: error: no matching function  
+> for call to ?multiplyAcc(PLearn::Mat&, PLearn::Mat&, int)?
+> /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/ 
+> online/ShuntingNNetLayerModule.cc:415: error: no matching function  
+> for call to ?multiplyAcc(PLearn::Mat&, PLearn::Mat&, int)?
+>
+>
+
+
+
+From nouiz at nouiz.org  Wed Mar 11 19:13:45 2009
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Wed, 11 Mar 2009 14:13:45 -0400
+Subject: [Plearn-developers] Plearn installation error due to wrong
+	arguments in multiplyAcc ?
+In-Reply-To: <030357F3-C71F-48C4-B687-E319D3E0C9AC@apstat.com>
+References: <38dc1cea0903110951k13e3964vdd8c6e65aa8f90f6@mail.gmail.com>
+	<030357F3-C71F-48C4-B687-E319D3E0C9AC@apstat.com>
+Message-ID: <2d1d7fe70903111113q60144649yb79264172025e702@mail.gmail.com>
+
+Hi,
+
+a fast fix is to don't include this file if you don't need it. To do this
+comment the line 257 in the file commands/plearn_noblas_inc.h
+
+here is this line to comment.
+
+#include <plearn_learners/online/ShuntingNNetLayerModule.h>
+
+Fred
+
+On Wed, Mar 11, 2009 at 1:44 PM, Pascal Vincent <pascal at apstat.com> wrote:
+
+> Bonjour Olivier,
+>
+> Je fais suivre votre message ? la liste plearn-developers.
+>
+> Le 09-03-11 ? 12:51, Olivier Temam a ?crit :
+>
+> > Hi,
+> >
+> >   I am really not sure I am mailing this to the proper address, so
+> > thanks in advance for redirecting me to the right one, though I
+> > could not find any "users list" for Plearn.
+> > I have an installation problem which does not seem to be related to
+> > library dependence issues, but rather to a coding issue. It is in
+> > file ShuntingNNetLayerModule.cc, and the problem seems to be that
+> > method multiplyAcc is called with <TMat, TMat> arguments while I
+> > could only find methods with TVec arguments in TMat_maths_impl.h.
+> > The full error is shown below (I have no other compilation error).
+> >
+> > Thanks in advance for your help,
+> > Olivier
+> >
+> >  /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+> > online/ShuntingNNetLayerModule.cc: In member function ?virtual void
+> > PLearn::ShuntingNNetLayerModule::bpropUpdate(const PLearn::Mat&,
+> > const PLearn::Mat&, PLearn::Mat&, const PLearn::Mat&, bool)?:
+> > /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+> > online/ShuntingNNetLayerModule.cc:414: error: no matching function
+> > for call to ?multiplyAcc(PLearn::Mat&, PLearn::Mat&, int)?
+> > /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+> > online/ShuntingNNetLayerModule.cc:415: error: no matching function
+> > for call to ?multiplyAcc(PLearn::Mat&, PLearn::Mat&, int)?
+> >
+> >
+>
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20090311/7421b4f4/attachment.html>
+
+From nouiz at nouiz.org  Wed Mar 11 19:19:37 2009
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Wed, 11 Mar 2009 14:19:37 -0400
+Subject: [Plearn-developers] Plearn installation error due to wrong
+	arguments in multiplyAcc ?
+In-Reply-To: <2d1d7fe70903111113q60144649yb79264172025e702@mail.gmail.com>
+References: <38dc1cea0903110951k13e3964vdd8c6e65aa8f90f6@mail.gmail.com>
+	<030357F3-C71F-48C4-B687-E319D3E0C9AC@apstat.com>
+	<2d1d7fe70903111113q60144649yb79264172025e702@mail.gmail.com>
+Message-ID: <2d1d7fe70903111119h7b7f2125jfa6855a38abb3ecf@mail.gmail.com>
+
+Hi,
+
+I have commited a fix update plearn to have it. The trouble is that the fct
+that exist is
+multiplyAcc(PLearn::Mat&, PLearn::Mat&, real)
+and it is
+multiplyAcc(PLearn::Mat&, PLearn::Mat&, int)
+
+that is called. Here the compiler cast the int to real(float or double, that
+is selected at compile time) automaticly.
+What is the compiler that you used and which version?
+
+thanks
+
+Fred
+
+On Wed, Mar 11, 2009 at 2:13 PM, Fr?d?ric Bastien <nouiz at nouiz.org> wrote:
+
+> Hi,
+>
+> a fast fix is to don't include this file if you don't need it. To do this
+> comment the line 257 in the file commands/plearn_noblas_inc.h
+>
+> here is this line to comment.
+>
+> #include <plearn_learners/online/ShuntingNNetLayerModule.h>
+>
+> Fred
+>
+>
+> On Wed, Mar 11, 2009 at 1:44 PM, Pascal Vincent <pascal at apstat.com> wrote:
+>
+>> Bonjour Olivier,
+>>
+>> Je fais suivre votre message ? la liste plearn-developers.
+>>
+>> Le 09-03-11 ? 12:51, Olivier Temam a ?crit :
+>>
+>> > Hi,
+>> >
+>> >   I am really not sure I am mailing this to the proper address, so
+>> > thanks in advance for redirecting me to the right one, though I
+>> > could not find any "users list" for Plearn.
+>> > I have an installation problem which does not seem to be related to
+>> > library dependence issues, but rather to a coding issue. It is in
+>> > file ShuntingNNetLayerModule.cc, and the problem seems to be that
+>> > method multiplyAcc is called with <TMat, TMat> arguments while I
+>> > could only find methods with TVec arguments in TMat_maths_impl.h.
+>> > The full error is shown below (I have no other compilation error).
+>> >
+>> > Thanks in advance for your help,
+>> > Olivier
+>> >
+>> >  /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+>> > online/ShuntingNNetLayerModule.cc: In member function ?virtual void
+>> > PLearn::ShuntingNNetLayerModule::bpropUpdate(const PLearn::Mat&,
+>> > const PLearn::Mat&, PLearn::Mat&, const PLearn::Mat&, bool)?:
+>> > /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+>> > online/ShuntingNNetLayerModule.cc:414: error: no matching function
+>> > for call to ?multiplyAcc(PLearn::Mat&, PLearn::Mat&, int)?
+>> > /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+>> > online/ShuntingNNetLayerModule.cc:415: error: no matching function
+>> > for call to ?multiplyAcc(PLearn::Mat&, PLearn::Mat&, int)?
+>> >
+>> >
+>>
+>> _______________________________________________
+>> Plearn-developers mailing list
+>> Plearn-developers at lists.berlios.de
+>> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>>
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20090311/8b59b06c/attachment.html>
+
+From olivier.temam at inria.fr  Thu Mar 12 16:34:42 2009
+From: olivier.temam at inria.fr (Olivier Temam)
+Date: Thu, 12 Mar 2009 16:34:42 +0100
+Subject: [Plearn-developers] Plearn installation error due to wrong
+	arguments in multiplyAcc ?
+In-Reply-To: <2d1d7fe70903111119h7b7f2125jfa6855a38abb3ecf@mail.gmail.com>
+References: <38dc1cea0903110951k13e3964vdd8c6e65aa8f90f6@mail.gmail.com>
+	<030357F3-C71F-48C4-B687-E319D3E0C9AC@apstat.com>
+	<2d1d7fe70903111113q60144649yb79264172025e702@mail.gmail.com>
+	<2d1d7fe70903111119h7b7f2125jfa6855a38abb3ecf@mail.gmail.com>
+Message-ID: <38dc1cea0903120834l7d27d52byee57c582139b784c@mail.gmail.com>
+
+Hi Frederic & Pascal,
+
+  Many thanks for your quick reply. It did solve this compilation problem. I
+am still struggling with some link time issues but I will first try to
+resolve them by myself before further bothering you.
+
+Take care,
+Olivier
+
+On Wed, Mar 11, 2009 at 7:19 PM, Fr?d?ric Bastien <nouiz at nouiz.org> wrote:
+
+> Hi,
+>
+> I have commited a fix update plearn to have it. The trouble is that the fct
+> that exist is
+> multiplyAcc(PLearn::Mat&, PLearn::Mat&, real)
+> and it is
+> multiplyAcc(PLearn::Mat&, PLearn::Mat&, int)
+>
+> that is called. Here the compiler cast the int to real(float or double,
+> that is selected at compile time) automaticly.
+> What is the compiler that you used and which version?
+>
+> thanks
+>
+> Fred
+>
+>
+> On Wed, Mar 11, 2009 at 2:13 PM, Fr?d?ric Bastien <nouiz at nouiz.org> wrote:
+>
+>> Hi,
+>>
+>> a fast fix is to don't include this file if you don't need it. To do this
+>> comment the line 257 in the file commands/plearn_noblas_inc.h
+>>
+>> here is this line to comment.
+>>
+>> #include <plearn_learners/online/ShuntingNNetLayerModule.h>
+>>
+>> Fred
+>>
+>>
+>> On Wed, Mar 11, 2009 at 1:44 PM, Pascal Vincent <pascal at apstat.com>wrote:
+>>
+>>> Bonjour Olivier,
+>>>
+>>> Je fais suivre votre message ? la liste plearn-developers.
+>>>
+>>> Le 09-03-11 ? 12:51, Olivier Temam a ?crit :
+>>>
+>>> > Hi,
+>>> >
+>>> >   I am really not sure I am mailing this to the proper address, so
+>>> > thanks in advance for redirecting me to the right one, though I
+>>> > could not find any "users list" for Plearn.
+>>> > I have an installation problem which does not seem to be related to
+>>> > library dependence issues, but rather to a coding issue. It is in
+>>> > file ShuntingNNetLayerModule.cc, and the problem seems to be that
+>>> > method multiplyAcc is called with <TMat, TMat> arguments while I
+>>> > could only find methods with TVec arguments in TMat_maths_impl.h.
+>>> > The full error is shown below (I have no other compilation error).
+>>> >
+>>> > Thanks in advance for your help,
+>>> > Olivier
+>>> >
+>>> >  /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+>>> > online/ShuntingNNetLayerModule.cc: In member function ?virtual void
+>>> > PLearn::ShuntingNNetLayerModule::bpropUpdate(const PLearn::Mat&,
+>>> > const PLearn::Mat&, PLearn::Mat&, const PLearn::Mat&, bool)?:
+>>> > /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+>>> > online/ShuntingNNetLayerModule.cc:414: error: no matching function
+>>> > for call to ?multiplyAcc(PLearn::Mat&, PLearn::Mat&, int)?
+>>> > /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+>>> > online/ShuntingNNetLayerModule.cc:415: error: no matching function
+>>> > for call to ?multiplyAcc(PLearn::Mat&, PLearn::Mat&, int)?
+>>> >
+>>> >
+>>>
+>>> _______________________________________________
+>>> Plearn-developers mailing list
+>>> Plearn-developers at lists.berlios.de
+>>> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>>>
+>>
+>>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20090312/8fa19543/attachment.html>
+
+From nouiz at nouiz.org  Thu Mar 12 18:01:21 2009
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Thu, 12 Mar 2009 13:01:21 -0400
+Subject: [Plearn-developers] Plearn installation error due to wrong
+	arguments in multiplyAcc ?
+In-Reply-To: <38dc1cea0903120834l7d27d52byee57c582139b784c@mail.gmail.com>
+References: <38dc1cea0903110951k13e3964vdd8c6e65aa8f90f6@mail.gmail.com>
+	<030357F3-C71F-48C4-B687-E319D3E0C9AC@apstat.com>
+	<2d1d7fe70903111113q60144649yb79264172025e702@mail.gmail.com>
+	<2d1d7fe70903111119h7b7f2125jfa6855a38abb3ecf@mail.gmail.com>
+	<38dc1cea0903120834l7d27d52byee57c582139b784c@mail.gmail.com>
+Message-ID: <2d1d7fe70903121001k386158e1g6890d004da499e92@mail.gmail.com>
+
+Hi,
+
+Just a quick help about compilation. This is the flags that I use most
+often:
+
+to compile
+pymake $PLEARNDIR/commands/plearn_{full,noblas,...}
+
+this will compile in debug mode. To compile in opt mode:
+pymake -opt $PLEARNDIR/commands/plearn_{full,noblas,...}
+
+To speed up the link time if your plearndir is on nfs:
+pymake -local_ofiles $PLEARNDIR/commands/plearn_{full,noblas,...}
+
+for parallel compilation on an SMP host where N is the number of parallel
+threads:
+pymake -local=N $PLEARNDIR/commands/plearn_{full,noblas,...}
+
+You can also make parallel compilation on many computer with ssh if you need
+to compile it many times(likes us when we devellop for it)
+
+To control the compilation verbosity their is the -v, -vv, -vvv, -vvvv
+option that default to -vv if I remember correctly.
+
+Fred
+
+On Thu, Mar 12, 2009 at 11:34 AM, Olivier Temam <olivier.temam at inria.fr>wrote:
+
+> Hi Frederic & Pascal,
+>
+>   Many thanks for your quick reply. It did solve this compilation problem.
+> I am still struggling with some link time issues but I will first try to
+> resolve them by myself before further bothering you.
+>
+> Take care,
+> Olivier
+>
+>
+> On Wed, Mar 11, 2009 at 7:19 PM, Fr?d?ric Bastien <nouiz at nouiz.org> wrote:
+>
+>> Hi,
+>>
+>> I have commited a fix update plearn to have it. The trouble is that the
+>> fct that exist is
+>> multiplyAcc(PLearn::Mat&, PLearn::Mat&, real)
+>> and it is
+>> multiplyAcc(PLearn::Mat&, PLearn::Mat&, int)
+>>
+>> that is called. Here the compiler cast the int to real(float or double,
+>> that is selected at compile time) automaticly.
+>> What is the compiler that you used and which version?
+>>
+>> thanks
+>>
+>> Fred
+>>
+>>
+>> On Wed, Mar 11, 2009 at 2:13 PM, Fr?d?ric Bastien <nouiz at nouiz.org>wrote:
+>>
+>>> Hi,
+>>>
+>>> a fast fix is to don't include this file if you don't need it. To do this
+>>> comment the line 257 in the file commands/plearn_noblas_inc.h
+>>>
+>>> here is this line to comment.
+>>>
+>>> #include <plearn_learners/online/ShuntingNNetLayerModule.h>
+>>>
+>>> Fred
+>>>
+>>>
+>>> On Wed, Mar 11, 2009 at 1:44 PM, Pascal Vincent <pascal at apstat.com>wrote:
+>>>
+>>>> Bonjour Olivier,
+>>>>
+>>>> Je fais suivre votre message ? la liste plearn-developers.
+>>>>
+>>>> Le 09-03-11 ? 12:51, Olivier Temam a ?crit :
+>>>>
+>>>> > Hi,
+>>>> >
+>>>> >   I am really not sure I am mailing this to the proper address, so
+>>>> > thanks in advance for redirecting me to the right one, though I
+>>>> > could not find any "users list" for Plearn.
+>>>> > I have an installation problem which does not seem to be related to
+>>>> > library dependence issues, but rather to a coding issue. It is in
+>>>> > file ShuntingNNetLayerModule.cc, and the problem seems to be that
+>>>> > method multiplyAcc is called with <TMat, TMat> arguments while I
+>>>> > could only find methods with TVec arguments in TMat_maths_impl.h.
+>>>> > The full error is shown below (I have no other compilation error).
+>>>> >
+>>>> > Thanks in advance for your help,
+>>>> > Olivier
+>>>> >
+>>>> >  /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+>>>> > online/ShuntingNNetLayerModule.cc: In member function ?virtual void
+>>>> > PLearn::ShuntingNNetLayerModule::bpropUpdate(const PLearn::Mat&,
+>>>> > const PLearn::Mat&, PLearn::Mat&, const PLearn::Mat&, bool)?:
+>>>> > /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+>>>> > online/ShuntingNNetLayerModule.cc:414: error: no matching function
+>>>> > for call to ?multiplyAcc(PLearn::Mat&, PLearn::Mat&, int)?
+>>>> > /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+>>>> > online/ShuntingNNetLayerModule.cc:415: error: no matching function
+>>>> > for call to ?multiplyAcc(PLearn::Mat&, PLearn::Mat&, int)?
+>>>> >
+>>>> >
+>>>>
+>>>> _______________________________________________
+>>>> Plearn-developers mailing list
+>>>> Plearn-developers at lists.berlios.de
+>>>> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>>>>
+>>>
+>>>
+>>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20090312/1c0d8471/attachment.html>
+
+From nouiz at nouiz.org  Thu Mar 19 15:56:59 2009
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Thu, 19 Mar 2009 10:56:59 -0400
+Subject: [Plearn-developers] PP are not thread safe
+Message-ID: <2d1d7fe70903190756t602c6d4fue9f8bfa0624229ba@mail.gmail.com>
+
+Hi,
+
+Will using some new optimisation that used PP, I discovered that PP are not
+thread safe as the count the number of reference. If I put lock around the
+modification of the lock, this is too slow, so I removed their creation
+inside my parallel region.
+
+This is just to let you know.
+
+Fred
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20090319/296f130c/attachment.html>
+
+From nouiz at nouiz.org  Mon Mar 30 22:43:45 2009
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Mon, 30 Mar 2009 16:43:45 -0400
+Subject: [Plearn-developers] plearn vmat diff now compare the field name and
+	field type
+Message-ID: <2d1d7fe70903301343v71ae05cawf74b7d8c79accf51@mail.gmail.com>
+
+Hi,
+
+I just did too commit, one that make plearn vmat diff compare the
+field name and field type of the two matrix. The second it contain fix
+for the test. I don't know if this will make the ApStats test fail, so
+I just let you know.
+
+Fred
+
+

@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Processing macros when reading	pyplearn	scripts
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-May/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Processing%20macros%20when%20reading%0A%09pyplearn%09scripts&In-Reply-To=%3C20080505135353.7lvi45c1s0gg0g4g%40webmail.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000177.html">
+   <LINK REL="Next"  HREF="000178.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Processing macros when reading	pyplearn	scripts</H1>
+    <B>chapados at iro.umontreal.ca</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Processing%20macros%20when%20reading%0A%09pyplearn%09scripts&In-Reply-To=%3C20080505135353.7lvi45c1s0gg0g4g%40webmail.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] Processing macros when reading	pyplearn	scripts">chapados at iro.umontreal.ca
+       </A><BR>
+    <I>Mon May  5 19:53:53 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000177.html">[Plearn-developers] Processing macros when reading	pyplearn	scripts
+</A></li>
+        <LI>Next message: <A HREF="000178.html">[Plearn-developers] FilteredVMatrix had a bug
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#176">[ date ]</a>
+              <a href="thread.html#176">[ thread ]</a>
+              <a href="subject.html#176">[ subject ]</a>
+              <a href="author.html#176">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>There are a few reasons why we want to macro-process the .plearn script that
+arises from the .pyplearn.  The main issue is that it is useful for
+&quot;production&quot; models to be in .plearn rather than .pyplearn, and those models
+need to refer to environment variables -- that may not be known at
+.pyplearn-time, but are required at .plearn-time.
+
+As to your particular issue, I'm not sure I fully understand it, but I 
+just want
+to emphasize that the generation of a .plearn from a .pyplearn may be quite
+temporally distant from the execution of the .plearn per se.
+
+    + Nicolas
+
+
+Quoting Pascal Vincent &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">pascal at apstat.com</A>&gt;:
+
+&gt;<i>
+</I>&gt;<i> Le 08-05-05 =E0 13:05, Olivier Delalleau a =E9crit :
+</I>&gt;<i>
+</I>&gt;&gt;<i> In plearn/io/PyPLearnScript.cc, line 307:
+</I>&gt;&gt;<i>     PStream is     =3D openString( plearn_script, PStream::raw_ascii );
+</I>&gt;&gt;<i>     time_t latest  =3D 0 ;
+</I>&gt;&gt;<i>     plearn_script  =3D readAndMacroProcess( is, vars, latest );
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Is there a good reason to process macros in Python scripts? It can
+</I>&gt;&gt;<i> create some issues if we have some code that manipulates characters  =
+</I>&gt;<i>
+</I>&gt;&gt;<i> like
+</I>&gt;&gt;<i> ${}.
+</I>&gt;&gt;<i> An example is when trying to create a PPath with an environment  =
+</I>&gt;<i>
+</I>&gt;&gt;<i> variable
+</I>&gt;&gt;<i> in it, since the syntax of a PPath environment variable is the same  =
+</I>&gt;<i>
+</I>&gt;&gt;<i> as a
+</I>&gt;&gt;<i> .plearn script macro definition (${VAR}), the program crashes when
+</I>&gt;&gt;<i> trying to convert ${VAR} since no such macro exists.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Since it should be much easier (and cleaner) to deal with variables in
+</I>&gt;&gt;<i> Python rather than generate the corresponding .plearn scripting  =
+</I>&gt;<i>
+</I>&gt;&gt;<i> syntax,
+</I>&gt;&gt;<i> there seems to be little point in the current implementation: I'd  =
+</I>&gt;<i>
+</I>&gt;&gt;<i> rather
+</I>&gt;&gt;<i> skip the macro processing part. Any objection/thought?
+</I>&gt;<i>
+</I>&gt;<i> I'm not sure I understand the issue very well, but my spontaneous  =
+</I>&gt;<i>
+</I>&gt;<i> reasoning is the following:
+</I>&gt;<i> a) we surely do not want to plearn-macro-process python scripts per se.
+</I>&gt;<i> b) but my understanding is that the .pyplearn brand of python scripts  =
+</I>&gt;<i>
+</I>&gt;<i> &quot;outputs&quot; a .plearn object description, and we *should* macro-process  =
+</I>&gt;<i>
+</I>&gt;<i> this *output* (but clearly not the python script that produces the  =
+</I>&gt;<i>
+</I>&gt;<i> output...)
+</I>&gt;<i> c) of course this doesn't apply for the &quot;python-extension&quot; kinds of  =
+</I>&gt;<i>
+</I>&gt;<i> scripts (that do not produce a .plearn object description)
+</I>&gt;<i>
+</I>&gt;<i> I believe the macro-processing to be useful in this case b),  =
+</I>&gt;<i>
+</I>&gt;<i> especially for .pyplearn scripts that need to 'include' or otherwise  =
+</I>&gt;<i>
+</I>&gt;<i> interact with some legacy .plearn script.
+</I>&gt;<i>
+</I>&gt;<i> Now if the PPath system clashes with straight .plearn preprocessing,  =
+</I>&gt;<i>
+</I>&gt;<i> this is a different kind of problem, that shouldn't be...
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> -- Pascal
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Plearn-developers mailing list
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">Plearn-developers at lists.berlios.de</A>
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">https://lists.berlios.de/mailman/listinfo/plearn-developers</A>
+</I>&gt;<i>
+</I>
+
+
+----------------------------------------------------------------
+This message was sent using IMP, the Internet Messaging Program.
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000177.html">[Plearn-developers] Processing macros when reading	pyplearn	scripts
+</A></li>
+	<LI>Next message: <A HREF="000178.html">[Plearn-developers] FilteredVMatrix had a bug
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#176">[ date ]</a>
+              <a href="thread.html#176">[ thread ]</a>
+              <a href="subject.html#176">[ subject ]</a>
+              <a href="author.html#176">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

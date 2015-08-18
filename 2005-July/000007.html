@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] VMat statistics
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2005-July/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20VMat%20statistics&In-Reply-To=%3C20050718182736.GA20711%40lsvm.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000006.html">
+   <LINK REL="Next"  HREF="000008.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] VMat statistics</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20VMat%20statistics&In-Reply-To=%3C20050718182736.GA20711%40lsvm.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] VMat statistics">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Mon Jul 18 20:27:36 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000006.html">[Plearn-developers] VMat statistics
+</A></li>
+        <LI>Next message: <A HREF="000008.html">[Plearn-developers] Filenames / Noms de fichiers
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7">[ date ]</a>
+              <a href="thread.html#7">[ thread ]</a>
+              <a href="subject.html#7">[ subject ]</a>
+              <a href="author.html#7">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 18 Jul 2005, Olivier Delalleau wrote:
+&gt;<i> I made some important changes to most methods computing statistics
+</I>&gt;<i> (mean, variance &amp; co) in plearn/vmat/VMat_basic_stats.cc. Basically,
+</I>&gt;<i> these methods now rely on StatsCollectors instead of having their own
+</I>&gt;<i> independent code living on its own.
+</I>&gt;<i> In particular this means:
+</I>&gt;<i> - missing values should now be handled correctly
+</I>
+&gt;<i> - results may not be exactly the same (in particular, when computing the
+</I>&gt;<i>   variance, the old code for non-weighted stats was dividing by n-1,
+</I>&gt;<i>   while the new one will divide by n)
+</I>
+I was wrong, I just checked and it will actually be divided by n-1, just
+as before. For the moment ;)
+
+--
+Olivier
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000006.html">[Plearn-developers] VMat statistics
+</A></li>
+	<LI>Next message: <A HREF="000008.html">[Plearn-developers] Filenames / Noms de fichiers
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#7">[ date ]</a>
+              <a href="thread.html#7">[ thread ]</a>
+              <a href="subject.html#7">[ subject ]</a>
+              <a href="author.html#7">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

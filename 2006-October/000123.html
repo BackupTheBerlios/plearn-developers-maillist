@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Assertions in PLearn
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-October/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Assertions%20in%20PLearn&In-Reply-To=%3C45365D25.9080905%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000124.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Assertions in PLearn</H1>
+    <B>Nicolas Chapados</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Assertions%20in%20PLearn&In-Reply-To=%3C45365D25.9080905%40apstat.com%3E"
+       TITLE="[Plearn-developers] Assertions in PLearn">chapados at apstat.com
+       </A><BR>
+    <I>Wed Oct 18 18:58:13 CEST 2006</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000124.html">[Plearn-developers] FOLLOW-UP: Assertions in PLearn
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#123">[ date ]</a>
+              <a href="thread.html#123">[ thread ]</a>
+              <a href="subject.html#123">[ subject ]</a>
+              <a href="author.html#123">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello fellow PLearners,
+
+Just a quick note to inform you that I modified the C assertion checking 
+mechanism -- when inside PLearn -- to raise an exception (PLERROR) when 
+an exception is not satisfied.  The syntax remains the same as C 
+standard asserts:
+
+    assert(condition);
+
+except that if &quot;condition&quot; is not satisfied, this produces a PLERROR.  
+The new behavior kicks into play as soon as you include 
+&lt;plearn/base/plerror.h&gt;, which is almost everywhere in PLearn.  In 
+addition, I added a macro &quot;pl_assert&quot; which allows one to include a 
+descriptive message as to what the failed condition indicates.  Use it 
+as follows:
+
+    plassert(condition, &quot;This condition indicates a problem in the XYZ subsystem&quot;);
+
+As always, when you compile with the -opt option in pymake, these 
+assertions are not actually compiled into your code.  Therefore, you 
+should (liberally) use assertions for checking genuine logic errors in 
+your programs, and not conditions that may result from a user 
+interaction (such as bad values in a script).  Keep using old-fashioned 
+PLERROR for this purpose.
+
+
+FREQUENTLY-ASKED QUESTIONS
+=====================
+
+Q1) What are the interactions with the C standard &lt;assert.h&gt; mechanism?
+A1) The interaction is as follows: as soon as plerror.h is included, any 
+previous assert macro is undefined, and replaced with this new definition.
+
+Q2) What happens if I include &lt;assert.h&gt; after plerror.h?
+A2) Nothing.  The standard assert does not override the PLearn one.
+
+Q3) Can I go back to the standard assert mechanism?
+A3) No.  But tell me if this is something you need.
+
+Q4) Why bother with this at all?  I thought normal asserts were fine!
+A4) Normal asserts abort the program when the condition is not 
+satisfied.  This is a big no-no for running PLearn in server mode, which 
+should NEVER ABORT.  With this change, any internal error is caught at 
+the top-level, and relayed back to the calling program in the form of an 
+exception, which at least tells the client that something wrong happened 
+instead of just hanging in its face.
+
+Wishing all a fully-asserted PLearn future.
+
+    Cheers,
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000124.html">[Plearn-developers] FOLLOW-UP: Assertions in PLearn
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#123">[ date ]</a>
+              <a href="thread.html#123">[ thread ]</a>
+              <a href="subject.html#123">[ subject ]</a>
+              <a href="author.html#123">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

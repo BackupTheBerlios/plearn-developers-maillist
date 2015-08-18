@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Default value for logging
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-December/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Default%20value%20for%20logging&In-Reply-To=%3C20081205184012.GA30736%40opale.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000201.html">
+   <LINK REL="Next"  HREF="000203.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Default value for logging</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Default%20value%20for%20logging&In-Reply-To=%3C20081205184012.GA30736%40opale.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] Default value for logging">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Fri Dec  5 19:40:12 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000201.html">[Plearn-developers] Default value for logging
+</A></li>
+        <LI>Next message: <A HREF="000203.html">[Plearn-developers] Default value for logging
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#202">[ date ]</a>
+              <a href="thread.html#202">[ thread ]</a>
+              <a href="subject.html#202">[ subject ]</a>
+              <a href="author.html#202">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 05 Dec 2008, Xavier Saint-Mleux wrote:
+&gt;<i> Also, it might be useful to 
+</I>&gt;<i> consider implementing a way to omit some modules when the default is 
+</I>&gt;<i> &quot;__ALL__&quot;; it may become necessary if, for example, PP is instrumented 
+</I>&gt;<i> to log all refs and unrefs.  As another example, I am currently 
+</I>&gt;<i> debugging the PLearn&lt;-&gt;Python bridge (to allow parallel execution) and I 
+</I>&gt;<i> think most people will want to omit debug logs from PythonObjectWrapper 
+</I>&gt;<i> and PythonExtension once I'm done; I would rather not have to remove all 
+</I>&gt;<i> logs since they may be useful again in the future (and it would defeat 
+</I>&gt;<i> the purpose of logs altogether.)
+</I>
+I think debug logs (in the sense of being useful for debug code) should
+never show by default, but it should not be a module-level exclusion,
+but instead be based on the specific log level.
+Which I believe is what you're coming to in the following...
+
+&gt;<i> What remains to be solved is the exact definition of the different 
+</I>&gt;<i> logging levels.  We probably need to start using it and experimenting 
+</I>&gt;<i> with it before we can take any final decision.  For now, the following 
+</I>&gt;<i> examples illustrate messages which I think may belong to different levels:
+</I>&gt;<i> 1- low-level core system debugging information; e.g. logging each ref 
+</I>&gt;<i> and unref to every PP
+</I>&gt;<i> 2- machine-learning-related low-level information; e.g. number of rows 
+</I>&gt;<i> selected by SelectRowsVMatrix
+</I>&gt;<i> 3- machine-learning-related potential errors; e.g. warning for bagging 
+</I>&gt;<i> with several identical bags
+</I>&gt;<i> 4- user-oriented low-level information; e.g. validation error at each 
+</I>&gt;<i> stage of hyper-learning
+</I>&gt;<i> 5- global progress information; e.g. start of a new split
+</I>&gt;<i> Does this list make sense to you?  If so, how would you assign each of 
+</I>&gt;<i> these messages to the different levels of logs?
+</I>
+Maybe I missed a part of the discussion at some point, but I thought
+initially the plan was just to get rid of PLWARNING. Are we now also
+trying to get rid of the direct use of pout/perr at the same time? If
+yes, isn't it going to be somewhat redundant with the verbosity / 
+report_progress options in some classes? (without the flexibility of
+being able to tweak the logging level for each instance of a class).
+Just trying to understand what's the plan here.
+
+--
+Olivier
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000201.html">[Plearn-developers] Default value for logging
+</A></li>
+	<LI>Next message: <A HREF="000203.html">[Plearn-developers] Default value for logging
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#202">[ date ]</a>
+              <a href="thread.html#202">[ thread ]</a>
+              <a href="subject.html#202">[ subject ]</a>
+              <a href="author.html#202">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

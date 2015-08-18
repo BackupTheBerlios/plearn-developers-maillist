@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Conjugate gradient optimization
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-January/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Conjugate%20gradient%20optimization&In-Reply-To=%3C20060109142315.GA14456%40lsvm.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000051.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Conjugate gradient optimization</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Conjugate%20gradient%20optimization&In-Reply-To=%3C20060109142315.GA14456%40lsvm.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] Conjugate gradient optimization">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Mon Jan  9 15:23:15 CET 2006</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000051.html">[Plearn-developers] Conjugate gradient optimization
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#49">[ date ]</a>
+              <a href="thread.html#49">[ thread ]</a>
+              <a href="subject.html#49">[ subject ]</a>
+              <a href="author.html#49">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Until now, conjugate gradient optimization in PLearn has never really
+worked (at least from my own experience and from what I heard from other
+users). I have implemented in PLearn the algorithm originally written in
+Matlab by Carl Rasmussen. Hopefully, this one will work better than
+previous PLearn CJ implementations (I still need to test it more
+thoroughly...).
+
+I plan to clean the code of ConjGradientOptimizer to leave only this
+algorithm, and thus remove the current unnecessary complexity. So:
+
+==&gt; Previous code using ConjGradientOptimizer WILL BE BROKEN &lt;==
+
+If this is not acceptable to you, please let me know asap.
+
+--
+Olivier
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000051.html">[Plearn-developers] Conjugate gradient optimization
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#49">[ date ]</a>
+              <a href="thread.html#49">[ thread ]</a>
+              <a href="subject.html#49">[ subject ]</a>
+              <a href="author.html#49">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

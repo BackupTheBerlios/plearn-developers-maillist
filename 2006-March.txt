@@ -1,0 +1,667 @@
+From chapados at apstat.com  Thu Mar  2 01:19:58 2006
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Wed, 01 Mar 2006 19:19:58 -0500
+Subject: [Plearn-developers] Re: Reflexions plus ou moins vagues sur setOption
+In-Reply-To: <20060301224743.GA10719@pig.zood.org>
+References: <20060301224743.GA10719@pig.zood.org>
+Message-ID: <44063A2E.6050103@apstat.com>
+
+?a existe d?j? dans PLearn::Object et ?a s'appelle changeOptions (et ?a 
+prend une map de tout ce qui doit ?tre chang?).  La version actuelle 
+appelle simplement setOption de mani?re r?p?t?e (sans appeler build).  
+En r?alit?, la situation est un peu plus complexe et Pascal Vincent et 
+moi avions pour projet il y a quelques mois de renforcir quelque peu 
+tout ce m?canisme.  En gros, le plan typique d'utilisation est le suivant:
+
+    1) faire un paquet de changement aux options
+    2) appeler build() pour mettre ? jour l'objet suite ? ces changements
+
+Comme tu le dis tr?s correctement Pascal, il est imp?ratif que la classe 
+d?riv?e puisse faire une sorte de build intelligent apr?s un 
+changeOptions.  ?a nous laisse penser qu'il pourrait ?tre une bonne id?e 
+pour changeOptions de garantir comme post-condition un 
+"?quivalent-build", c'est-?-dire que cette fonction laisse l'objet dans 
+un ?tat "comme si" build avait ?t? appel?.  Par exemple, on pourrait 
+rappeler build() dans l'implantation de la classe de base, mais les 
+classes d?riv?es seraient libres de faire ce qui leur pla?t.
+
+L? o? ?a se complique, c'est qu'un nom d'option peut ?tre utilis? pour 
+r?f?rencer pas seulement une option d'un objet, mais ?galement de 
+SOUS-OBJETS (avec indexage dans des vecteurs, ne pas l'oublier).  Et il 
+faudrait appeler build() sur ces sous-objets ?galement, ssi ils ont ?t? 
+modif?s par une sp?cification d'option qui les affecte.  C'est l? o? 
+Pascal Vincent et moi avions bloqu?, car c'?tait compliqu? et nous 
+avions une autre urgence ? compl?ter ? l'?poque.
+
+Mais la version propre de changeOptions est la suivante:
+
+1) identifier tous les objets affect?s par la liste d'options qui vient 
+d'?tre pass?e.
+2) faire des setOption sur tous ces objets.
+3) appeler build() de mani?re bottom-up sur tous les objets identifi?s 
+en (1) -- et peut-?tre aussi sur les objets interm?diaires dans le 
+graphe???  ? voir.  (En tous les cas, Pascal et Olivier, jetez un oeil ? 
+ObjectGraphIterator dans plearn/base qui pourrait ?tre utile pour ce 
+genre de t?che).
+
+    + Nicolas
+
+
+Pascal Lamblin wrote:
+> Salut tout le monde,
+>
+> Pour ne pas perdre ma r?putation d'id?aliste r?veur qui croit (encore) ?
+> l'am?lioration de l'user-friendlycit? de PLearn, je vais essayer de
+> retranscrire ici les pistes de r?flexion qu'Olivier et moi avons eues
+> tant?t, ? propos du m?canisme d'affectation d'options (setOption en
+> particulier).
+>
+> Le principal probl?me avec setOption, c'est qu'il se contente de changer
+> la valeur d'un membre de la classe, et qu'il n'y a aucune trace de ce
+> qu'il vient de faire. En particulier, on n'a aucun moyen de savoir
+> qu'une valeur vient de changer.
+>
+> ?a peut devenir g?nant si l'on d?cide d'appeler build_() pour assurer la
+> coh?rence de l'objet, puisqu'on ne sait pas forc?ment quels param?tres
+> on doit changer, dans le cas g?n?ral. Olivier citait l'exemple de
+> MemoryVMatrix, o? l'on ne sait pas pendant le build_(), lorsque
+> length_ et width_ ne correspondent pas aux dimensions des donn?es, si
+> l'on a chang? les donn?es (auquel cas il faudrait changer length_ et
+> width_) ou si l'on voulu redimensionner la matrice (auquel cas il faut
+> redimensionner les donn?es).
+>
+> Un autre probl?me est que l'on ne peut pas lier plusieurs options
+> ensemble, ou d?clencher une modification ou un appel de fonction lorsque
+> l'on modifie une certaine option, ce qui pourrait ?tre utilis? pour
+> r?soudre le probl?me pr?c?dent.
+>
+> Pour le moment, ce dernier point est contourn? par l'ajout de m?thodes
+> sp?cifiques, comme setTrainingSet, setMetadataDir, mais d'une part ce
+> n'est pas tr?s ergonomique pour l'utilisateur, qui a toujours la
+> possibilit? d'utiliser setOption et qui ne va pas forc?ment regarder si
+> autre chose existe, et d'autre part ces m?thodes ne sont pas appelable
+> depuis un objet qui, comme HyperLearner, va changer certaines options
+> automatiquement selon ce qu'il lit dans un script.
+>
+> Pour modifier ?a, il faudrait une m?thode qui reste aussi g?n?rale que
+> setOption, mais qui puisse ?tre ? d?tourn?e ? si on veut que le
+> changement de la valeur d'une certaine option d'une certaine classe
+> fasse quelque chose en plus. On pourrait par exemple faire en sorte que
+> objet.setOption("machin", "valeur") appelle objet.setMachin("valeur") si
+> cette fonction existe.
+>
+> Est-ce que certains d'entre-vous ont d?j? pens? ? ce genre de m?canisme,
+> pens? qu'il valait mieux ne pas mettre ?a dans PLearn (et pourquoi ?),
+> des id?es de comment on pourrait impl?menter ?a, de comment il ne
+> faudrait surtout pas impl?menter ?a, ou d'autres pistes de r?flexions ?
+>
+> N'h?sitez pas ? faire part de vos id?es, on pourrait m?me se retrouver
+> en vrai un jour autour d'une table (ou d'une bi?re) avec les int?ress?s
+> (s'il y en a).
+>
+> ? plus,
+>   
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+
+
+From lamblinp at iro.umontreal.ca  Thu Mar  2 01:49:09 2006
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Thu, 2 Mar 2006 01:49:09 +0100
+Subject: [Plearn-developers] Re: Reflexions plus ou moins vagues sur setOption
+In-Reply-To: <44063A2E.6050103@apstat.com>
+References: <20060301224743.GA10719@pig.zood.org> <44063A2E.6050103@apstat.com>
+Message-ID: <20060302004909.GB11319@pig.zood.org>
+
+On Wed, Mar 01, 2006, Nicolas Chapados wrote:
+> ?a existe d?j? dans PLearn::Object et ?a s'appelle changeOptions
+
+Hourra ! \o/
+
+> ?a nous laisse penser qu'il pourrait ?tre une bonne id?e pour
+> changeOptions de garantir comme post-condition un "?quivalent-build",
+
+Je pense ?galement que c'est une bonne id?e.
+
+> L? o? ?a se complique, c'est qu'un nom d'option peut ?tre utilis? pour 
+> r?f?rencer pas seulement une option d'un objet, mais ?galement de 
+> SOUS-OBJETS (avec indexage dans des vecteurs, ne pas l'oublier).  Et il 
+> faudrait appeler build() sur ces sous-objets ?galement, ssi ils ont ?t? 
+> modif?s par une sp?cification d'option qui les affecte.
+
+? mon avis, ce n'est pas build() qu'il faut appeler, mais changeOptions,
+r?cursivement. Si changeOptions laisse le sous-objet comme s'il
+sortait d'un build(), ?a ne change rien pour l'objet de base, mais ?a
+permettrait au sous-objet de faire d'autres choses qu'appeler simplement
+build(), en particulier si build() est lourd et que le changement n'a
+aucune cons?quence.
+
+> Mais la version propre de changeOptions est la suivante:
+> 
+> 1) identifier tous les objets affect?s par la liste d'options qui vient 
+> d'?tre pass?e.
+> 2) faire des setOption sur tous ces objets.
+> 3) appeler build() de mani?re bottom-up sur tous les objets identifi?s 
+> en (1) -- et peut-?tre aussi sur les objets interm?diaires dans le 
+> graphe???  ? voir.
+
+? mon avis, mais il faut voir comment faire ?a efficacement, ce qu'il
+faudrait ? l'?tape 2), c'est identifier et regrouper tous les noms
+d'options qui se rapportent ? un sous-objet, et les regrouper par
+sous-objet. Ensuite, on appelle setOption sur toutes les options qui ne
+concernent pas les param?tre d'un sous-objet, et changeOptions sur tous
+les sous-objet dont on change au moins une option (en passant la map de
+toutes les options relatives ? ce sous-objet).
+
+L'?tape 3) pourrait alors ?tre simplement un build(), ou quelque chose
+de plus particulier, mais uniquement sur cette classe-l?. Il pourrait
+aussi ?tre n?cessaire d'appeler build() sur les sous-objets sp?cifi?s
+par une seule option, c'est-?-dire qu'on aurait appliqu? ? l'?tape 2) :
+setOption("some_option", "someObject( param1=value1, param2=value2 );").
+
+>  (En tous les cas, Pascal et Olivier, jetez un oeil ?
+> ObjectGraphIterator dans plearn/base qui pourrait ?tre utile pour ce
+> genre de t?che).
+
+OK.
+
+-- 
+Pascal
+
+
+From delallea at iro.umontreal.ca  Fri Mar  3 17:13:40 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 3 Mar 2006 11:13:40 -0500
+Subject: [Plearn-developers] Missing mailing-list emails
+Message-ID: <20060303161338.GA27854@opale.iro.umontreal.ca>
+
+It appears two emails sent to the PLearn mailing-list have not been
+properly sent by BerliOS.
+They are:
+
+1. "New mailing-list: plearn-commits"
+https://lists.berlios.de/pipermail/plearn-developers/2006-February/000061.html
+
+2. "Boost update at LISA"
+https://lists.berlios.de/pipermail/plearn-developers/2006-February/000062.html
+
+--
+Olivier
+
+
+From chrish at apstat.com  Fri Mar  3 17:22:10 2006
+From: chrish at apstat.com (Christian Hudon)
+Date: Fri, 03 Mar 2006 11:22:10 -0500
+Subject: [Plearn-developers] Missing mailing-list emails
+In-Reply-To: <20060303161338.GA27854@opale.iro.umontreal.ca>
+References: <20060303161338.GA27854@opale.iro.umontreal.ca>
+Message-ID: <44086D32.9000004@apstat.com>
+
+Olivier Delalleau wrote:
+> It appears two emails sent to the PLearn mailing-list have not been
+> properly sent by BerliOS.
+> They are:
+>
+> 1. "New mailing-list: plearn-commits"
+> https://lists.berlios.de/pipermail/plearn-developers/2006-February/000061.html
+>
+> 2. "Boost update at LISA"
+> https://lists.berlios.de/pipermail/plearn-developers/2006-February/000062.html
+>   
+I received a copy of both these emails on my apstat email address. So 
+I'd say the problem is not with BerliOS.
+
+  Christian
+
+
+
+From lamblinp at iro.umontreal.ca  Fri Mar  3 22:50:33 2006
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Fri, 3 Mar 2006 22:50:33 +0100
+Subject: [Plearn-developers] Missing mailing-list emails
+In-Reply-To: <44086D32.9000004@apstat.com>
+References: <20060303161338.GA27854@opale.iro.umontreal.ca> <44086D32.9000004@apstat.com>
+Message-ID: <20060303215032.GA23257@pig.zood.org>
+
+On Fri, Mar 03, 2006, Christian Hudon wrote:
+> I received a copy of both these emails on my apstat email address. So 
+> I'd say the problem is not with BerliOS.
+
+It seems like the addresses @users.berlios.de are affected, since you
+subscribed to the mailing-list with your @apstat.com address, it seems
+to work.
+
+I subscribed with an address unrelated with the university, and I
+received the e-mails.
+
+Now, I don't know if the addresses @users.berlios.de redirecting to
+other addresses than @iro.umontreal.ca receive the mail or not (and this
+is also a test).
+
+Hoping we will discover where the problem comes from,
+-- 
+Blip
+
+
+From chrish at apstat.com  Fri Mar  3 23:00:14 2006
+From: chrish at apstat.com (Christian Hudon)
+Date: Fri, 03 Mar 2006 17:00:14 -0500
+Subject: [Plearn-developers] Missing mailing-list emails
+In-Reply-To: <20060303215032.GA23257@pig.zood.org>
+References: <20060303161338.GA27854@opale.iro.umontreal.ca> <44086D32.9000004@apstat.com> <20060303215032.GA23257@pig.zood.org>
+Message-ID: <4408BC6E.3070304@apstat.com>
+
+Pascal Lamblin wrote:
+> It seems like the addresses @users.berlios.de are affected, since you
+> subscribed to the mailing-list with your @apstat.com address, it seems
+> to work.
+>
+> I subscribed with an address unrelated with the university, and I
+> received the e-mails.
+>
+> Now, I don't know if the addresses @users.berlios.de redirecting to
+> other addresses than @iro.umontreal.ca receive the mail or not (and this
+> is also a test).
+>   
+I've filed a support request with BerliOS regarding this problem:
+
+https://developer.berlios.de/support/index.php?func=detailsupport&support_id=101973&group_id=1
+
+  Christian
+
+
+
+From dorionc at apstat.com  Sat Mar  4 02:27:59 2006
+From: dorionc at apstat.com (Christian Dorion)
+Date: Fri, 03 Mar 2006 20:27:59 -0500
+Subject: [Plearn-developers] PyTest 0.9.4
+Message-ID: <4408ED1F.1090804@apstat.com>
+
+
+Hi everyone,
+
+Some modifications were made to the tests' results generation/update 
+process. When results add to be updated [pytest results], prior versions 
+of PyTest used to remove the whole results tree from svn and commit. The 
+whole results tree was thereafter added when the results were confirmed 
+by the user [pytest vc_add (deprecated)]. This was obviously a wacky way 
+to do things.
+
+The new version minimizes svn interactions and performs NO commit. The 
+results have to be confirmed using the confirm mode [pytest confirm] and 
+the commit operation is the responsability of the user (useful for unit 
+commit).
+
+--
+Adding a new test
+1) pytest add      # edit the config file
+2) pytest results # generating results
+3) pytest run       # just to make sure it passes...
+4) pytest confirm # add results (would update the svn tree if results 
+already existed)
+5) svn commit # Now or latter...
+
+Ciao
+-- 
+*Christian Dorion*/
+Doctorant en Finance (McGill's Faculty of Management)
+M.Sc. Informatique et Recherche Op?rationnelle//
+Apstat Technologies Inc./
+http://www.apstat.com
+T?l : (514) 343-9119, ext. 237
+
+"Soyons r?alistes, exigeons l'impossible",
+Ernesto "Che" Guevara, 1928-1967
+
+"Love is a Temple, Love the higher Law",
+One, U2
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20060303/032bf1f3/attachment.html>
+
+From lamblinp at iro.umontreal.ca  Mon Mar  6 23:05:53 2006
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Mon, 6 Mar 2006 23:05:53 +0100
+Subject: [Plearn-developers] documentation on pytest
+Message-ID: <20060306220553.GA6941@pig.zood.org>
+
+Hi everybody,
+
+I tried to update the documentation Olivier made on "how to make a
+pytest",
+https://lists.berlios.de/pipermail/plearn-developers/2005-November/000041.html
+
+The updated version, in LaTeX format, is in
+$PLEARNDIR/doc/tools_guide.tex, I hope the informations are up-to-date.
+Feel free to improve or correct it. And to use it :)
+
+-- 
+Pascal
+
+
+From delallea at iro.umontreal.ca  Thu Mar  9 17:00:28 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Thu, 9 Mar 2006 11:00:28 -0500
+Subject: [Plearn-developers] New random generator for UniformDistribution
+Message-ID: <20060309160026.GA12460@opale.iro.umontreal.ca>
+
+Just to let you know that the UniformDistribution class now uses its own
+PRandom RNG instead of the old global PLearn RNG.
+This did not break any test but one I had added yesterday, but if you
+use it in your own experiments, you should expect completely different
+results.
+
+--
+Olivier
+
+
+From lamblinp at iro.umontreal.ca  Mon Mar 13 15:07:53 2006
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Mon, 13 Mar 2006 15:07:53 +0100
+Subject: [Plearn-developers] new plearn-core mailing-list
+Message-ID: <20060313140753.GA16026@pig.zood.org>
+
+Hello everybody,
+
+A new mailing-list has been created, for discussions about PLearn's
+core, namely plearn-core at lists.berlios.de .
+
+People interested by modifying PLearn existing classes (and not just
+adding new ones) can subscribe on this page:
+https://lists.berlios.de/mailman/listinfo/plearn-core
+
+And people knowing much about PLearn internal functionment _should_
+subscribe...
+
+-- 
+Pascal
+
+
+From lamblinp at iro.umontreal.ca  Mon Mar 13 21:27:25 2006
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Mon, 13 Mar 2006 21:27:25 +0100
+Subject: [Plearn-developers] changes in subclasses of VMatrix
+Message-ID: <20060313202725.GB17464@pig.zood.org>
+
+Hi everybody,
+
+I did some changes in several VMatrix classes, which I'm going to commit
+soon. The goal is to have more coherent option names, especially for
+VMats performing operations on other VMats.
+
+The previous option names (used in scripts for example) should still
+work for the moment, but it would be cleaner if you changed to use the
+new ones.
+
+The changes in the names of the class members, however, are not backward
+compatible, so if you have code using explicitly some members, that you
+did not include in plearn nor lplearn, it might not compile anymore.
+
+Here is the list of changed classes, options and member names.
+
+Class that now derive from SourceVMatrix:
+Class                           option            member            new name
+ExtendedVMatrix                 distr             distr             source
+FinancePreprocVMatrix           underlying        vmat              source
+GeneralizedOneHotVMatrix        distr             distr             source
+IndexedVMatrix                  m                 m                 source
+JulianizeVMatrix                underlying        underlying        source
+OneHotVMatrix                   underlying_distr  underlying_distr  source
+PLearnerOutputVMatrix           data              data              source
+ProcessSymbolicSequenceVMatrix  source            source            source
+RemapLastColumnVMatrix          underlying_distr  underlying_distr  source
+ShiftAndRescaleVMatrix          vm                underlying_vmat   source
+SubVMatrix                      parent            parent            source
+
+[Not included in PLearn, no option compatibility for these ones]
+ConcatRowsSubVMatrix            distr             distr             source
+TemporalHorizonVMatrix          distr             distr             source
+ThresholdVMatrix                underlying_distr  underlying_distr  source
+UniformizeVMatrix               distr             distr             source
+VecExtendedVMatrix              underlying_       underlying_       source
+
+Parameters renaming only:
+AutoVMatrix                     specification     specification     filename
+ConcatColumnsVMatrix            array             array             sources
+ConcatRowsVMatrix               array             array             sources
+MemoryVMatrix                   data_vm           data_vm           source
+
+[Not included in PLearn, no option compatibility for these ones]
+BinaryOpVMatrix                 vm1               vm1               source1
+BinaryOpVMatrix                 vm2               vm2               source2
+KernelVMatrix                   d1                d1                source1
+KernelVMatrix                   d2                d2                source2
+CrossReferenceVMatrix           vm1               vm1               master
+CrossReferenceVMatrix           vm2               vm2               slave
+InterleaveVMatrix               vm                vm                sources
+
+
+Some tests at apstat might be broken, especially if they compare saved
+objects, or objects output to pout.
+
+If something is wrong in your code, you can revert to svn tag
+'before_source_vmat_options_change', and of course let me know.
+
+Hoping I'm not breaking everything,
+
+
+-- 
+Pascal
+
+
+From delallea at iro.umontreal.ca  Mon Mar 13 21:31:24 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Mon, 13 Mar 2006 15:31:24 -0500
+Subject: [Plearn-developers] changes in subclasses of VMatrix
+In-Reply-To: <20060313202725.GB17464@pig.zood.org>
+References: <20060313202725.GB17464@pig.zood.org>
+Message-ID: <20060313203123.GA18432@opale.iro.umontreal.ca>
+
+> Hoping I'm not breaking everything,
+
+Mouhahahaha!!!
+
+
+From chapados at apstat.com  Mon Mar 13 21:45:13 2006
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Mon, 13 Mar 2006 15:45:13 -0500
+Subject: [Plearn-developers] FinancePreprocVMatrix
+Message-ID: <4415D9D9.2050004@apstat.com>
+
+Hello all,
+
+Who uses the afore-mentioned class?  If nobody, we will deprecate it.
+
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+
+
+From lamblinp at iro.umontreal.ca  Mon Mar 13 22:12:41 2006
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Mon, 13 Mar 2006 22:12:41 +0100
+Subject: [Plearn-developers] changes in subclasses of VMatrix
+In-Reply-To: <20060313203123.GA18432@opale.iro.umontreal.ca>
+References: <20060313202725.GB17464@pig.zood.org> <20060313203123.GA18432@opale.iro.umontreal.ca>
+Message-ID: <20060313211241.GA18104@pig.zood.org>
+
+On Mon, Mar 13, 2006, Olivier Delalleau wrote:
+> > Hoping I'm not breaking everything,
+> 
+> Mouhahahaha!!!
+
+It sould be finished now, my (almost clean) copy of PLearn runs
+correctly and the tests pass. Apstat, any problems ?
+
+-- 
+Pascal
+
+
+From chapados at iro.umontreal.ca  Mon Mar 13 22:17:30 2006
+From: chapados at iro.umontreal.ca (Nicolas Chapados)
+Date: Mon, 13 Mar 2006 16:17:30 -0500
+Subject: [Plearn-developers] changes in subclasses of VMatrix
+In-Reply-To: <20060313211241.GA18104@pig.zood.org>
+References: <20060313202725.GB17464@pig.zood.org> <20060313203123.GA18432@opale.iro.umontreal.ca> <20060313211241.GA18104@pig.zood.org>
+Message-ID: <4415E16A.7030907@iro.umontreal.ca>
+
+On n'a pas encore eu le courage de rouler nos tests. :-)  Je te donne 
+l'?tat du d?sastre demain (!).
+
+
+Pascal Lamblin wrote:
+> On Mon, Mar 13, 2006, Olivier Delalleau wrote:
+>   
+>>> Hoping I'm not breaking everything,
+>>>       
+>> Mouhahahaha!!!
+>>     
+>
+> It sould be finished now, my (almost clean) copy of PLearn runs
+> correctly and the tests pass. Apstat, any problems ?
+>
+>   
+
+-- 
+Nicolas Chapados, Ph.D. candidate
+D?partement d'informatique et recherche op?rationnelle
+Universit? de Montr?al
+http://www.iro.umontreal.ca/~chapados
+
+
+
+
+From chrish at apstat.com  Fri Mar 17 18:04:26 2006
+From: chrish at apstat.com (Christian Hudon)
+Date: Fri, 17 Mar 2006 12:04:26 -0500
+Subject: [Plearn-developers] Automated build tool for PLearn
+Message-ID: <441AEC1A.30808@apstat.com>
+
+Hi,
+
+I have installed a buildbot (www.buildbot.org) to run automated builds 
+and tests after each commit to PLearn. The setup is not competely 
+finished, but it is complete enough to be useful.
+
+Basically, the buildbot listens to commits on the PLearn repository. For 
+each new commit it will update its local copy of PLearn to that version, 
+compile plearn_full and then run all the pytests. It will note if any of 
+these operations failed, keeping a copy of the output produced.
+
+The status (success or failure of each build) is exported in a couple of 
+ways. The first one is email. The person who did the commit will receive 
+an email letting them know if the build was successful or not. All these 
+emails are also send to the new plearn-builds mailing list, to which 
+people interested in keeping track of the success of each build can 
+subscribe.
+
+There is also a web interface, which for now lives at 
+http://janus.apstat.com:8010/ where you can see the build history and 
+examine the output produced by each build step. There is one column for 
+each machine doing builds... right now this is only the ApSTAT i386 
+build cluster, but the buildbot software was designed so it is very easy 
+to add other machines of different types, even at remote locations 
+(like, say, LISA i386 and AMD64 builds).
+
+So if you rely on a class or algorithm of PLearn for your thesis work, 
+etc., add a pytest for it in PLearn, people who break your test will now 
+get automatically notified!
+
+Enjoy!
+
+  Christian
+
+
+
+From delallea at iro.umontreal.ca  Thu Mar 30 17:30:15 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Thu, 30 Mar 2006 10:30:15 -0500
+Subject: [Plearn-developers] Potential non-backward compatible change to NNet
+Message-ID: <20060330153011.GA25240@opale.iro.umontreal.ca>
+
+Is there anyone out there who would have a problem if the initialization
+of the parameters of a NNet was changed?
+I'd like to make it use its own PRandom object, as the current code
+relies on the global PLearn RNG (which is not very safe when you start
+combining various objects using it).
+Let me know if you need me to preserve the old initialization code.
+
+--
+Olivier
+
+
+From delallea at iro.umontreal.ca  Thu Mar 30 17:38:50 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Thu, 30 Mar 2006 10:38:50 -0500
+Subject: [Plearn-developers] Potential non-backward compatible change to NNet
+In-Reply-To: <2DE20992-C2D9-46F6-A3BA-0A04680339BD@dms.umontreal.ca>
+References: <20060330153011.GA25240@opale.iro.umontreal.ca> <2DE20992-C2D9-46F6-A3BA-0A04680339BD@dms.umontreal.ca>
+Message-ID: <20060330153849.GA25349@opale.iro.umontreal.ca>
+
+Salut,
+Ca ne changerait absolument rien a tes scripts. Le seul changement,
+c'est que les parametres initiaux du NNet ne seraient plus les memes
+(mais ils seraient toujours tires de la meme loi). 
+Donc qualitativement, les resultats d'experiences ne devraient pas
+changer, mais ils ne seront pas *exactement* similaires.
+
+D'ailleurs, j'en profiterais en meme temps pour rajouter un PRandom dans
+PLearner, que chaque classe n'aurait qu'a creer dans son constructeur si
+elle veut l'utiliser.
+
+--
+Olivier
+
+On 30 Mar 2006, Charles Dugas wrote:
+> Salut Olivier,
+> l'initialisation NNet m'affecte !
+> Quel est l'ampleur des changements ?
+> Est-ce que ce sera relativement simple de modifier les .plearn en  
+> cons?quence ?
+> Merci !
+> Charles
+> 
+> 
+> Le 06-03-30 ? 10:30, Olivier Delalleau a ?crit :
+> 
+> >Is there anyone out there who would have a problem if the  
+> >initialization
+> >of the parameters of a NNet was changed?
+> >I'd like to make it use its own PRandom object, as the current code
+> >relies on the global PLearn RNG (which is not very safe when you start
+> >combining various objects using it).
+> >Let me know if you need me to preserve the old initialization code.
+> >
+> >--
+> >Olivier
+
+
+From delallea at iro.umontreal.ca  Fri Mar 31 22:46:52 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 31 Mar 2006 15:46:52 -0500
+Subject: [Plearn-developers] Two non-backward compatible changes to NNet
+Message-ID: <20060331204650.GA11726@opale.iro.umontreal.ca>
+
+1. Parameter initialization has been modified to use the new common
+PRandom object in the PLearner class.
+
+2. If a first hidden layer is provided by the user, this layer is not
+automatically transposed anymore (as far as I remember, this was a fix
+to get it to work with Yoshua's Var that had the wrong dimensions). You
+need to set the new option 'transpose_first_hidden_layer' to true if you
+want to replicate the old behavior.
+
+Potential required updates to the test-suite will follow.
+
+--
+Olivier
+
+

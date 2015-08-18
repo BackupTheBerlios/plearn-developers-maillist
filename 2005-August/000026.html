@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Valeur INFINITY
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Valeur%20INFINITY&In-Reply-To=%3C20050803135713.GA10027%40lsvm.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000025.html">
+   <LINK REL="Next"  HREF="000023.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Valeur INFINITY</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Valeur%20INFINITY&In-Reply-To=%3C20050803135713.GA10027%40lsvm.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] Valeur INFINITY">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Wed Aug  3 15:57:13 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000025.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+        <LI>Next message: <A HREF="000023.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26">[ date ]</a>
+              <a href="thread.html#26">[ thread ]</a>
+              <a href="subject.html#26">[ subject ]</a>
+              <a href="author.html#26">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Avec le gcc (3.3.3) install&#233; au LISA, &#231;a ne fonctionne pas pareil: il
+utilise soit directement un 'pattern' particulier, soit une fonction
+interne __builtin_inff() (je pense que c'est plut&#244;t ce dernier cas).
+Par contre si on fait:
+
+double x = 1e50f;
+cout &lt;&lt; x &lt;&lt; endl;
+
+On voit que 'x' est bien 'inf' (d'ailleurs isinf(x) est bien 'true').
+Seulement, &#231;a compile sans probl&#232;me sans -pedantic, et &#231;a donne un
+warning (pas une erreur) avec -pedantic.
+
+J'ai fouill&#233; un peu dans le code de gcc 4.0.0 et j'ai trouv&#233; &#231;a:
+
+  /* Both C and C++ require a diagnostic for a floating constant
+     outside the range of representable values of its type.  Since we
+     have __builtin_inf* to produce an infinity, it might now be
+     appropriate for this to be a mandatory pedwarn rather than
+     conditioned on -pedantic.  */
+  if (REAL_VALUE_ISINF (real) &amp;&amp; pedantic)
+    pedwarn (&quot;floating constant exceeds range of %&lt;%s%&gt;&quot;, type_name);
+
+C'est sans doute ce qui d&#233;clenche le warning (ou l'erreur sous Mac OS).
+A priori il s'attend &#224; utiliser __builtin_inf pour INFINITY, donc
+utiliser &#224; la place un grand float (sorte de 'hack' qui produit un
+overflow car 1e50 &gt; FLT_MAX) est consid&#233;r&#233; comme une erreur.
+Conclusion:
+1. Il faudrait voir pourquoi INFINITY est d&#233;fini comme 1e50f et pas
+__builtin_inf()
+2. Un hack temporaire pourrait &#234;tre de remplacer x = INFINITY par
+x = (FLT_MAX * 2), en tout cas &#231;a semble marcher avec gcc 3.3.3 (&#231;a
+d&#233;clenche un overflow &#224; l'ex&#233;cution, pas &#224; la compilation, donc pas
+d'erreur). Le code suivant devrait permettre de voir si &#231;a marche:
+double x = FLT_MAX * 2;
+cout &lt;&lt; x &lt;&lt; endl; // Devrait &#234;tre 'inf'
+cout &lt;&lt; isinf(x) &lt;&lt; endl; // Devrait &#234;tre '1'.
+
+Ca m'int&#233;resserait de regarder sur ton ordi pour investiguer le point 1.
+
+--
+Olivier
+
+On 02 Aug 2005, Jasmin Lapalme wrote:
+&gt;<i> Bonjour,
+</I>&gt;<i>     Je ne croyais pas d&#233;clencher une discussion vive comme celle-l&#224;.
+</I>&gt;<i>     Apr&#232;s recherche intensive dans les .h de gcc 4.0 de Mac OS X.  
+</I>&gt;<i> Voici comment &#231;a se passe. Dans math.h il y un #define INFINITY  
+</I>&gt;<i> HUGE_VALF . (&#192; remarquer le F de HUGE_VALF) Juste avant il y a les  
+</I>&gt;<i> defines suivant :
+</I>&gt;<i> 
+</I>&gt;<i> #define HUGE_VAL        1e500
+</I>&gt;<i> #define HUGE_VALF       1e50f
+</I>&gt;<i> #define HUGE_VALL       1e500L
+</I>&gt;<i> 
+</I>&gt;<i>     Si je compile le programme avec &quot;g++ test.cpp&quot; pas de probl&#232;me,  
+</I>&gt;<i> mais d&#232;s que je mets l'option -pedantic comme dans PLearn j'obtiens  
+</I>&gt;<i> l'erreur : test.cpp:7: error: floating constant exceeds range of 'float'
+</I>&gt;<i> 
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000025.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+	<LI>Next message: <A HREF="000023.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26">[ date ]</a>
+              <a href="thread.html#26">[ thread ]</a>
+              <a href="subject.html#26">[ subject ]</a>
+              <a href="author.html#26">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

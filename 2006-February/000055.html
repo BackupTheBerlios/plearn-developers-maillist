@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Named logging in PLearn
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-February/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Named%20logging%20in%20PLearn&In-Reply-To=%3C43E2A4FB.5040004%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000054.html">
+   <LINK REL="Next"  HREF="000056.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Named logging in PLearn</H1>
+    <B>Nicolas Chapados</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Named%20logging%20in%20PLearn&In-Reply-To=%3C43E2A4FB.5040004%40apstat.com%3E"
+       TITLE="[Plearn-developers] Named logging in PLearn">chapados at apstat.com
+       </A><BR>
+    <I>Fri Feb  3 01:34:03 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000054.html">[Plearn-developers] StatsCollector: Minor Python utility class
+</A></li>
+        <LI>Next message: <A HREF="000056.html">[Plearn-developers] Compiler Warnings
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#55">[ date ]</a>
+              <a href="thread.html#55">[ thread ]</a>
+              <a href="subject.html#55">[ subject ]</a>
+              <a href="author.html#55">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello all PLearners,
+
+Some of you are aware of PLearn's useful logging facility, that's very 
+convenient for debugging and testcase creation. In a nutshell, by 
+including &lt;plearn/io/pl_log.h&gt;, you can write in your code:
+
+    DBG_LOG &lt;&lt; &quot;Some debugging message&quot; &lt;&lt; endl;
+
+and that message is displayed only when the RUNTIME VERBOSITY LEVEL is 
+high enough, for instance when PLearn is invoked with the option:
+
+    plearn --verbosity VLEVEL_DBG
+
+The logs are full-blown PStreams, so any object that can be serialized 
+on a PStream can be output in a log.  The following verbosity levels 
+(from most important to least important) are supported.  When running at 
+a given level (with the --verbosity option), messages at more important 
+levels are displayed as well:
+
+    * VLEVEL_IMP: only important messages are displayed
+    * VLEVEL_NORMAL: normal logging message
+    * VLEVEL_DBG: debug information
+    * VLEVEL_EXTREME: extremely-detailed debugging information
+
+That was until now.  *READ ON FOR THE NEW STUFF*.
+------------------------------------------------------------------------
+
+Now consider the following scenario: you're writing a new test case for 
+pytest, and you want to enable debug logging only for the new module 
+that you're testing (to make sure it's working correctly inside), but 
+disable it for other modules.  Until now, this was difficult to do. 
+
+A new feature called NAMED LOGGING allows you to do just that.  It lets 
+you perform module-specific logging, meaning that each log operation 
+gets a NAME (presumably the module name).  When invoking PLearn, you can 
+selectively enable or disable specific log names, so that you only get 
+the logs that you want.
+
+Here is how it works.
+
+As always, in your .cc you include the required file from PLearn:
+
+    #include &lt;plearn/io/pl_log.h&gt;
+      
+
+Then, within a function for which you want to do logging, you write:
+
+    void foo()
+    {
+        NAMED_LOG(&quot;MyFancyModule&quot;)
+            &lt;&lt; &quot;Output1: &quot; &lt;&lt; complex_object_that_can_be_serialized
+            &lt;&lt; &quot;Output2: &quot; &lt;&lt; other_complex_object
+            &lt;&lt; endl;
+
+        // ...
+    }
+      
+
+These outputs are kept if and only if &quot;MyFancyModule&quot; is enabled.  Since 
+all named logs ARE DISABLED BY DEFAULT  when starting PLearn you will 
+have to enable it, thus:
+
+    plearn --enable-logging MyFancyModule,OtherModule,ThirdModule name_of_script.plearn ...
+      
+
+You can also use the special keywords __ALL__ and __NONE__ that 
+respectively enable named logging for all modules, and forcibly disable 
+all named logging.  Note that named logging operates at the &quot;NORMAL&quot; 
+verbosity level for logs, so that if you run at a lower level, you get 
+no named logging at all, irrespective of the setting of 
+--enable-logging.  Furthermore, if your COMPILATION VERBOSITY is lower 
+than the &quot;NORMAL&quot; level, then logging code is not even compiled into 
+your executable, thereby taking up no space and no time.
+
+There is also a feature called &quot;module logging&quot; that lets you define a 
+&quot;module name&quot; and then carry out named logging using a simple MODULE_LOG 
+output stream (with no name, since it is implicit within a module).  
+Please see pl_log.h documentation for details.
+
+CONCLUSION: this feature is extremely handy for test cases that must 
+output a lot of debug information within a specific test, but for which 
+said debugging information would quickly become annoying in normal 
+circumstances.  You can set up a pytest case that selectively enables 
+logging only for the modules that are currently subjected to test.  
+Furthermore, if you decide to add more logging information under a 
+module name, other existing test cases (that don't enable this module 
+name) don't suddenly fail due to different output.
+
+Comments and suggestions welcome.
+
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="https://lists.berlios.de/pipermail/plearn-developers/attachments/20060202/a457120e/attachment.html">https://lists.berlios.de/pipermail/plearn-developers/attachments/20060202/a457120e/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000054.html">[Plearn-developers] StatsCollector: Minor Python utility class
+</A></li>
+	<LI>Next message: <A HREF="000056.html">[Plearn-developers] Compiler Warnings
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#55">[ date ]</a>
+              <a href="thread.html#55">[ thread ]</a>
+              <a href="subject.html#55">[ subject ]</a>
+              <a href="author.html#55">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

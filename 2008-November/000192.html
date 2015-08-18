@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] erreurs, warnings, logs, etc.
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-November/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20erreurs%2C%20warnings%2C%20logs%2C%20etc.&In-Reply-To=%3C492EE85F.6060406%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000187.html">
+   <LINK REL="Next"  HREF="000195.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] erreurs, warnings, logs, etc.</H1>
+    <B>Xavier Saint-Mleux</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20erreurs%2C%20warnings%2C%20logs%2C%20etc.&In-Reply-To=%3C492EE85F.6060406%40apstat.com%3E"
+       TITLE="[Plearn-developers] erreurs, warnings, logs, etc.">saintmlx at apstat.com
+       </A><BR>
+    <I>Thu Nov 27 19:35:11 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000187.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+        <LI>Next message: <A HREF="000195.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#192">[ date ]</a>
+              <a href="thread.html#192">[ thread ]</a>
+              <a href="subject.html#192">[ subject ]</a>
+              <a href="author.html#192">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+&gt;<i> Une chose que je croit important c'est qu'il soit facile et que cela
+</I>&gt;<i> soit clair dans la documentation comment avoir tout les messages de
+</I>&gt;<i> debug. Ceci est la raison pourquoi personnelement je n'utilise pas
+</I>&gt;<i> pl_log, la doc est perdu dans un email et c'est moi qui par hazard a
+</I>&gt;<i> rejout&#233; de l'info dans &quot;plearn help&quot; sur sa syntaxe si je me rappele
+</I>&gt;<i> bien. Par example &quot;pymake -dbg ...&quot; devrait continuer a donner tous
+</I>&gt;<i> les messages de debug par default. Si on ne garde pas cela, on risque
+</I>&gt;<i> de perdre des messages quand on debogue.
+</I>&gt;<i>   
+</I>
+Le code est assez bien doccument&#233;.  S'il y a d'autres endroits o&#249; il 
+doit y avoir du help-text &#224; ce sujet, je crois qu'on devrait les 
+identifier et corriger la situation en donnant toute l'aide n&#233;cessaire 
+aux bons endroits, comme tu l'as fait pour &quot;plearn help&quot;, qui donne 
+maintenant:
+
+&quot;&quot;&quot;
+                 [...]
+                 --verbosity LEVEL: The level of log to print.
+                     Must have been compiled with the same level of more
+                     Available level:
+                             VLEVEL_MAND    // Mandatory
+                             VLEVEL_IMP     // Important
+                             VLEVEL_NORMAL  // Normal (Default)
+                             VLEVEL_DBG     // Debug Info
+                             VLEVEL_EXTREME // Extreme Verbosity
+                 --enable-logging module1,module2,module3,...:
+                     Option to enable logging for the specified modules,
+                     specified a comma-separated list of modules 
+(without spaces).
+                     Special keywords __ALL__ and __NONE__ can be 
+specified to log
+                     for all modules or no modules respectively.
+                 [...]
+&quot;&quot;&quot;
+
+
+Extrait de pl_log.h:
+&quot;&quot;&quot;
+    /**
+     *  Named logging support.  Enable logging for the specified list
+     *  of modules.  If the special &quot;__ALL__&quot; keyword is used, then all
+     *  named logging is enabled.  If the special &quot;__NONE__&quot; keyword is
+     *  used, then no named logging is enabled.  (Default = &quot;__NONE__&quot;)
+     */
+    void enableNamedLogging(const vector&lt;string&gt;&amp; module_names);
+&quot;&quot;&quot;
+
+Et il y a une raison pour que la valeur par d&#233;faut soit &quot;__NONE__&quot;...
+
+
+&gt;<i> En ce moment, on a tous les messages de debug en compilant avec -dbg
+</I>&gt;<i> car tous les PLWARNINGS sont toujours imprim&#233;. Il faut juste ne pas
+</I>&gt;<i> perdre cette simplicit&#233; pour tout logger. On pourrait perdre des
+</I>&gt;<i> messages de debug si on se mets a envoyer plusieurs PLWARNING en mode
+</I>&gt;<i> DEBUG, car ce niveau de log n'est pas imprim&#233; par default. Pour les
+</I>&gt;<i> imprimers il faudrait faire: &quot;plearn --verbosity VLEVEL_DBG&quot;, ce qui
+</I>&gt;<i> complique un peu les choses et risque que nous oublions de le faire
+</I>&gt;<i> une fois de temps en temps. Ceci est comme le build bot qui nous
+</I>&gt;<i> rappelle a l'ordre de temps en temps.
+</I>&gt;<i>   
+</I>L'option -dbg ne change rien aux warnings &#224; ce que je sache... ils sont 
+aussi imprim&#233;s en mode optimis&#233;, ce qui est d&#233;finitivement un probl&#232;me.  
+Je pense aussi que ce n'est pas la meilleure chose que d'avoir &#224; 
+recompiler pour activer ou d&#233;sactiver des messages.  L'option 
+--verbosity est justement une r&#233;ponse ce genre de probl&#232;mes.  Aussi, de 
+mani&#232;re g&#233;n&#233;rale, les usagers ne devraient pas voir de messages de 
+debug; c'est aux programmeurs de d&#233;cider quand ils veulent tester et 
+d&#233;boguer, et quoi en particulier (on ne peut pas tout d&#233;boguer en m&#234;me 
+temps.)  Quand il y a trop de messages, les gens les ignorent tous.
+
+&gt;<i> Dans le cas particulier des messages d'erreur que tu as eu, je crois
+</I>&gt;<i> que c'est la classe BootstrapVMatrix(qui h&#233;rite de SelectRowsVMatrix)
+</I>&gt;<i> qui devrait mettre warn_if_all_rows_selected a faut quand on l'utilise
+</I>&gt;<i> juste pour un shuffle.(Je crois que c'est bien cette class qui est
+</I>&gt;<i> utiliser dans ton cas, mais je peux me tromper). Autre choses
+</I>&gt;<i> possible, Dans SelectRowsVMatrix, on peut  generer le message d'erreur
+</I>&gt;<i> seulement si on selectionne toutes les lignes et qu'elles sont dans
+</I>&gt;<i> l'ordre de 0 a n-1(utilisation inutile de la classe).
+</I>&gt;<i>   
+</I>Je ne pourrais &#234;tre moins d'accord avec ces deux suggestions: 
+
+1) on fait des classes d&#233;riv&#233;es pour isoler la sp&#233;cialisation et ne 
+partager que ce qui est vraiment g&#233;n&#233;rique dans la super-classe...  on 
+ne devrait pas adapter la super-classe aux particularit&#233;s de certaines 
+de ses sous-classes.  BootstrapVMatrix devrait v&#233;rifier elle-m&#234;me ce qui 
+est pertinent pour un bootstrap; il n'y a pas grand chose qu'une 
+SelectRowsVMatrix peut v&#233;rifier et qui soit valable dans tous les cas 
+(filtre, bootstrap, shuffle, tri, etc.)
+
+2) Si on v&#233;rifie toutes les lignes, on ne peut plus rien faire en O(1) 
+sur une SelectRowsVMatrix: m&#234;me dans les cas o&#249; on ne veut que, par ex., 
+le metadatadir, &#231;a va prendre un temps O(n).  Encore une fois, ce test 
+n'est pas valable dans le cas g&#233;n&#233;ral (e.g. filtre qui conserve tout, 
+tri d'une vmat d&#233;j&#224; tri&#233;e, etc.), ni tellement mieux pour du bagging, 
+car on peut quand-m&#234;me avoir exactement les m&#234;mes &#233;l&#233;ments, mais dans un 
+ordre diff&#233;rent.
+
+Une SelectRowsVMatrix peut avoir moins, plus ou autant de lignes que sa 
+sous-matrice, et que de ces trois cas, le plus fr&#233;quent est probablement 
+celui o&#249; on a autant de lignes!  &#199;a n'arrive pas que pour du &quot;shuffle&quot;: 
+dans le cas du bagging, l'id&#233;e est que chacun des bags peut contenir des 
+r&#233;p&#233;titions et omettre d'autres lignes, et on veut habituellement que le 
+total reste le m&#234;me; il y a aussi beaucoup d'autres cas o&#249; la taille est 
+la m&#234;me car le SelectRows ne change rien par rapport &#224; la vmat source 
+(voir plus haut.)
+
+
+
+Xavier
+
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000187.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+	<LI>Next message: <A HREF="000195.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#192">[ date ]</a>
+              <a href="thread.html#192">[ thread ]</a>
+              <a href="subject.html#192">[ subject ]</a>
+              <a href="author.html#192">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

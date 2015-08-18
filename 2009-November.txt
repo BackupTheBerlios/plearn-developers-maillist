@@ -1,0 +1,91 @@
+From guillaume.desjardins at gmail.com  Fri Nov 27 16:11:31 2009
+From: guillaume.desjardins at gmail.com (Guillaume Desjardins)
+Date: Fri, 27 Nov 2009 10:11:31 -0500
+Subject: [Plearn-developers] Bug with ParzenWindow.cc (?)
+Message-ID: <daecc3cb0911270711n4e0df0fcse8e667c0c1a83fe1@mail.gmail.com>
+
+Hi everyone,
+
+While reimplementing a Parzen window  density estimator in Theano, I
+noticed a little discrepancy between my results and those returned by
+PLearn...
+Basically, to get the same results, I have to treat the sigma^2
+parameter of the (spherical) Gaussian kernel, as the standard
+deviation.
+
+This seems to be confirmed by looking at the code. ParzenWindow's
+constructor takes as input a sigma_square parameter. ParzenWindow
+extends the GaussMix class however, which computes the likelihood as
+follows:
+
+real stddev = type_id == TYPE_SPHERICAL ? sigma[j] : diag_j[k];
+stddev = max(sigma_min, stddev);
+log_likelihood += gauss_log_density_stddev(y[k], mu_y[k], stddev);
+
+Everything's good so far... except that ParzenWindow initializes the
+sigma[j]'s with sigma_square !
+(plearn_learners/distributions/ParzenWindow.cc:164).
+So it looks like the "sigma_square" parameter to ParzenWindow is
+actually the standard deviation, and should thus be renamed to
+"sigma".
+
+Before going through with the change I'd like to confirm that I'm not
+missing something. I'm not very familiar with PLearn, so I'd like to
+make sure this change would not have any unintended side-effects.
+
+Thanks in advance,
+
+Guillaume
+
+
+From delallea at iro.umontreal.ca  Fri Nov 27 16:48:52 2009
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 27 Nov 2009 10:48:52 -0500
+Subject: [Plearn-developers] Bug with ParzenWindow.cc (?)
+In-Reply-To: <daecc3cb0911270711n4e0df0fcse8e667c0c1a83fe1@mail.gmail.com>
+References: <daecc3cb0911270711n4e0df0fcse8e667c0c1a83fe1@mail.gmail.com>
+Message-ID: <20091127154852.GA27659@opale.iro.umontreal.ca>
+
+I confirm it is a bug (or at least a bad option name).
+
+- Olivier
+
+On 27 Nov 2009, Guillaume Desjardins wrote:
+> Hi everyone,
+> 
+> While reimplementing a Parzen window  density estimator in Theano, I
+> noticed a little discrepancy between my results and those returned by
+> PLearn...
+> Basically, to get the same results, I have to treat the sigma^2
+> parameter of the (spherical) Gaussian kernel, as the standard
+> deviation.
+> 
+> This seems to be confirmed by looking at the code. ParzenWindow's
+> constructor takes as input a sigma_square parameter. ParzenWindow
+> extends the GaussMix class however, which computes the likelihood as
+> follows:
+> 
+> real stddev = type_id == TYPE_SPHERICAL ? sigma[j] : diag_j[k];
+> stddev = max(sigma_min, stddev);
+> log_likelihood += gauss_log_density_stddev(y[k], mu_y[k], stddev);
+> 
+> Everything's good so far... except that ParzenWindow initializes the
+> sigma[j]'s with sigma_square !
+> (plearn_learners/distributions/ParzenWindow.cc:164).
+> So it looks like the "sigma_square" parameter to ParzenWindow is
+> actually the standard deviation, and should thus be renamed to
+> "sigma".
+> 
+> Before going through with the change I'd like to confirm that I'm not
+> missing something. I'm not very familiar with PLearn, so I'd like to
+> make sure this change would not have any unintended side-effects.
+> 
+> Thanks in advance,
+> 
+> Guillaume
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+
+

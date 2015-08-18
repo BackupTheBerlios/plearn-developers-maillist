@@ -1,0 +1,169 @@
+From chapados at apstat.com  Wed Oct 18 18:58:13 2006
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Wed, 18 Oct 2006 12:58:13 -0400
+Subject: [Plearn-developers] Assertions in PLearn
+Message-ID: <45365D25.9080905@apstat.com>
+
+Hello fellow PLearners,
+
+Just a quick note to inform you that I modified the C assertion checking 
+mechanism -- when inside PLearn -- to raise an exception (PLERROR) when 
+an exception is not satisfied.  The syntax remains the same as C 
+standard asserts:
+
+    assert(condition);
+
+except that if "condition" is not satisfied, this produces a PLERROR.  
+The new behavior kicks into play as soon as you include 
+<plearn/base/plerror.h>, which is almost everywhere in PLearn.  In 
+addition, I added a macro "pl_assert" which allows one to include a 
+descriptive message as to what the failed condition indicates.  Use it 
+as follows:
+
+    plassert(condition, "This condition indicates a problem in the XYZ subsystem");
+
+As always, when you compile with the -opt option in pymake, these 
+assertions are not actually compiled into your code.  Therefore, you 
+should (liberally) use assertions for checking genuine logic errors in 
+your programs, and not conditions that may result from a user 
+interaction (such as bad values in a script).  Keep using old-fashioned 
+PLERROR for this purpose.
+
+
+FREQUENTLY-ASKED QUESTIONS
+=====================
+
+Q1) What are the interactions with the C standard <assert.h> mechanism?
+A1) The interaction is as follows: as soon as plerror.h is included, any 
+previous assert macro is undefined, and replaced with this new definition.
+
+Q2) What happens if I include <assert.h> after plerror.h?
+A2) Nothing.  The standard assert does not override the PLearn one.
+
+Q3) Can I go back to the standard assert mechanism?
+A3) No.  But tell me if this is something you need.
+
+Q4) Why bother with this at all?  I thought normal asserts were fine!
+A4) Normal asserts abort the program when the condition is not 
+satisfied.  This is a big no-no for running PLearn in server mode, which 
+should NEVER ABORT.  With this change, any internal error is caught at 
+the top-level, and relayed back to the calling program in the form of an 
+exception, which at least tells the client that something wrong happened 
+instead of just hanging in its face.
+
+Wishing all a fully-asserted PLearn future.
+
+    Cheers,
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+
+
+From chapados at apstat.com  Wed Oct 25 21:19:35 2006
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Wed, 25 Oct 2006 15:19:35 -0400
+Subject: [Plearn-developers] FOLLOW-UP: Assertions in PLearn
+In-Reply-To: <45365D25.9080905@apstat.com>
+References: <45365D25.9080905@apstat.com>
+Message-ID: <453FB8C7.2050105@apstat.com>
+
+Dear PLearners,
+
+A follow-up regarding assertion-handling in PLearn.  It turns out that 
+some compilers are VERY VIOLENT against attempts to "override" the 
+standard assert() mechanism.  [[You will recall that this is what my 
+previous message was about.]]  Since this was starting to cause more 
+headaches than could easily be solved by a single bottle of Advil, I had 
+to resort to the alternative solution:
+
+*DEFINE OUR OWN ASSERTION-CHECKING MACRO IN PLEARN
+*
+
+So I just committed the following macros (in <plearn/base/plerror.h>) ::
+
+   1. PLASSERT(condition): this is just like the standard assert()
+      macro, except that it throws an exception on failure. (Same kind
+      as a PLERROR at the moment -- Pascal Vincent tells me he might
+      change this in the future).
+   2. PLASSERT_MSG(condition, message): as above, but with an additional
+      explanatory message if the condition fails.
+
+Furthermore, PLearn svn revision 6351 contains a GLOBAL SEARCH-REPLACE 
+of all occurrences of assert() to PLASSERT(). IT IS IMPERATIVE that you 
+start using PLASSERT() from now on, instead of the standard assert().  
+[[Why?  As explained below, the standard assert() aborts the program on 
+failure, which is highly unsuitable for running PLearn in server mode.]]
+
+Questions, comments and suggestions are, as always, welcome.
+
+    +Nicolas
+
+
+Nicolas Chapados wrote:
+> Hello fellow PLearners,
+>
+> Just a quick note to inform you that I modified the C assertion checking 
+> mechanism -- when inside PLearn -- to raise an exception (PLERROR) when 
+> an exception is not satisfied.  The syntax remains the same as C 
+> standard asserts:
+>
+>     assert(condition);
+>
+> except that if "condition" is not satisfied, this produces a PLERROR.  
+> The new behavior kicks into play as soon as you include 
+> <plearn/base/plerror.h>, which is almost everywhere in PLearn.  In 
+> addition, I added a macro "pl_assert" which allows one to include a 
+> descriptive message as to what the failed condition indicates.  Use it 
+> as follows:
+>
+>     plassert(condition, "This condition indicates a problem in the XYZ subsystem");
+>
+> As always, when you compile with the -opt option in pymake, these 
+> assertions are not actually compiled into your code.  Therefore, you 
+> should (liberally) use assertions for checking genuine logic errors in 
+> your programs, and not conditions that may result from a user 
+> interaction (such as bad values in a script).  Keep using old-fashioned 
+> PLERROR for this purpose.
+>
+>
+> FREQUENTLY-ASKED QUESTIONS
+> =====================
+>
+> Q1) What are the interactions with the C standard <assert.h> mechanism?
+> A1) The interaction is as follows: as soon as plerror.h is included, any 
+> previous assert macro is undefined, and replaced with this new definition.
+>
+> Q2) What happens if I include <assert.h> after plerror.h?
+> A2) Nothing.  The standard assert does not override the PLearn one.
+>
+> Q3) Can I go back to the standard assert mechanism?
+> A3) No.  But tell me if this is something you need.
+>
+> Q4) Why bother with this at all?  I thought normal asserts were fine!
+> A4) Normal asserts abort the program when the condition is not 
+> satisfied.  This is a big no-no for running PLearn in server mode, which 
+> should NEVER ABORT.  With this change, any internal error is caught at 
+> the top-level, and relayed back to the calling program in the form of an 
+> exception, which at least tells the client that something wrong happened 
+> instead of just hanging in its face.
+>
+> Wishing all a fully-asserted PLearn future.
+>
+>     Cheers,
+>     + Nicolas
+>
+>   
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20061025/5c0716c5/attachment.html>
+

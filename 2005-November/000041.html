@@ -1,0 +1,243 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Adding tests to the PLearn test-suite
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Adding%20tests%20to%20the%20PLearn%20test-suite&In-Reply-To=%3C20051104205048.GA28391%40lsvm.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000040.html">
+   <LINK REL="Next"  HREF="000042.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Adding tests to the PLearn test-suite</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Adding%20tests%20to%20the%20PLearn%20test-suite&In-Reply-To=%3C20051104205048.GA28391%40lsvm.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] Adding tests to the PLearn test-suite">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Fri Nov  4 21:50:48 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000040.html">[Plearn-developers] PRandom behaves differently with Boost 1.32 and 1.33
+</A></li>
+        <LI>Next message: <A HREF="000042.html">[Plearn-developers] Adding tests to the PLearn test-suite
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#41">[ date ]</a>
+              <a href="thread.html#41">[ thread ]</a>
+              <a href="subject.html#41">[ subject ]</a>
+              <a href="author.html#41">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>This email is intended to help anyone interested in creating his own
+PLearn tests for the test suite. This test-suite is still in
+development by its author Christian Dorion, but it is already usable and
+should probably be used by anyone who wants to ensure his code does not
+get broken accidentally.
+
+The following instructions are a step-by-step example, whose goal is
+just to help other people, myself, and future writers of a test-suite
+documentation ;) They are not officially supported by Christian, and may
+not work anymore on a later version of the test-suite.
+In addition, those who already know of the test-suite may find the new
+PLearn object class 'PTest' useeful to write C++ tests that do not make
+the test-suite explode both in size and execution time (in addition to
+provide understandable floating numbers diff through the PLearn diff
+command applied on objects).
+
+1. If it does not already exist, create the appropriate 'test'
+directory, add this directory to the Subversion repository, and move
+into it:
+    mkdir ${PLEARNDIR}/plearn/var/test
+    svn add ${PLEARNDIR}/plearn/var/test
+    cd ${PLEARNDIR}/plearn/var/test
+
+2. [Optional] If your test relies on more than a couple of custom files
+(data files, scripts, ...), better create its own directory:
+    mkdir Var_utils
+    svn add Var_utils
+    cd Var_utils
+
+3. If it does not already exist, create a template 'pytest.config' file:
+    pytest add
+
+4. There are mainly two kinds of tests. If a simple '.plearn' or
+'.pyplearn' script is enough to run the test (e.g. if you plan to test a
+new PLearner class), go to step 14. If you need to create C++ code to
+test some specific functions, go on to step 5.
+
+5. Create a PTest subclass template:
+    pyskeleton PTest VarUtilsTest
+    
+6. Edit the resulting files (e.g. VarUtilsTest.h and VarUtilsTest.cc):
+    - fill the PLEARN_IMPLEMENT_OBJECT macro help:
+        PLEARN_IMPLEMENT_OBJECT(
+            VarUtilsTest,
+            &quot;Test various functions in Var_utils&quot;,
+            &quot;&quot;
+        );
+    - write your actual test code in the perform() method
+    - to store the test results, you can either:
+
+        (a) display them (using the 'pout' or 'perr' PStreams, or the
+        PLearn logging system):
+            // In VarUtilsTest::perform
+            pout &lt;&lt; my_function(x) &lt;&lt; endl;
+            MAND_LOG &lt;&lt; my_function(x) &lt;&lt; endl;
+        (b) store them in your PTest object options (this requires a
+        little more work, but is actually easier to understand when the test
+        fails):
+            // In VarUtilsTest.h
+            map&lt;string, Vec&gt; vec_results;
+            // In VarUtilsTest::declareOptions
+            declareOption(ol, &quot;vec_results&quot;, &amp;VarUtilsTest::vec_results,
+                OptionBase::buildoption,
+                &quot;Test Vec results.&quot;);
+            // In VarUtilsTest::perform
+            vec_results[&quot;my_function&quot;] = my_function(x);
+
+7. Once your code compiles and is ready to be tested, add your new PTest
+in 'PLearn/commands/plearn_tests_inc.h':
+    #include &lt;plearn/var/test/VarUtilsTest.h&gt;
+
+8. Edit your pytest.config file to specify how your test is supposed to be run.
+
+    - Typically you will run 'plearn' on a '.plearn' or '.pyplearn'
+    script (this script will describe one or more objects of your
+    PTest subclass, with its specific options):
+        Test(
+            name = &quot;Var_util&quot;,
+            description = &quot;Test various functions in Var_utils&quot;,
+            program = GlobalCompilableProgram(
+                name = &quot;plearn&quot;,
+                compiler = &quot;pymake&quot;,
+                compile_options = &quot;&quot;
+            ),
+            arguments = &quot;varutils_test.plearn&quot;,
+            resources = [ &quot;varutils_test.plearn&quot; ],
+            precision = 1e-06,
+            disabled = False
+        )
+
+    - But if your PTest object does not need extra options, you can save
+    the use of a script:
+        Test(
+            name = &quot;Var_util&quot;,
+            description = &quot;Test various functions in Var_utils&quot;,
+            program = GlobalCompilableProgram(
+                name = &quot;plearn&quot;,
+                compiler = &quot;pymake&quot;,
+                compile_options = &quot;&quot;
+            ),
+            arguments = &quot;PLEARNDIR:scripts/command_line_object.plearn 'object=VarUtilsTest()'&quot;,
+            resources = [ ],
+            precision = 1e-06,
+            disabled = False
+        )
+
+9. [Optional] For debug purpose, you may temporarily use 'plearn_tests'
+instead of 'plearn' in pytest.config, and also comment out all tests but
+your own test in 'plearn_tests_inc.h'. This will make compilation faster
+when debugging your test. Setting 'compile_options' to '-opt' will also
+probably speed up the link time.
+
+10. Run your test to generate results. Check everything is fine in the
+generated 'pytest/expected_results' directory. If it is not, fix your
+code. Do this until you are happy with the results.
+    pytest results
+
+11. If you had made any of the actions described in optional step 9,
+revert back to the standard test configuration.
+
+12. Add your specific files to version control:
+    svn add VarUtilsTest.h VarUtilsTest.cc
+
+13. Go to step 19
+
+14. Write your '.plearn' or '.pyplearn' script, and make sure it runs
+smoothly.
+
+15. Once you are confident it works fine, remove all the data that was
+generated while running it (the script must generate data and / or
+output to cout / cerr, otherwise it is useless).
+
+16. Edit your 'pytest.config' file to specify how your test is to be
+run:
+        Test(
+            name = &quot;Var_util&quot;,
+            description = &quot;Test various functions in Var_utils&quot;,
+            program = GlobalCompilableProgram(
+                name = &quot;plearn&quot;,
+                compiler = &quot;pymake&quot;,
+                compile_options = &quot;&quot;
+            ),
+            arguments = &quot;varutils_test.plearn&quot;,
+            resources = [ &quot;varutils_test.plearn&quot; ],
+            precision = 1e-06,
+            disabled = False
+        )
+
+17. Run your test to generate results. Check everything is fine in the
+generated 'pytest/expected_results' directory. If it is not, fix your
+script. Do this until you are happy with the results.
+    pytest results
+
+18. Add your specific files to version control:
+    svn add varutils_test.plearn
+
+19. Add generic test files to version control:
+    pytest vc_add
+
+20. Do a 'svn status' and remove useless files marked with '?' (do not
+accidentally delete some of your own important files!)
+
+21. Check that your test works fine:
+    pytest run
+
+22. Do a 'svn status' to check what files have been generated but should
+be ignored by version control, and ignore them:
+    svn propedit svn:ignore pytest
+        --&gt; *.compilation_log
+            run_results
+
+23. Assuming your test passes correctly, it is ready for commit:
+    cd ${PLEARNDIR}
+    svn status          &lt;-- to check which files you need to commit
+    svn commit -m &quot;New test: VarUtilsTest&quot; commands/plearn_tests_inc.h plearn/var/test
+
+Happy testing!
+
+--
+Olivier
+
+PS: Christian, feel free to correct me if I said something wrong...
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000040.html">[Plearn-developers] PRandom behaves differently with Boost 1.32 and 1.33
+</A></li>
+	<LI>Next message: <A HREF="000042.html">[Plearn-developers] Adding tests to the PLearn test-suite
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#41">[ date ]</a>
+              <a href="thread.html#41">[ thread ]</a>
+              <a href="subject.html#41">[ subject ]</a>
+              <a href="author.html#41">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

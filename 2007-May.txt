@@ -1,0 +1,156 @@
+From delallea at iro.umontreal.ca  Fri May 18 18:47:35 2007
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 18 May 2007 12:47:35 -0400
+Subject: [Plearn-developers] New OnlineLearningModule interface and
+	ModuleLearner
+Message-ID: <20070518164732.GA20521@opale.iro.umontreal.ca>
+
+Here is a brief summary on how to use the new OnlineLearningModule
+features in a ModuleLearner to learn some complex networks:
+
+- There is no explicit notion of 'input' and 'output' anymore. Instead,
+an OnlineLearningModule has some 'ports' you can use to send/retrieve
+data (it's up to the module to crash if a port is meant to be only read
+or written). Each port takes a value (represented by a matrix), and can
+be provided with some gradient (or asked to compute some gradient).
+
+- The fprop method thus takes as input a list of matrices. More
+precisely, it is a TVec<Mat*>. A full matrix indicates a value
+provided as input. An empty matrix indicates a value we want to retrieve
+(so the matrix will be resized within the module), and a NULL matrix is
+a port whose value is of no interest to the caller.
+
+- Similarly, the brop method takes a list of matrices (the gradients),
+where a full matrix is a provided gradient, an empty matrix is a
+gradient we wish to compute, and a NULL pointer a gradient that we do
+not care about. Note that the bprop method is actually named
+bpropAccUpdate, ie:
+    (i) it systematically ACCUMULATES the gradient: an empty matrix we
+want to accumulate into must have its width set to the correct witdth,
+and length 0 (we use the fact that PLearn does not erase previous data
+when resizing)
+    (2) it also updates the module's internal parameters (usually using
+the gradient provided as input)
+
+- You can still use most old OnlineLearningModules as there are default
+mechanisms to define two ports ("input" and "output"), forwarding the
+fprop and bpropAccUpdate methods to the corresponding mini-batch
+existing implementations (and hopefully crashing if you try to use the
+"input" port as an output).
+
+- Remember to always run your experiments first in debug mode, there are
+  a lot of safety checks that are skipped in optimized mode.
+
+- Each OnlineLearningModule can now be given a name (see below for its
+  use)
+
+- There is a new module called NetworkModule that you can use to plug
+OnlineLearningModules together. It takes mainly 3 options:
+    (1) a list of modules
+    (2) a list of connections between modules (each connection is
+defined by its source and destination, as a string whose format is
+"module_name.port_name").
+    (3) a list of ports that can be accessed from the outside, and which
+redirect towards ports of some modules in the network. For instance:
+ports = [ "input"  "rbm.visible"
+          "target" "nll.target"
+          "output" "rbm.hidden"
+          "cost"   "nll.cost"
+        ]
+means the NetworkModule has four ports (named input, target, output and
+cost).
+
+- You can optimize an OnlineLearningModule thanks to a ModuleLearner.
+Note the similarity with the ModulesLearner class (I only noticed it
+afterwards, so don't mix them up, even though they do very similar
+things). A ModuleLearner basically takes an OnlineLearningModule that
+has ports named input, target, output and cost, and optimize them.
+Typically, you want this OnlineLearningModule to be a NetworkModule that
+describes the fancy network architecture originally issued from
+Yoshua's brain.
+
+- Look into PLearn/plearn_learners/online/test/ModuleLearner for two
+  examples of using a ModuleLearner
+
+- Some random stuff to finish with:
+    (1) Use connections with propagate_gradient = 0 if you want for
+instance to compute a cost but not optimize on it
+    (2) I haven't written yet the class that concatenates various
+modules, so you probably can't compute various costs easily, sorry!
+(this will probably be my priority this afternoon)
+    (3) Due to the flexibility of what you can do, some error messages
+may seem cryptic (I need to add some warnings in a few places). In
+particular, check that you have properly defined the ports of the
+NetworkModule, that there is no missing connection, that you're not
+trying to propagate the gradient of a cost to the target, and that
+you're not using two modules with the same name (be aware the default
+name is the class name)
+    (4) There is still a lot to improve in the code. Feel free to mess
+with it or email me about your issues/suggestions.
+    (5) Only the online mode is supported right now. A way to perform
+greedy learning will be added soon (TM)
+    (6) Use the RBMModule instead of manually connecting layers (and
+keep in mind the ports of a RBMModule are visible and hidden, not input
+and output)
+    (7) the default ports for a cost are 'prediction', 'target' and
+'cost', while the default port for a module are 'input' and 'output'.
+
+Have fun :)
+
+--
+Olivier
+
+
+
+From delallea at iro.umontreal.ca  Fri May 18 18:52:52 2007
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 18 May 2007 12:52:52 -0400
+Subject: [Plearn-developers] New OnlineLearningModule interface and
+	ModuleLearner
+In-Reply-To: <20070518164732.GA20521@opale.iro.umontreal.ca>
+References: <20070518164732.GA20521@opale.iro.umontreal.ca>
+Message-ID: <20070518165250.GA22163@opale.iro.umontreal.ca>
+
+> - Some random stuff to finish with:
+> (...)
+    
+    (8) In doubt, set the learning rate in each module that takes one.
+I'm not too sure which learning rates are forwarded and where (I'll need
+to look into this).
+
+    (9) I believe the ModuleLearner does not properly create and forward
+a random generator right now, so set it in the NetworkModule (this one
+does forward it to all modules in the network). I'll also look into it
+and fix it at some point.
+
+--
+Olivier
+
+
+
+From delallea at iro.umontreal.ca  Wed May 30 18:32:07 2007
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Wed, 30 May 2007 12:32:07 -0400
+Subject: [Plearn-developers] Erreur description de vecscalmul
+Message-ID: <20070530163205.GA25821@opale.iro.umontreal.ca>
+
+Hi,
+
+If anyone is using ProcessingVMatrices with the 'vecscalmul' statement,
+be aware that the VMatLanguage documentation did not match the actual
+code. Here is the diff of the update where I fixed the description:
+
+-                        " _ vecscalmul     : x1 ... xn n alpha  --> (x1*alpha) ... (xn*alpha)\n"
++                        " _ vecscalmul     : x1 ... xn alpha n  --> (x1*alpha) ... (xn*alpha)\n"
+
+As you can see, n and alpha are reversed.
+
+I changed the description and not the code because I'm not sure which
+one is the intended one, and I thought I should warn everyone as it is
+easy to use it thinking it works, when actually it does not.
+
+--
+Olivier
+
+
+

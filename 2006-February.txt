@@ -1,0 +1,370 @@
+From chapados at apstat.com  Fri Feb  3 01:10:14 2006
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Thu, 02 Feb 2006 19:10:14 -0500
+Subject: [Plearn-developers] StatsCollector: Minor Python utility class
+Message-ID: <43E29F66.9010107@apstat.com>
+
+Hello all PLearners,
+
+I added a small Python utility class that vaguely mimics the 
+StatsCollector of PLearn.  It tries to be efficient and uses numarray 
+for all calculations, and never explicitly loops on the rows of the 
+matrix.  The choice of statistics is a bit limited, but can easily be 
+extended.
+
+Have a look under python_modules/plearn/math/StatsCollector.py
+
+To try it out, perform a svn update of PLearn, and try:
+
+    > cd ~/PLearn/python_modules/plearn/math/test
+    > python StatsCollector.py
+
+Comments and suggestions welcome.
+
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+
+
+From chapados at apstat.com  Fri Feb  3 01:34:03 2006
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Thu, 02 Feb 2006 19:34:03 -0500
+Subject: [Plearn-developers] Named logging in PLearn
+Message-ID: <43E2A4FB.5040004@apstat.com>
+
+Hello all PLearners,
+
+Some of you are aware of PLearn's useful logging facility, that's very 
+convenient for debugging and testcase creation. In a nutshell, by 
+including <plearn/io/pl_log.h>, you can write in your code:
+
+    DBG_LOG << "Some debugging message" << endl;
+
+and that message is displayed only when the RUNTIME VERBOSITY LEVEL is 
+high enough, for instance when PLearn is invoked with the option:
+
+    plearn --verbosity VLEVEL_DBG
+
+The logs are full-blown PStreams, so any object that can be serialized 
+on a PStream can be output in a log.  The following verbosity levels 
+(from most important to least important) are supported.  When running at 
+a given level (with the --verbosity option), messages at more important 
+levels are displayed as well:
+
+    * VLEVEL_IMP: only important messages are displayed
+    * VLEVEL_NORMAL: normal logging message
+    * VLEVEL_DBG: debug information
+    * VLEVEL_EXTREME: extremely-detailed debugging information
+
+That was until now.  *READ ON FOR THE NEW STUFF*.
+------------------------------------------------------------------------
+
+Now consider the following scenario: you're writing a new test case for 
+pytest, and you want to enable debug logging only for the new module 
+that you're testing (to make sure it's working correctly inside), but 
+disable it for other modules.  Until now, this was difficult to do. 
+
+A new feature called NAMED LOGGING allows you to do just that.  It lets 
+you perform module-specific logging, meaning that each log operation 
+gets a NAME (presumably the module name).  When invoking PLearn, you can 
+selectively enable or disable specific log names, so that you only get 
+the logs that you want.
+
+Here is how it works.
+
+As always, in your .cc you include the required file from PLearn:
+
+    #include <plearn/io/pl_log.h>
+      
+
+Then, within a function for which you want to do logging, you write:
+
+    void foo()
+    {
+        NAMED_LOG("MyFancyModule")
+            << "Output1: " << complex_object_that_can_be_serialized
+            << "Output2: " << other_complex_object
+            << endl;
+
+        // ...
+    }
+      
+
+These outputs are kept if and only if "MyFancyModule" is enabled.  Since 
+all named logs ARE DISABLED BY DEFAULT  when starting PLearn you will 
+have to enable it, thus:
+
+    plearn --enable-logging MyFancyModule,OtherModule,ThirdModule name_of_script.plearn ...
+      
+
+You can also use the special keywords __ALL__ and __NONE__ that 
+respectively enable named logging for all modules, and forcibly disable 
+all named logging.  Note that named logging operates at the "NORMAL" 
+verbosity level for logs, so that if you run at a lower level, you get 
+no named logging at all, irrespective of the setting of 
+--enable-logging.  Furthermore, if your COMPILATION VERBOSITY is lower 
+than the "NORMAL" level, then logging code is not even compiled into 
+your executable, thereby taking up no space and no time.
+
+There is also a feature called "module logging" that lets you define a 
+"module name" and then carry out named logging using a simple MODULE_LOG 
+output stream (with no name, since it is implicit within a module).  
+Please see pl_log.h documentation for details.
+
+CONCLUSION: this feature is extremely handy for test cases that must 
+output a lot of debug information within a specific test, but for which 
+said debugging information would quickly become annoying in normal 
+circumstances.  You can set up a pytest case that selectively enables 
+logging only for the modules that are currently subjected to test.  
+Furthermore, if you decide to add more logging information under a 
+module name, other existing test cases (that don't enable this module 
+name) don't suddenly fail due to different output.
+
+Comments and suggestions welcome.
+
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20060202/a457120e/attachment.html>
+
+From chapados at apstat.com  Thu Feb  9 17:17:34 2006
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Thu, 09 Feb 2006 11:17:34 -0500
+Subject: [Plearn-developers] Compiler Warnings
+Message-ID: <43EB6B1E.3080907@apstat.com>
+
+Hello all PLearners,
+
+I would like to emphasize one more time that COMPILER WARNINGS are not 
+generally acceptable for code committed into PLearn.  You should always 
+compile at the highest warning level and make sure that code "compiles 
+cleanly". 
+
+Incidentally (no finger pointing, just a little friendly teaching), this 
+morning I was recompiling after a PLearn update, and I stumble upon:
+
+BallTreeNearestNeighbors.cc : /home/chapados/PLearn/plearn_learners/nearest_neighbors/BallTreeNearestNeighbors.cc: In
+   member function `virtual void 
+   PLearn::BallTreeNearestNeighbors::BallKNN(std::priority_queue<std::pair<double,
+   int>, std::vector<std::pair<double, int>, std::allocator<std::pair<double, 
+   int> > >, std::less<std::pair<double, int> > >&, 
+   PLearn::PP<PLearn::BinaryBallTree>, const PLearn::Vec&, double&, double, 
+   int) const':
+/home/chapados/PLearn/plearn_learners/nearest_neighbors/BallTreeNearestNeighbors.cc:746: warning: comparison
+   between signed and unsigned integer expressions
+
+This happens on the following code:
+
+void BallTreeNearestNeighbors::BallKNN(
+     priority_queue< pair<real,int> >& q, BinBallTree node,
+     const Vec& t, real& d2_sofar, real d2_pivot, const int k ) const
+{
+	// ...
+                if( q.size() > k )
+                {
+                    q.pop();
+                    d2_sofar = q.top().first;
+                }
+}
+
+OK, this happens of course because all STL containers return size_t 
+(some unsigned type) for size().  Should we fix this as:
+
+	if (int(q.size()) > k) { }
+
+or
+
+	if (q.size() > unsigned(k)) { }
+
+???
+
+Notice what happens if k==-1.  In the second case, this is converted to 
+(assuming a 32-bit machine) 0xFFFFFFFF, which is the LARGEST unsigned 
+integer!  Hence the "if" in the second case is always false. 
+
+Moral of the story, you should cast from unsigned to signed (in that 
+direction), and PLEASE DON'T COMMIT CODE THAT CONTAINS WARNINGS.
+
+    Thanks and happy PLearning,
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+
+
+From delallea at iro.umontreal.ca  Mon Feb 13 18:39:50 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Mon, 13 Feb 2006 12:39:50 -0500
+Subject: [Plearn-developers] SVN links
+Message-ID: <20060213173949.GA25907@lsvm.iro.umontreal.ca>
+
+If this is possible, it would be best to avoid adding symbolic links to
+the SVN repository. Windows has a lot of trouble dealing with links.
+
+--
+Olivier
+
+
+From delallea at iro.umontreal.ca  Thu Feb 16 18:27:58 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Thu, 16 Feb 2006 12:27:58 -0500
+Subject: [Plearn-developers] Commits 'PYTEST INTERNAL TEST'
+Message-ID: <20060216172758.GA18820@lsvm.iro.umontreal.ca>
+
+I just realized I had apparently made some commits entitled 'PYTEST
+INTERNAL TEST' lately.
+I never did those intentionally. I did run the test-suite, but without
+committing anything (just pytest run --all).
+Is this normal?
+
+--
+Olivier
+
+
+From dorionc at apstat.com  Thu Feb 16 18:55:02 2006
+From: dorionc at apstat.com (Christian Dorion)
+Date: Thu, 16 Feb 2006 12:55:02 -0500
+Subject: [Plearn-developers] Commits 'PYTEST INTERNAL TEST'
+In-Reply-To: <20060216172758.GA18820@lsvm.iro.umontreal.ca>
+References: <20060216172758.GA18820@lsvm.iro.umontreal.ca>
+Message-ID: <43F4BC76.3040907@apstat.com>
+
+Hi all,
+
+Olivier Delalleau wrote:
+> I just realized I had apparently made some commits entitled 'PYTEST
+> INTERNAL TEST' lately.
+> I never did those intentionally. I did run the test-suite, but without
+> committing anything (just pytest run --all).
+> Is this normal?
+>   
+It *was* normal:
+ 
+There is a test called PL_PyTest_Modes that is meant to test PyTest 
+(c'est vraiment le comble) whenever I do modifications to it (PyTest). 
+Among other things, this test ensures that the svn-management blocks of 
+PyTest were not broken by the new features added. There, this test 
+commits (and removes) some 'internal test' behind your back... 
+
+However, I modified the Test class lately so that a test instance can be 
+associated to a category. By default, this category is assigned to 
+'General'. In the case of PL_PyTest_Modes, it was modified to 
+'PyTestDev'. As the default behavior of PyTest 0.9.3 is to run only the 
+'General' tests, most users should not run that test anymore.
+
+Note that if you want to add extensive tests to the test suite, over 
+your own algorithms for instance, you could create yourself a "Olivier's 
+Tests" category so that you, and others, don't have to run those all the 
+time. Be aware that a category is whatever string you like, so that 
+mispelling a category simply creates a new one...
+
+Well, let me remember you that running 'pytest run --all' before each 
+commit keeps the doctor away..
+Happy PLearning
+
+Chris
+
+---
+I don't why I copied that here, but...
+---
+loki % cd ~/PLearn/python_modules/plearn/pytest
+loki % pytest list
+
+In /home/dorionc/PLearn/python_modules/plearn/pytest
+    PL_PyTestCore             Disabled: False
+
+loki % pytest list --category=PyTestDev
+
+In /home/dorionc/PLearn/python_modules/plearn/pytest
+    PL_PyTest_Modes           Disabled: False
+
+-- 
+*Christian Dorion*/
+Doctorant en Finance (McGill's Faculty of Management)
+M.Sc. Informatique et Recherche Op?rationnelle//
+Apstat Technologies Inc./
+http://www.apstat.com
+T?l : (514) 343-9119, ext. 237
+
+"Soyons r?alistes, exigeons l'impossible",
+Ernesto "Che" Guevara, 1928-1967
+
+"Love is a Temple, Love the higher Law",
+One, U2
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20060216/563543aa/attachment.html>
+
+From lamblinp at iro.umontreal.ca  Sun Feb 19 04:11:48 2006
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Sun, 19 Feb 2006 04:11:48 +0100
+Subject: [Plearn-developers] New skeletons for Variables
+Message-ID: <20060219031148.GA21575@pig.zood.org>
+
+Hello everybody,
+
+I just added new skeletons (for pyskeleton), namely UnaryVariable,
+BinaryVariable and NaryVariable, because I think it can be useful.
+
+Feel free to enhance them, or to let me know if there's a problem with
+them.
+
+-- 
+Pascal
+
+
+From chrish at apstat.com  Mon Feb 27 20:51:55 2006
+From: chrish at apstat.com (Christian Hudon)
+Date: Mon, 27 Feb 2006 14:51:55 -0500
+Subject: [Plearn-developers] New mailing-list: plearn-commits
+Message-ID: <4403585B.6040000@apstat.com>
+
+Hi,
+
+I have created a new mailing-list to help keep track of PLearn 
+development: plearn-commits at lists.berlios.de.  After every commit to the 
+PLearn subversion repository, an email is automatically sent to this 
+list with the following information:
+
+- the user id of the person doing the commit
+- the svn revision number
+- a list of the files modified
+- the log message for the commit
+- a unified diff of the changes made
+
+You can subscribe to this mailing-list by visiting the following web page:
+http://lists.berlios.de/mailman/listinfo/plearn-commits
+
+Enjoy!
+
+  Christian
+
+
+
+From delallea at iro.umontreal.ca  Mon Feb 27 22:41:04 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Mon, 27 Feb 2006 16:41:04 -0500
+Subject: [Plearn-developers] Boost update at LISA
+Message-ID: <20060227214103.GA20678@opale.iro.umontreal.ca>
+
+I upgraded to Boost 1.33.1 at the LISA to fix a bug in the Boost graph
+library. You may need to clean your current objects and recompile
+everything, or some weird bugs *might* happen.
+
+--
+Olivier
+
+

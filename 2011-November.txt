@@ -1,0 +1,18 @@
+From nouiz at nouiz.org  Tue Nov 15 23:01:03 2011
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Tue, 15 Nov 2011 17:01:03 -0500
+Subject: [Plearn-developers] Plearn moved back to SourceForge
+Message-ID: <CADKKbtigO6eW+mkrhGiORyLV_XFAfaj+SFG9GbYGsKycQE2SBQ@mail.gmail.com>
+
+berlios is closing, So I moved the PLearn trunk.
+
+You must execute this command in your PLearn checkout to reflect the
+change of server:
+
+svn switch --relocate
+svn+ssh://nouiz at svn.berlios.de/svnroot/repos/plearn
+https://plearn.svn.sourceforge.net/svnroot/plearn
+
+Fred
+
+

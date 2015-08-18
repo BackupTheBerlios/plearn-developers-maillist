@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Valeur INFINITY, la solution
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Valeur%20INFINITY%2C%20la%20solution&In-Reply-To=%3CB7C13A1B-DDD3-412D-A335-74C7A72341A9%40iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000023.html">
+   <LINK REL="Next"  HREF="000028.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Valeur INFINITY, la solution</H1>
+    <B>Jasmin Lapalme</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Valeur%20INFINITY%2C%20la%20solution&In-Reply-To=%3CB7C13A1B-DDD3-412D-A335-74C7A72341A9%40iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] Valeur INFINITY, la solution">lapalmej at iro.umontreal.ca
+       </A><BR>
+    <I>Fri Aug  5 20:34:19 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000023.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+        <LI>Next message: <A HREF="000028.html">[Plearn-developers] PLearn Code Reformatting
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27">[ date ]</a>
+              <a href="thread.html#27">[ thread ]</a>
+              <a href="subject.html#27">[ subject ]</a>
+              <a href="author.html#27">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Bonjour,
+     Apr&#232;s toutes ces discussions, recherches et participations &#224; des  
+forums de discussions, je crois que je viens de trouver une  
+excellente solution.
+     Il existe maintenant dans la librairie &lt;limits&gt; de c++, une  
+classe qui s'appelle numeric_limits&lt;&gt; qui d&#233;finit plusieurs valeurs  
+limites pour tous les types de valeurs. Entre autre, la valeur  
+infinity pour double.
+     Ce qui est magnifique, on peut commencer maintenant &#224; changer  
+les INFINITY par les infinity de numeric_limits et si on en oublie  
+les deux valeurs on la m&#234;me valeurs. (ie INFINITY ==  
+numeric_limits&lt;double&gt;::infinity() ).
+     L'avantage de tout &#231;a! &#199;a compile sur OS X avec -pedantic sans  
+warning, ni erreur.
+
+Jasmin
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000023.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+	<LI>Next message: <A HREF="000028.html">[Plearn-developers] PLearn Code Reformatting
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#27">[ date ]</a>
+              <a href="thread.html#27">[ thread ]</a>
+              <a href="subject.html#27">[ subject ]</a>
+              <a href="author.html#27">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

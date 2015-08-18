@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Fwd: [Plearn-commits] r9586 -	trunk/plearn_learners/hyper
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-October/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Fwd%3A%20%5BPlearn-commits%5D%20r9586%20-%0A%09trunk/plearn_learners/hyper&In-Reply-To=%3C2d1d7fe70810201155x7111bdc6te1335dcdb5636cf8%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000184.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Fwd: [Plearn-commits] r9586 -	trunk/plearn_learners/hyper</H1>
+    <B>Fr&#233;d&#233;ric Bastien</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Fwd%3A%20%5BPlearn-commits%5D%20r9586%20-%0A%09trunk/plearn_learners/hyper&In-Reply-To=%3C2d1d7fe70810201155x7111bdc6te1335dcdb5636cf8%40mail.gmail.com%3E"
+       TITLE="[Plearn-developers] Fwd: [Plearn-commits] r9586 -	trunk/plearn_learners/hyper">nouiz at nouiz.org
+       </A><BR>
+    <I>Mon Oct 20 20:55:55 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000184.html">[Plearn-developers] LIBSVMSparseVMatrix
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#185">[ date ]</a>
+              <a href="thread.html#185">[ thread ]</a>
+              <a href="subject.html#185">[ subject ]</a>
+              <a href="author.html#185">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+I did a bug fix in HyperOptimize. It don't break test here, but their
+is some chance that it break some others at apstats. Olivier D. and
+Pascal agree with the fix. So this email is to leat people know what
+changed in case something break.
+
+Fred
+
+
+---------- Forwarded message ----------
+From: nouiz at BerliOS &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">nouiz at mail.berlios.de</A>&gt;
+Date: Mon, Oct 20, 2008 at 2:51 PM
+Subject: [Plearn-commits] r9586 - trunk/plearn_learners/hyper
+To: <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">plearn-commits at lists.berlios.de</A>
+
+
+Author: nouiz
+Date: 2008-10-20 20:51:34 +0200 (Mon, 20 Oct 2008)
+New Revision: 9586
+
+Modified:
+  trunk/plearn_learners/hyper/HyperOptimize.cc
+Log:
+corrected the option HyperOptimize::min_n_trials so that if it is 10
+do a mininum of 10 trials and not 11 as in the past.
+
+
+Modified: trunk/plearn_learners/hyper/HyperOptimize.cc
+===================================================================
+--- trunk/plearn_learners/hyper/HyperOptimize.cc        2008-10-20
+17:51:15 UTC (rev 9585)
++++ trunk/plearn_learners/hyper/HyperOptimize.cc        2008-10-20
+18:51:34 UTC (rev 9586)
+@@ -436,6 +436,7 @@
+        }
+        option_vals = oracle-&gt;generateNextTrial(option_vals,objective);
+
++        ++trialnum;
+        if(!is_missing(objective) &amp;&amp;
+           (objective &lt; best_objective || best_results.length()==0) &amp;&amp;
+(trialnum&gt;=min_n_trials || !option_vals))
+        {
+@@ -452,7 +453,7 @@
+                             best_learner);
+            }
+        }
+-        ++trialnum;
++
+        if(verbosity&gt;1) {
+            perr &lt;&lt; &quot;In HyperOptimize::optimize() - cost=&quot; &lt;&lt; which_cost
+                 &lt;&lt; &quot; nb of trials=&quot;&lt;&lt;trialnum
+
+_______________________________________________
+Plearn-commits mailing list
+<A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">Plearn-commits at lists.berlios.de</A>
+<A HREF="https://lists.berlios.de/mailman/listinfo/plearn-commits">https://lists.berlios.de/mailman/listinfo/plearn-commits</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000184.html">[Plearn-developers] LIBSVMSparseVMatrix
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#185">[ date ]</a>
+              <a href="thread.html#185">[ thread ]</a>
+              <a href="subject.html#185">[ subject ]</a>
+              <a href="author.html#185">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

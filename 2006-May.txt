@@ -1,0 +1,390 @@
+From pascal at apstat.com  Wed May  3 21:36:26 2006
+From: pascal at apstat.com (Pascal Vincent)
+Date: Wed, 03 May 2006 15:36:26 -0400
+Subject: [Plearn-developers] Added extrasize field to VMatrix
+Message-ID: <4459063A.2050104@apstat.com>
+
+Hello fellow PLearners,
+
+I've just comitted a long due change: adding an extrasize_ to VMatrix.
+The semantic is now that the row of a VMatrix as understood from a 
+PLearner is made of
+inputsize_ input fields
+followed by targetsize_ target fields
+followed by weightsize_ (1 or 0) sample weight fields
+followed by extrasize_ extra fields
+
+The extra fields serve to put additional information that should neither 
+be considered a learner's input, target or a sample weight, but may be 
+used for other things (such as performance assessment).
+
+I also added a new method getExtra to access the extra info (which 
+complements the already existing getExample method)
+
+    //! Default version calls getSubRow based on inputsize_ targetsize_ 
+weightsize_
+    //! But exotic subclasses may construct, input, target and weight 
+however they please.
+    //! If not a weighted matrix, weight should be set to default value 1.
+    virtual void getExample(int i, Vec& input, Vec& target, real& weight);
+
+    //! Complements the getExample method, fetching the the extrasize_ 
+"extra" fields
+    //! expected to appear after the input, target and weight fields
+    //! Default version calls getSubRow based on inputsize_ targetsize_ 
+weightsize_ and extrasize_
+    virtual void getExtra(int i, Vec& extra);
+
+(Note to self: these methods should some day be made const, and in all 
+subclasses as well)
+
+Note that all the testsuite passes.
+
+Also extrasize_ defaults to zero. Thus all current code using *current 
+datasets* should still work exactly as before.
+
+Also nothing currently *enforces* 
+inputsize_+targetsize_+weightsize_+extrasize_ to be equal to width_ 
+(although it is recommended that it be the case), so that old code that 
+used extra fields beyond the weight and inferred their size from width_ 
+should still work (but could be corrected for clarity).
+
+Now of course things may go sour if you make up a *new* dataset with a 
+non-zero extrasize and pass it through VMatrix processing or learners 
+that enforce or suppose that
+inputsize_+targetsize_+weightsize_ == width_  (incriminating ex: 
+fetching the weight with v[width_-1] is wrong!).
+So you may need to make a few minor modifications to the code to 
+properly handle VMatrixes with non-zero extrasize_
+
+Should this little incremental change of mine cause the Earth to stop 
+revolving around the Sun, you/we may go back to previous version that 
+was tagged under SVN: tags/before_adding_VMatrix_extrasize
+
+Have fun!
+
+-- Pascal
+
+-- 
+
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+http://www.apstat.com
+
+
+
+From chapados at apstat.com  Tue May  9 17:33:51 2006
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Tue, 09 May 2006 11:33:51 -0400
+Subject: [Plearn-developers] NEW! VERY EASY way to add remote methods to PLearn Objects
+Message-ID: <4460B65F.70908@apstat.com>
+
+Dear all fellow PLearners,
+
+Few people know about it, but PLearn has supported a *remote method 
+invokation* mechanism for all PLearn Objects for over a year.  This lets 
+you run PLearn in *server mode* (using the "server" command), where it 
+waits for connections and dispatches method calls to instantiated objects.
+
+Until today however, making your objects "remote-callable" involved a 
+complicated procedure: you had to override the Object::call() method, 
+handle argument and return value marshalling/unmarshalling, etc, for 
+EACH method to be "published" outside.  Furthermore, there was no way to 
+query an object as to what methods are remote-callable, or to attach 
+documentation to them.
+
+In order to make more of PLearn remote-callable, and not lose our 
+collective sanity, I am pleased to announce a new mechanism to declare 
+remote methods, called quite appropriately "declareMethods", and similar 
+to the existing "declareOptions".  The idea is as follows: for each C++ 
+member function that you want to make available remotely, you simply 
+declare it with a "declareMethod", give it a remote name and some 
+documentation. Most functions do not even have to know that they will be 
+called from afar, as all the necessary wrapping code is generated 
+automatically!  For example:
+
+    // It is necessary to inherit directly or indirectly from PLearn::Object
+    class X : public PLearn::Object
+    {
+    public:
+        //! This method is to be published for remote invocation. Note that 
+        //! we accept normal C++ argument types and return normal types.  The
+        //! only requirement is for those types to be serializable to a PStream.
+        //! All wrapping to a PStream representation is handled automatically
+        //! by the declareMethod below
+        Vec complexServerCalculation(Vec inputs, const map<string,real>& params);
+
+    protected:
+        //! This is where remote method declaration happens
+        static void declareMethods(RemoteMethodMap& rmm);
+
+        //! Plus the usual PLearn poutine in the class definition...
+    };
+
+    void X::declareMethods(RemoteMethodMap& rmm)
+    {
+        // Make sure that inherited methods are declared
+        rmm.inherited(inherited::_getRemoteMethodMap_());
+
+        // Insert class-specific methods
+        declareMethod(rmm, "complexServerCalculation", &X::complexServerCalculation,
+                      (BodyDoc("This function carries out a computation of such\n"
+                               "complexity that it should only be attempted on a\n"
+                               "capable server."),
+                       ArgDoc ("inputs", "Vector of inputs for the computation"),
+                       ArgDoc ("params", "Additional parameters that will condition\n"
+                                         "the operations"),
+                       RetDoc ("The return value is a vector of computed results.")));
+    } 
+            
+
+
+Notice the following points:
+
+   1. It is no longer necessary to override Object::call() for having
+      remote methods.
+   2. Normal C++ member functions can easily be exported with no
+      additional fuss; you don't need to write special code that is
+      remote-callable.  (Although in some contexts it may be necessary
+      as you won't necessarily have precisely the same interface).
+   3. You don't need to declare the argument types or return value type
+      of "complexServerCalculation" in the *declareMethod*.  This is
+      inferred automatically, thanks to C++ (also called "deep template
+      voodoo" in polite company).
+   4. Documentation can be attached to the method and given some
+      semantics. In the above, "BodyDoc" means the main documentation of
+      the function, and should explain the purpose. "ArgDoc" means
+      argument documentation, and there should be one such element per
+      function argument: the order of declaration is important for
+      ArgDocs and must match the function argument order! Finally,
+      "RetDoc" means return value documentation, and should explain how
+      the return value should be interpreted.
+   5. There is an additional pair of parenthesis around the
+      documentation components: don't dare forget it!
+
+The HTMLHelpCommand has been updated to automatically query all classes 
+for their remote methods, and outputs a very nice documentation for all 
+of them. This documentation is accessible from Plide or the PLearn 
+website, which will be updated. At the moment, most remote methods are 
+the standard ones declared at the level of PLearn::Object, but PLearner 
+and PTester have both been upgraded to the new mechanism, so you can 
+look at these classes to get an idea of what is possible.
+
+Comments, flowers, gifts, dark chocolate, and suggestions welcome!
+
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20060509/4761db87/attachment.html>
+
+From dan.popovici at gmail.com  Mon May 15 22:59:50 2006
+From: dan.popovici at gmail.com (Dan Popovici)
+Date: Mon, 15 May 2006 16:59:50 -0400
+Subject: [Plearn-developers] New: FAQ for PLearn added to SVN
+Message-ID: <22777a450605151359g1f1e5291l21b450748c181b90@mail.gmail.com>
+
+Dear fellow PLearners,
+
+I have added a document under svn (doc/faq.tex) which will( hopefully in the
+very near future ) contain answers to most of the questions people have
+related to PLearn.
+
+The aim of this document is to provide quick answers to questions like which
+function computes this, or how can I quickly create a new test case using
+PyTest. An up to date document of this kind should save a considerable
+amount of time to many people.
+
+If you have been asked the same question twice, just take one minute and add
+it to the document. If everything works well you won't have to answer it the
+third time.
+
+Each entry has an author associated with it. If you think the response of a
+questions could be improved, just contact the author and make the necessary
+changes.
+
+I'll make sure the document is properly organized as more entries are added
+to the document.
+
+Regards,
+Dan
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20060515/f2ed7103/attachment.html>
+
+From delallea at iro.umontreal.ca  Tue May 16 15:58:38 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Tue, 16 May 2006 09:58:38 -0400
+Subject: [Plearn-developers] New: FAQ for PLearn added to SVN
+In-Reply-To: <22777a450605151359g1f1e5291l21b450748c181b90@mail.gmail.com>
+References: <22777a450605151359g1f1e5291l21b450748c181b90@mail.gmail.com>
+Message-ID: <20060516135836.GA11675@opale.iro.umontreal.ca>
+
+Having a FAQ is certainly a good idea. However, don't forget there is
+(supposed to be) a manual too. Some of the FAQ's questions should
+probably refer to a section in the manual (rather than duplicate its
+content). This is not a criticism (I actually haven't looked at the FAQ
+yet), just an advice for future FAQ updates (updating the manual at the
+same time would be nice ;)
+
+--
+Olivier
+
+On 15 May 2006, Dan Popovici wrote:
+> Dear fellow PLearners,
+> 
+> I have added a document under svn (doc/faq.tex) which will( hopefully in the
+> very near future ) contain answers to most of the questions people have related
+> to PLearn.
+> 
+> The aim of this document is to provide quick answers to questions like which
+> function computes this, or how can I quickly create a new test case using
+> PyTest. An up to date document of this kind should save a considerable amount
+> of time to many people.
+> 
+> If you have been asked the same question twice, just take one minute and add it
+> to the document. If everything works well you won't have to answer it the third
+> time.
+> 
+> Each entry has an author associated with it. If you think the response of a
+> questions could be improved, just contact the author and make the necessary
+> changes.
+> 
+> I'll make sure the document is properly organized as more entries are added to
+> the document.
+> 
+> Regards,
+> Dan
+> 
+
+
+From pascal at apstat.com  Tue May 16 18:53:32 2006
+From: pascal at apstat.com (Pascal Vincent)
+Date: Tue, 16 May 2006 12:53:32 -0400
+Subject: [Plearn-developers] New: FAQ for PLearn added to SVN
+In-Reply-To: <20060516135836.GA11675@opale.iro.umontreal.ca>
+References: <22777a450605151359g1f1e5291l21b450748c181b90@mail.gmail.com> <20060516135836.GA11675@opale.iro.umontreal.ca>
+Message-ID: <446A038C.5050005@apstat.com>
+
+Olivier Delalleau wrote:
+> Having a FAQ is certainly a good idea. However, don't forget there is
+> (supposed to be) a manual too. Some of the FAQ's questions should
+> probably refer to a section in the manual (rather than duplicate its
+> content). This is not a criticism (I actually haven't looked at the FAQ
+> yet), just an advice for future FAQ updates (updating the manual at the
+> same time would be nice ;)
+>   
+I agree. FAQ entries should be relatively short, to-the-point answers 
+(one or 2 small paragraphs). If you feel more space is required for 
+further development, then this should probably go in one of the guides, 
+with the FAQ entry just pointing to it.
+
+Note 1: I've added a new chapter in the Programmer's Guide on "Managing 
+software growth" (chapter 5). It's still unfinished, but is already 
+worth a read for PLearn C++ developers.
+Note 2: The rest of the guide is terribly outdated, to the point that 
+information therein can be misleading. I'll have to do a full pass over 
+it (and the user's guide) one of these days.
+
+-- Pascal
+
+
+-- 
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+http://www.apstat.com
+
+
+
+From pascal at apstat.com  Wed May 24 19:56:38 2006
+From: pascal at apstat.com (Pascal Vincent)
+Date: Wed, 24 May 2006 13:56:38 -0400
+Subject: [Plearn-developers] Regarding inclusion of tostring.h
+Message-ID: <44749E56.3020307@apstat.com>
+
+If some files that previously compile no longer do, it may be because 
+you have to #include <plearn/base/tostring.h> explicitly now (whereas 
+before, it might have been included indirectly through another of your 
+include directives).
+
+Rationale: In a tiny drop of contribution towards decreasing 
+dependency-hell in PLearn, I tried to make stringutils.h independent of 
+PStream. Thus I moved out the 2 PStream related methods, and removed the 
+automatic include of tostring. Thus, including stringutils no longer 
+automatically includes tostring, which you may thus have to include 
+explicitly.
+
+-- 
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+http://www.apstat.com
+
+
+
+From pascal at apstat.com  Wed May 24 20:04:48 2006
+From: pascal at apstat.com (Pascal Vincent)
+Date: Wed, 24 May 2006 14:04:48 -0400
+Subject: [Plearn-developers] Advertisement: NEW! plearn/base/tuple.h
+Message-ID: <4474A040.3040909@apstat.com>
+
+The "tuple" construct from the boost library (see 
+http://www.boost.org/libs/tuple/doc/tuple_users_guide.html ) is now 
+officially supported and recommended for use within PLearn.
+
+If you wish to use tuples, you are advised to #include 
+<plearn/base/tuple.h> which injects the tuple, make_tuple, tie and get 
+operations from the boost::tuples namespace in the PLearn namespace, and 
+defines proper serialization of tuples to/from PStream (thus tostring 
+will also work) as well as proper TypeTraits for tuples.
+
+Have fun with tuples!
+
+-- 
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+http://www.apstat.com
+
+
+
+From chapados at apstat.com  Mon May 29 21:19:15 2006
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Mon, 29 May 2006 15:19:15 -0400
+Subject: [Plearn-developers] Logging in Optimizers
+Message-ID: <447B4933.105@apstat.com>
+
+Hello all,
+
+This is just to inform you of a small change I made to GradientOptimizer 
+and ConjGradientOptimizer: logging is now carried out through named 
+logs, in order to facilitate sorting out the bunch of output messages 
+that may come out of a PLearn run.
+
+SO, in order to view the progress of your optimization, as before you 
+need to set the optimizer verbosity to 1 or 2, and IN ADDITION, you need 
+to invoke PLearn with the option:
+
+	plearn --enable-logging GradientOptimizer,ConjGradientOptimizer [my-script.plearn]
+
+
+Note that if you only use either of GradientOptimizer or 
+ConjGradientOptimizer, you may omit the other enable-logging in the 
+above invocation.
+
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+
+

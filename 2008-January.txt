@@ -1,0 +1,18 @@
+From nouiz at nouiz.org  Tue Jan 29 22:28:18 2008
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Tue, 29 Jan 2008 16:28:18 -0500
+Subject: [Plearn-developers] GaussianizeVMatrix default behavior changed.
+Message-ID: <2d1d7fe70801291328r27fe89b2n211edd94f2a44749@mail.gmail.com>
+
+Hi,
+
+I changed the default behavior of GaussianizeVMatrix!
+
+I added a build option, gaussianize_binary, in GaussianizeVMatrix.
+When false binary variable are not gaussianized.
+The default value is false. This change the default behavior as in the
+past only the threshold is used. In some case in the old version
+binary variable was gaussianised. So if you use it in your experiment,
+check them...
+
+

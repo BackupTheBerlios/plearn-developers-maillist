@@ -1,0 +1,236 @@
+From lamblinp at iro.umontreal.ca  Wed Jul  4 04:43:47 2007
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Wed, 4 Jul 2007 04:43:47 +0200
+Subject: [Plearn-developers] new syntax in pymake *.hosts files
+Message-ID: <20070704024347.GA19202@pig.zood.org>
+
+Hi,
+
+I just committed a change that I've been thinking of for a while:
+there's now an extended syntax for the files linux-i386.hosts,
+linux-x86_64.hosts (and so on), which are used by pymake.
+
+Previously, each line consisted in a hostname (or an empty or
+commented-out line).
+Now, we can also specify a number of compilation processes to run on
+this host, and a nice value (useful if you want to compile on desktop
+machines). Both are optional: default number of processes is 1, and
+default nice value can be specified in your pymake.config.model
+(variable 'default_nice_value').
+
+The syntax is:
+hostname[/n_processes] [nice_value]
+
+The '/' was chosen because it's used in distcc's syntax.
+
+I changed the files in /u/lisa/.pymake, so if you have a symlink to
+them, you might want to update pymake and pymake.config.model:
+
+$ cd $PLEARNDIR; svn update pymake.config.model python_modules/plearn/pymake/pymake.py
+
+Please let me know if you experience any problem.
+-- 
+Pascal
+
+
+From popovicd at iro.umontreal.ca  Sun Jul 22 23:01:08 2007
+From: popovicd at iro.umontreal.ca (popovicd at iro.umontreal.ca)
+Date: Sun, 22 Jul 2007 17:01:08 -0400 (EDT)
+Subject: [Plearn-developers] pylearn compilation error
+Message-ID: <64874.89.59.198.4.1185138068.squirrel@webmail.iro.umontreal.ca>
+
+Hi guys,
+
+I am trying to compile {PLEARNDIR}/pylearn, and I get the following error
+message when I run make:
+
+pyste --multiple --out=pylearn --cache-dir=pyste.cache -I `pwd`/.. -D
+USE_EXCEPTIONS -D USEDOUBLE base.pyste
+Traceback (most recent call last):
+  File "/usr/bin/pyste", line 4, in <module>
+    pyste.main()
+  File "/var/lib/python-support/python2.5/Pyste/pyste.py", line 418, in main
+    status = Begin()
+  File "/var/lib/python-support/python2.5/Pyste/pyste.py", line 251, in Begin
+    ExecuteInterface(interface)
+  File "/var/lib/python-support/python2.5/Pyste/pyste.py", line 298, in
+ExecuteInterface
+    execfile(interface, context)
+  File "base.pyste", line 3, in <module>
+    from defs import *
+  File "/home/chrissi/PLearn/pylearn/defs.py", line 1, in <module>
+    from policies import *
+ImportError: No module named policies
+make: *** [pylearn/_base.cpp] Error 1
+
+
+Does anybody have any where I can get the module policies from?
+
+BTW, I use ubuntu.
+
+
+Thanks,
+Dan
+
+
+From bengioy at iro.umontreal.ca  Tue Jul 31 02:54:53 2007
+From: bengioy at iro.umontreal.ca (Yoshua Bengio)
+Date: Mon, 30 Jul 2007 20:54:53 -0400
+Subject: [Plearn-developers] Defining and re-defining methods of PLearn
+	objects from python
+Message-ID: <46AE885D.8060901@iro.umontreal.ca>
+
+Hi all,
+
+Xavier Saint-Mleux strikes again!
+
+It is now possible to the following marvelous things when using the 
+python-plearn extension (plearn shared object called from python). This 
+should allow us to get much better organized in adding functionality to 
+PLearn C++ code from python, exploiting object-oriented programming and 
+adding special functionality easily from python (with the option to make 
+it more efficient later by moving the method to C++!).
+
+You can now
+
+  - define a subclass of a PLearn class, e.g.
+class myRBM(RBMModule):
+           ...
+
+  - define new methods for these instances, e.g.
+class myRBM(RBMModule):
+           def f(self,blah):
+               print self.name+blah
+               return
+
+ - redefine existing C++ methods in PLearn, and call the C++ one from 
+the python one:
+
+class myRBM(RBMModule):
+    def getPorts(self):
+        print "calling python's getPorts"
+        return RBMModule.getPorts(self)
+ >>> x = myRBM()
+ >>> x.getPorts()
+calling python's getPorts
+['visible', 'hidden.state', 'hidden_activations.state', 
+'visible_sample', 'visible_expectation', 'visible_activation', 
+'hidden_sample', 'energy', 'hidden_bias', 'weights', 
+'neg_log_likelihood', 'neg_log_phidden', 'neg_log_pvisible_given_phidden']
+
+
+Note that python classes for the PLearn C++ classes are created on the 
+fly when needed (e.g. when subclassing them). After running the above 
+code, the object "RBMModule" exists (as a class), but it dit not before. 
+Similarly, after evaluating "pl.LinearRegressor()", the object class 
+"LinearRegressor" will be created.
+
+-- Yoshua
+
+
+
+
+
+
+From chapados at apstat.com  Tue Jul 31 23:35:27 2007
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Tue, 31 Jul 2007 17:35:27 -0400
+Subject: [Plearn-developers] Defining and re-defining methods of PLearn
+ objects from python
+In-Reply-To: <46AE885D.8060901@iro.umontreal.ca>
+References: <46AE885D.8060901@iro.umontreal.ca>
+Message-ID: <46AFAB1F.7040204@apstat.com>
+
+Just a few more precisions on the current state of the object-oriented 
+Python-PLearn bridge.
+
+It is currently possible for a Python class to inherit from a C++ class, 
+to add methods and attributes, and to override C++ methods.  This works 
+as long as OTHER PYTHON CODE calls the inherited object.  What is 
+currently not possible is to take the Python object, pass it back to 
+PLearn, and have C++ code make virtual function calls that are mapped to 
+the dynamic Python overrides.  In other words, keep the following matrix 
+in mind:
+
+*Supported scenario:*
+
+    * Base class: C++ (inherits from PLearn::Object).
+    * Derived class: Python.
+    * Client code calling derived class: Python
+
+*UNSUPPORTED scenario (thus far):*
+
+    * Base class: C++ (inherits from PLearn::Object).
+    * Derived class: Python.
+    * Client code calling derived class: C++
+
+
+    + Nicolas
+
+
+Yoshua Bengio wrote:
+> Hi all,
+>
+> Xavier Saint-Mleux strikes again!
+>
+> It is now possible to the following marvelous things when using the 
+> python-plearn extension (plearn shared object called from python). This 
+> should allow us to get much better organized in adding functionality to 
+> PLearn C++ code from python, exploiting object-oriented programming and 
+> adding special functionality easily from python (with the option to make 
+> it more efficient later by moving the method to C++!).
+>
+> You can now
+>
+>   - define a subclass of a PLearn class, e.g.
+> class myRBM(RBMModule):
+>            ...
+>
+>   - define new methods for these instances, e.g.
+> class myRBM(RBMModule):
+>            def f(self,blah):
+>                print self.name+blah
+>                return
+>
+>  - redefine existing C++ methods in PLearn, and call the C++ one from 
+> the python one:
+>
+> class myRBM(RBMModule):
+>     def getPorts(self):
+>         print "calling python's getPorts"
+>         return RBMModule.getPorts(self)
+>  >>> x = myRBM()
+>  >>> x.getPorts()
+> calling python's getPorts
+> ['visible', 'hidden.state', 'hidden_activations.state', 
+> 'visible_sample', 'visible_expectation', 'visible_activation', 
+> 'hidden_sample', 'energy', 'hidden_bias', 'weights', 
+> 'neg_log_likelihood', 'neg_log_phidden', 'neg_log_pvisible_given_phidden']
+>
+>
+> Note that python classes for the PLearn C++ classes are created on the 
+> fly when needed (e.g. when subclassing them). After running the above 
+> code, the object "RBMModule" exists (as a class), but it dit not before. 
+> Similarly, after evaluating "pl.LinearRegressor()", the object class 
+> "LinearRegressor" will be created.
+>
+> -- Yoshua
+>
+>
+>
+>
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> https://lists.berlios.de/mailman/listinfo/plearn-developers
+>   
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20070731/96988708/attachment.html>
+

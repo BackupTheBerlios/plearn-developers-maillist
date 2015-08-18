@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Valeur INFINITY
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Valeur%20INFINITY&In-Reply-To=%3C42EE84CF.5050604%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000018.html">
+   <LINK REL="Next"  HREF="000020.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Valeur INFINITY</H1>
+    <B>Pascal Vincent</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Valeur%20INFINITY&In-Reply-To=%3C42EE84CF.5050604%40apstat.com%3E"
+       TITLE="[Plearn-developers] Valeur INFINITY">pascal at apstat.com
+       </A><BR>
+    <I>Mon Aug  1 22:23:43 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000018.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+        <LI>Next message: <A HREF="000020.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19">[ date ]</a>
+              <a href="thread.html#19">[ thread ]</a>
+              <a href="subject.html#19">[ subject ]</a>
+              <a href="author.html#19">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Jasmin Lapalme wrote:
+
+&gt;<i> Bonjour,
+</I>&gt;<i>     J'ai encore des probl&#232;mes &#224; la compilation sous Mac OS X (10.4,  
+</I>&gt;<i> gcc 4.0.0). Dans PStream.cc:537, une constante INFINITY est donn&#233; &#224;  
+</I>&gt;<i> un double et ceci cause l'erreur suivante :
+</I>&gt;<i>
+</I>&gt;<i> error: floating constant exceeds tange of 'float'
+</I>&gt;<i>
+</I>&gt;<i>     Que repr&#233;sente la constante INFINITY? lorsque que je la remplace  
+</I>&gt;<i> DBL_MAX le fichier compile bien. Va-t-il y avoir un probl&#232;me si je  
+</I>&gt;<i> met DBL_MAX &#224; la place?
+</I>&gt;<i>
+</I>&gt;<i> Merci
+</I>&gt;<i>
+</I>&gt;<i> Jasmin
+</I>
+Il y a un standard IEEE qui d&#233;finit le format (bit-patern) pour les 
+float et double, et qui d&#233;finit aussi un certain nombre de 'valeurs 
+sp&#233;ciales' qui incluent si je ne m'abuse plusieurs sortes de NaN (not a 
+number) et plusieurs sortes d'infinis (plus l'infini, moins l'infini, 
+etc...). Je ne sais pas si il y a une fa&#231;on portable et/ou officielle 
+d'attribuer ces valeurs sp&#233;ciales &#224; un float ou double. Si c'est 
+vraiment crucial pour son usage, peut-&#234;tre la personne qui a cod&#233; ce cas 
+sp&#233;cial pourra mettre a jour le code. En attendant je sugg&#232;re plut&#244;t de 
+le remplacer par MISSING_VALUE (pour lesquels on utilise NaN) plut&#244;t que 
+par DBL_MAX.
+
+-- 
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+<A HREF="http://www.apstat.com">http://www.apstat.com</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000018.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+	<LI>Next message: <A HREF="000020.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#19">[ date ]</a>
+              <a href="thread.html#19">[ thread ]</a>
+              <a href="subject.html#19">[ subject ]</a>
+              <a href="author.html#19">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

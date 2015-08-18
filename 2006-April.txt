@@ -1,0 +1,14 @@
+From delallea at iro.umontreal.ca  Tue Apr 11 20:11:03 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Tue, 11 Apr 2006 14:11:03 -0400
+Subject: [Plearn-developers] Stochastic hack disabled by default in GradientOptimizer
+Message-ID: <20060411181100.GA9422@opale.iro.umontreal.ca>
+
+I changed the value of option 'use_stochastic_hack' from true to false,
+as this hack may cause a different behavior (in particular it does not
+take Variable box constraints into account).
+
+--
+Olivier
+
+

@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] cleaning in pymake and pymake.config.model
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20cleaning%20in%20pymake%20and%20pymake.config.model&In-Reply-To=%3C20060721041440.GA19111%40pig.zood.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000114.html">
+   <LINK REL="Next"  HREF="000107.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] cleaning in pymake and pymake.config.model</H1>
+    <B>Pascal Lamblin</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20cleaning%20in%20pymake%20and%20pymake.config.model&In-Reply-To=%3C20060721041440.GA19111%40pig.zood.org%3E"
+       TITLE="[Plearn-developers] cleaning in pymake and pymake.config.model">lamblinp at iro.umontreal.ca
+       </A><BR>
+    <I>Fri Jul 21 06:14:40 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000114.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+        <LI>Next message: <A HREF="000107.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#115">[ date ]</a>
+              <a href="thread.html#115">[ thread ]</a>
+              <a href="subject.html#115">[ subject ]</a>
+              <a href="author.html#115">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Mon, Jul 17, 2006, Pascal Vincent wrote:
+&gt;<i> &gt; if you execute &quot;pymake -double -float plearn.cc&quot;, do you need it to
+</I>&gt;<i> &gt; compile in &quot;double&quot; mode (with a warning), or would it be OK if it
+</I>&gt;<i> &gt; aborted?
+</I>&gt;<i>
+</I>&gt;<i> Aborting with a nice explicit error message would be perfectly fine.
+</I>
+Done. Let me know if the message is not explicit enough.
+
+&gt;<i> &gt;&gt; DBDIR est un syst&#232;me pour sp&#233;cifier la localisation de datasets 
+</I>&gt;<i> &gt;&gt; &quot;standards&quot;. C'est un vieux syst&#232;me qu'il faudrait sans doute remplacer 
+</I>&gt;<i> &gt;&gt; (par quoi?), mais pour l'instant il semble encore utilis&#233; &#224; quelques 
+</I>&gt;<i> &gt;&gt; endroits.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Sachant que getDataSet() ne supporte plus les sp&#233;cifications de dataset
+</I>&gt;<i> &gt; &quot;standard&quot;, je ne sais m&#234;me pas si ce code est utilis&#233;.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Si on d&#233;cide de le r&#233;utiliser, je pr&#233;f&#232;rerais largement le remplacer par
+</I>&gt;<i> &gt; un PPath, comme pour UCI_MLDB_REP et UCI_MLDB.
+</I>&gt;<i>
+</I>&gt;<i> Oui, je seconde l'utilisation du m&#233;canisme de PPath avec un path ajout&#233; 
+</I>&gt;<i> &#224; ~/.plearn/ppath.config pour UCI_MLDB
+</I>
+C'est fait, j'ai modifi&#233; le script &quot;setup&quot; pour qu'il initialise
+&quot;DBDIR:&quot; &#224; &quot;$DBDIR&quot; s'il existe sinon &#224; &quot;/u/lisa/Database&quot;.
+J'ai &#233;galement rajout&#233; &quot;UCI_MLDB_REP:&quot;, initialis&#233; &#224; &quot;DBDIR:UCI_MLDB&quot;.
+
+Attention : si vous relancez le &quot;setup&quot; &#224; la main pour qu'il modifie le
+~/.plearn/ppath.config, pensez &#224; r&#233;&#233;diter ce dernier pour remplacer
+PLEARN_LIBDIR &quot;/u/lisa/local/&lt;plateforme&gt;/lib&quot; par
+PLEARN_LIBDIR &quot;${PLEARN_LIBDIR}&quot; si vous &#234;tes au lisa.
+
+D'ailleurs, est-ce que &#231;a serait possible que la variable ne soit pas
+&#233;valu&#233;e quand on lance &quot;setup&quot; ?
+
+Sinon, j'ai remplac&#233; les DBDIR &quot;...&quot; par des &quot;DBDIR:...&quot; dans PLearn,
+mais je n'ai pas touch&#233; &#224; LisaPLearn. Donc ce changement vous pose des
+probl&#232;mes, pr&#233;venez-moi et je rectifierai &#231;a dans LisaPLearn aussi.
+(Si &#231;a vous pose probl&#232;me dans Apstatsoft, par contre, d&#233;brouillez-vous
+;)
+
+&#192; plus,
+-- 
+Pascal
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000114.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+	<LI>Next message: <A HREF="000107.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#115">[ date ]</a>
+              <a href="thread.html#115">[ thread ]</a>
+              <a href="subject.html#115">[ subject ]</a>
+              <a href="author.html#115">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

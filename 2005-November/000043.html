@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Adding tests to the PLearn test-suite
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Adding%20tests%20to%20the%20PLearn%20test-suite&In-Reply-To=%3C436F89B1.6020503%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000042.html">
+   <LINK REL="Next"  HREF="000044.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Adding tests to the PLearn test-suite</H1>
+    <B>Christian Dorion</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Adding%20tests%20to%20the%20PLearn%20test-suite&In-Reply-To=%3C436F89B1.6020503%40apstat.com%3E"
+       TITLE="[Plearn-developers] Adding tests to the PLearn test-suite">dorionc at apstat.com
+       </A><BR>
+    <I>Mon Nov  7 18:06:57 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000042.html">[Plearn-developers] Adding tests to the PLearn test-suite
+</A></li>
+        <LI>Next message: <A HREF="000044.html">[Plearn-developers] Re: Adding tests to the PLearn test-suite
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#43">[ date ]</a>
+              <a href="thread.html#43">[ thread ]</a>
+              <a href="subject.html#43">[ subject ]</a>
+              <a href="author.html#43">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi everyone,
+
+About PyTest: a little undocumented (lazy me) convention that I'd like 
+to see followed is to prefix PLearn test names by 'PL_' as much already 
+are. The reason is quite simple; some day (in a hopefully close future) 
+it will be possible to use a regexp to restrict the tests to be ran by 
+'pytest run --all'. This may be useful, for example, for ApStat users 
+since apstatsoft general tests are prefixed by 'AP_' while some project 
+specific tests are prefixed 'LSE_' or 'CTA_'...
+
+I'd really like this convention to be followed and I give you my word 
+I'll document it when I'll release PyTest 1.0 ;)
+Ciao.
+-- 
+*Christian Dorion*/
+Doctorant en Finance (McGill's Faculty of Management)
+M.Sc. Informatique et Recherche Op&#233;rationnelle//
+Apstat Technologies Inc./
+<A HREF="http://www.apstat.com">http://www.apstat.com</A>
+T&#233;l : (514) 343-9119, ext. 237
+
+&quot;Soyons r&#233;alistes, exigeons l'impossible&quot;,
+Ernesto &quot;Che&quot; Guevara, 1928-1967
+
+&quot;Love is a Temple, Love the higher Law&quot;,
+One, U2
+ 
+
+Olivier Delalleau wrote:
+
+&gt;<i>A couple of remarks about my previous email:
+</I>&gt;<i>
+</I>&gt;<i>On 04 Nov 2005, Olivier Delalleau wrote:
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>&gt;&gt;<i>            // In VarUtilsTest::declareOptions
+</I>&gt;&gt;<i>            declareOption(ol, &quot;vec_results&quot;, &amp;VarUtilsTest::vec_results,
+</I>&gt;&gt;<i>                OptionBase::buildoption,
+</I>&gt;&gt;<i>                &quot;Test Vec results.&quot;);
+</I>&gt;&gt;<i>    
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>Actually, a learnt option (OptionBase::learntoption) would be more
+</I>&gt;<i>appropriate here.
+</I>&gt;<i>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>&gt;&gt;<i>18. Add your specific files to version control:
+</I>&gt;&gt;<i>    svn add varutils_test.plearn
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>19. Add generic test files to version control:
+</I>&gt;&gt;<i>    pytest vc_add
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>20. Do a 'svn status' and remove useless files marked with '?' (do not
+</I>&gt;&gt;<i>accidentally delete some of your own important files!)
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>21. Check that your test works fine:
+</I>&gt;&gt;<i>    pytest run
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>    
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>Better do step 21 (checking the test passes correctly) before step 19
+</I>&gt;<i>(addition of files to the subversion repository). Pytest is indeed a bit
+</I>&gt;<i>confused when trying to re-generate results while current results are
+</I>&gt;<i>scheduled to be added, but not committed yet.
+</I>&gt;<i>
+</I>&gt;<i>--
+</I>&gt;<i>Olivier
+</I>&gt;<i>_______________________________________________
+</I>&gt;<i>Plearn-developers mailing list
+</I>&gt;<i><A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">Plearn-developers at lists.berlios.de</A>
+</I>&gt;<i><A HREF="http://lists.berlios.de/mailman/listinfo/plearn-developers">http://lists.berlios.de/mailman/listinfo/plearn-developers</A>
+</I>&gt;<i>  
+</I>&gt;<i>
+</I>
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="https://lists.berlios.de/pipermail/plearn-developers/attachments/20051107/8f2ac649/attachment.html">https://lists.berlios.de/pipermail/plearn-developers/attachments/20051107/8f2ac649/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000042.html">[Plearn-developers] Adding tests to the PLearn test-suite
+</A></li>
+	<LI>Next message: <A HREF="000044.html">[Plearn-developers] Re: Adding tests to the PLearn test-suite
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#43">[ date ]</a>
+              <a href="thread.html#43">[ thread ]</a>
+              <a href="subject.html#43">[ subject ]</a>
+              <a href="author.html#43">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

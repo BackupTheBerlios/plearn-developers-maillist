@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] FOLLOW-UP: Assertions in PLearn
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-October/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20FOLLOW-UP%3A%20Assertions%20in%20PLearn&In-Reply-To=%3C453FB8C7.2050105%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000123.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] FOLLOW-UP: Assertions in PLearn</H1>
+    <B>Nicolas Chapados</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20FOLLOW-UP%3A%20Assertions%20in%20PLearn&In-Reply-To=%3C453FB8C7.2050105%40apstat.com%3E"
+       TITLE="[Plearn-developers] FOLLOW-UP: Assertions in PLearn">chapados at apstat.com
+       </A><BR>
+    <I>Wed Oct 25 21:19:35 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000123.html">[Plearn-developers] Assertions in PLearn
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#124">[ date ]</a>
+              <a href="thread.html#124">[ thread ]</a>
+              <a href="subject.html#124">[ subject ]</a>
+              <a href="author.html#124">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Dear PLearners,
+
+A follow-up regarding assertion-handling in PLearn.  It turns out that 
+some compilers are VERY VIOLENT against attempts to &quot;override&quot; the 
+standard assert() mechanism.  [[You will recall that this is what my 
+previous message was about.]]  Since this was starting to cause more 
+headaches than could easily be solved by a single bottle of Advil, I had 
+to resort to the alternative solution:
+
+*DEFINE OUR OWN ASSERTION-CHECKING MACRO IN PLEARN
+*
+
+So I just committed the following macros (in &lt;plearn/base/plerror.h&gt;) ::
+
+   1. PLASSERT(condition): this is just like the standard assert()
+      macro, except that it throws an exception on failure. (Same kind
+      as a PLERROR at the moment -- Pascal Vincent tells me he might
+      change this in the future).
+   2. PLASSERT_MSG(condition, message): as above, but with an additional
+      explanatory message if the condition fails.
+
+Furthermore, PLearn svn revision 6351 contains a GLOBAL SEARCH-REPLACE 
+of all occurrences of assert() to PLASSERT(). IT IS IMPERATIVE that you 
+start using PLASSERT() from now on, instead of the standard assert().  
+[[Why?  As explained below, the standard assert() aborts the program on 
+failure, which is highly unsuitable for running PLearn in server mode.]]
+
+Questions, comments and suggestions are, as always, welcome.
+
+    +Nicolas
+
+
+Nicolas Chapados wrote:
+&gt;<i> Hello fellow PLearners,
+</I>&gt;<i>
+</I>&gt;<i> Just a quick note to inform you that I modified the C assertion checking 
+</I>&gt;<i> mechanism -- when inside PLearn -- to raise an exception (PLERROR) when 
+</I>&gt;<i> an exception is not satisfied.  The syntax remains the same as C 
+</I>&gt;<i> standard asserts:
+</I>&gt;<i>
+</I>&gt;<i>     assert(condition);
+</I>&gt;<i>
+</I>&gt;<i> except that if &quot;condition&quot; is not satisfied, this produces a PLERROR.  
+</I>&gt;<i> The new behavior kicks into play as soon as you include 
+</I>&gt;<i> &lt;plearn/base/plerror.h&gt;, which is almost everywhere in PLearn.  In 
+</I>&gt;<i> addition, I added a macro &quot;pl_assert&quot; which allows one to include a 
+</I>&gt;<i> descriptive message as to what the failed condition indicates.  Use it 
+</I>&gt;<i> as follows:
+</I>&gt;<i>
+</I>&gt;<i>     plassert(condition, &quot;This condition indicates a problem in the XYZ subsystem&quot;);
+</I>&gt;<i>
+</I>&gt;<i> As always, when you compile with the -opt option in pymake, these 
+</I>&gt;<i> assertions are not actually compiled into your code.  Therefore, you 
+</I>&gt;<i> should (liberally) use assertions for checking genuine logic errors in 
+</I>&gt;<i> your programs, and not conditions that may result from a user 
+</I>&gt;<i> interaction (such as bad values in a script).  Keep using old-fashioned 
+</I>&gt;<i> PLERROR for this purpose.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> FREQUENTLY-ASKED QUESTIONS
+</I>&gt;<i> =====================
+</I>&gt;<i>
+</I>&gt;<i> Q1) What are the interactions with the C standard &lt;assert.h&gt; mechanism?
+</I>&gt;<i> A1) The interaction is as follows: as soon as plerror.h is included, any 
+</I>&gt;<i> previous assert macro is undefined, and replaced with this new definition.
+</I>&gt;<i>
+</I>&gt;<i> Q2) What happens if I include &lt;assert.h&gt; after plerror.h?
+</I>&gt;<i> A2) Nothing.  The standard assert does not override the PLearn one.
+</I>&gt;<i>
+</I>&gt;<i> Q3) Can I go back to the standard assert mechanism?
+</I>&gt;<i> A3) No.  But tell me if this is something you need.
+</I>&gt;<i>
+</I>&gt;<i> Q4) Why bother with this at all?  I thought normal asserts were fine!
+</I>&gt;<i> A4) Normal asserts abort the program when the condition is not 
+</I>&gt;<i> satisfied.  This is a big no-no for running PLearn in server mode, which 
+</I>&gt;<i> should NEVER ABORT.  With this change, any internal error is caught at 
+</I>&gt;<i> the top-level, and relayed back to the calling program in the form of an 
+</I>&gt;<i> exception, which at least tells the client that something wrong happened 
+</I>&gt;<i> instead of just hanging in its face.
+</I>&gt;<i>
+</I>&gt;<i> Wishing all a fully-asserted PLearn future.
+</I>&gt;<i>
+</I>&gt;<i>     Cheers,
+</I>&gt;<i>     + Nicolas
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="https://lists.berlios.de/pipermail/plearn-developers/attachments/20061025/5c0716c5/attachment.html">https://lists.berlios.de/pipermail/plearn-developers/attachments/20061025/5c0716c5/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000123.html">[Plearn-developers] Assertions in PLearn
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#124">[ date ]</a>
+              <a href="thread.html#124">[ thread ]</a>
+              <a href="subject.html#124">[ subject ]</a>
+              <a href="author.html#124">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

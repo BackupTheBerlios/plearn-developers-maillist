@@ -1,0 +1,618 @@
+From delallea at iro.umontreal.ca  Thu Jul  7 21:18:45 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Thu, 7 Jul 2005 15:18:45 -0400
+Subject: [Plearn-developers] PRandom object for random numbers generation
+Message-ID: <20050707191844.GA1395@lsvm.iro.umontreal.ca>
+
+Hi,
+
+Until now, generating (pseudo)-random numbers in PLearn was a bit
+dangerous when mixing different objects, each with its own seed.
+I have added a new class: <plearn/math/PRandom.h>, which offers (almost)
+the same methods as the 'old' random.h file, but allows each object
+needing random numbers to have its own generator (and thus, seed).
+
+I encourage you to use this new object for your future code, and to
+convert any existing code that may need it. Note however that, in order
+to preserve PLearn's legendary backward-compatibility, there could be a
+need for a transition period where the two methods (old and new)
+co-exist (with a friendly warning when the old method is used, urging
+the user to switch to the new one or be severely tortured).
+
+Basic use is simple. Before you had something like:
+  real x = gaussian_mu_sigma(1,4);
+which will become
+  real x = my_generator.gaussian_mu_sigma(1,4);
+where my_generator is a PRandom class member and will have been
+initialized at build time by:
+  my_generator.manual_seed(seed);
+(where seed is possibly -1 to initialize with the CPU time).
+
+If you don't want to have your own class member and don't care about
+other parts of the code interfering in your computations, you can use
+the static method PRandom::common() which returns a common PP<PRandom>
+object usable by everyone. Basically this means you can just do
+  real x = PRandom::common()->gaussian_mu_sigma(1,4);
+and even
+  real x = PRandom::common(false)->gaussian_mu_sigma(1,4);
+(the second option is if you want to use a PRandom object whose seed is
+fixed at compilation time in order to more or less always get the same
+numbers, while in the first one the PRandom seed is set by the CPU time
+and thus will differ at each execution).
+
+Important note: the underlying code is not the same, thus the same seed
+will not generate the same numbers as before. The code is now based on
+Boost, which has the advantage of providing more headaches to people
+trying to install PLearn, in addition to be open-source (while the old
+code is somewhat inspired from Numerical Recipes).
+
+Last, previous random methods are not all available yet, feel free to
+add (or tell me) what you need in it.
+
+--
+Olivier
+
+PS: I'm putting in cc some devs who have not confirmed yet their
+subscription to the mailing-list. Please do so as soon as the Berlios
+mailing-list is fixed (looks like there's a problem currently).
+
+
+
+From delallea at iro.umontreal.ca  Tue Jul 12 16:24:24 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Tue, 12 Jul 2005 10:24:24 -0400
+Subject: [Plearn-developers] PRandom object for random numbers generation
+Message-ID: <20050712142424.GA28527@lsvm.iro.umontreal.ca>
+
+Hi,
+
+Until now, generating (pseudo)-random numbers in PLearn was a bit
+dangerous when mixing different objects, each with its own seed.
+I have added a new class: <plearn/math/PRandom.h>, which offers (almost)
+the same methods as the 'old' random.h file, but allows each object
+needing random numbers to have its own generator (and thus, seed).
+
+I encourage you to use this new object for your future code, and to
+convert any existing code that may need it. Note however that, in order
+to preserve PLearn's legendary backward-compatibility, there could be a
+need for a transition period where the two methods (old and new)
+co-exist (with a friendly warning when the old method is used, urging
+the user to switch to the new one or be severely tortured).
+
+Basic use is simple. Before you had something like:
+  real x = gaussian_mu_sigma(1,4);
+which will become
+  real x = my_generator.gaussian_mu_sigma(1,4);
+where my_generator is a PRandom class member and will have been
+initialized at build time by:
+  my_generator.manual_seed(seed);
+(where seed is possibly -1 to initialize with the CPU time).
+
+If you don't want to have your own class member and don't care about
+other parts of the code interfering in your computations, you can use
+the static method PRandom::common() which returns a common PP<PRandom>
+object usable by everyone. Basically this means you can just do
+  real x = PRandom::common()->gaussian_mu_sigma(1,4);
+and even
+  real x = PRandom::common(false)->gaussian_mu_sigma(1,4);
+(the second option is if you want to use a PRandom object whose seed is
+fixed at compilation time in order to more or less always get the same
+numbers, while in the first one the PRandom seed is set by the CPU time
+and thus will differ at each execution).
+
+Important note: the underlying code is not the same, thus the same seed
+will not generate the same numbers as before. The code is now based on
+Boost, which has the advantage of providing more headaches to people
+trying to install PLearn, in addition to be open-source (while the old
+code is somewhat inspired from Numerical Recipes).
+
+Last, previous random methods are not all available yet, feel free to
+add (or tell me) what you need in it.
+
+--
+Olivier
+
+PS: Hopefully the PLearn mailing-list is now working... sorry for those
+who got two copies of this email.
+
+
+
+From delallea at iro.umontreal.ca  Wed Jul 13 19:29:48 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Wed, 13 Jul 2005 13:29:48 -0400
+Subject: [Plearn-developers] Passing arguments to scripts
+Message-ID: <20050713172948.GA27120@lsvm.iro.umontreal.ca>
+
+There is a (more or less) new cool feature in PLearn that allows you to
+pass arguments to a script, either in a VMatrix script read by the
+getDataSet function (e.g. the 'specification' option of an AutoVMatrix),
+or when including a PLearn script with the $INCLUDE macro.
+Basically this lets you define variables in the filename with the syntax
+filename::var1=x1::var2=x2 ...
+
+Self-explanatory examples:
+
+plearn vmat view myvmat.vmat::n=100::k=5
+AutoVMatrix(specification = "mypymat.pymat::n=100::k=5::plearn=rules")
+learner = $INCLUDE{nnet.plearn::nhidden=10::lr=1e-3)
+dataset = $INCLUDE{myvmat.vmat::normalize=1}
+
+Note that when using the $INCLUDE macro, the variables given as
+arguments are *local* to the included script, i.e. they are not defined
+in the rest of the script, except if they were defined before, in which
+case they will keep their initial value in the rest of the script.
+
+--
+Olivier
+
+
+
+From chapados at apstat.com  Thu Jul 14 03:47:44 2005
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Wed, 13 Jul 2005 21:47:44 -0400
+Subject: [Plearn-developers] Repository Version Information
+Message-ID: <42D5C440.5040404@apstat.com>
+
+Hello all,
+
+In order to facilitate issue tracking and resolution, I made a few 
+changes to take advantage of one killer feature of svn: the availability 
+of a repository-wide "revision number".  This revision number for the 
+complete PLearn library is now available from C++ PLearn code by calling 
+the function pl_repository_version() defined in (you wouldn't have 
+guessed) <plearn/main/pl_repository_version.h>.
+
+Apart from being printed when starting a PLearn executable, this 
+revision number will soon be available when running PLearn in "server mode".
+
+One minor change had to be made to pymake in order to support this 
+feature: the file plearn/main/pl_repository_version.cc is "touched" by 
+pymake upon every compilation (this is necessary to inject the 
+repository revision information into the source code).  This means that 
+this file will ALWAYS BE RECOMPILED whenever a PLearn executable 
+(containing a "plearn_main") is compiled.  *DON'T WORRY, THIS IS 
+NORMAL*.  You should see that all went well by typing, e.g. "plearn" at 
+the prompt and noticing:
+
+    plearn 0.92.0  *svn_revision:PL3790*  (Jul 13 2005 19:38:52)
+    Type 'plearn help' for help
+
+Let me know of your comments or suggestions.
+
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20050713/202cd5e2/attachment.html>
+
+From delallea at iro.umontreal.ca  Thu Jul 14 22:00:25 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Thu, 14 Jul 2005 16:00:25 -0400
+Subject: [Plearn-developers] Repository Version Information
+In-Reply-To: <42D5C440.5040404@apstat.com>
+References: <42D5C440.5040404@apstat.com>
+Message-ID: <20050714200025.GA23041@lsvm.iro.umontreal.ca>
+
+As a small improvement, the file plearn/main/pl_repository_version.cc
+will now only be re-compiled if the version has changed from the last
+time it was compiled.
+The version revision used for last compilation is stored in the file
+$HOME/.plearn/plearn_svn_repository_revision.
+
+Note: the PLearn repository revision is only updated when you run an
+update on the PLearn directory. Thus, if you care about your version
+number, don't forget to update first (committing your changes is not
+enough).
+
+--
+Olivier
+
+On 13 Jul 2005, Nicolas Chapados wrote:
+> Hello all,
+> 
+> In order to facilitate issue tracking and resolution, I made a few 
+> changes to take advantage of one killer feature of svn: the availability 
+> of a repository-wide "revision number".  This revision number for the 
+> complete PLearn library is now available from C++ PLearn code by calling 
+> the function pl_repository_version() defined in (you wouldn't have 
+> guessed) <plearn/main/pl_repository_version.h>.
+> 
+> Apart from being printed when starting a PLearn executable, this 
+> revision number will soon be available when running PLearn in "server mode".
+> 
+> One minor change had to be made to pymake in order to support this 
+> feature: the file plearn/main/pl_repository_version.cc is "touched" by 
+> pymake upon every compilation (this is necessary to inject the 
+> repository revision information into the source code).  This means that 
+> this file will ALWAYS BE RECOMPILED whenever a PLearn executable 
+> (containing a "plearn_main") is compiled.  *DON'T WORRY, THIS IS 
+> NORMAL*.  You should see that all went well by typing, e.g. "plearn" at 
+> the prompt and noticing:
+> 
+>    plearn 0.92.0  *svn_revision:PL3790*  (Jul 13 2005 19:38:52)
+>    Type 'plearn help' for help
+> 
+> Let me know of your comments or suggestions.
+> 
+>    + Nicolas
+> 
+
+
+From delallea at iro.umontreal.ca  Mon Jul 18 18:11:02 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Mon, 18 Jul 2005 12:11:02 -0400
+Subject: [Plearn-developers] VMat statistics
+Message-ID: <20050718161102.GA16796@lsvm.iro.umontreal.ca>
+
+I made some important changes to most methods computing statistics
+(mean, variance & co) in plearn/vmat/VMat_basic_stats.cc. Basically,
+these methods now rely on StatsCollectors instead of having their own
+independent code living on its own.
+In particular this means:
+- missing values should now be handled correctly
+- results may not be exactly the same (in particular, when computing the
+  variance, the old code for non-weighted stats was dividing by n-1,
+  while the new one will divide by n)
+
+--
+Olivier
+
+
+From delallea at iro.umontreal.ca  Mon Jul 18 20:27:36 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Mon, 18 Jul 2005 14:27:36 -0400
+Subject: [Plearn-developers] VMat statistics
+In-Reply-To: <20050718161102.GA16796@lsvm.iro.umontreal.ca>
+References: <20050718161102.GA16796@lsvm.iro.umontreal.ca>
+Message-ID: <20050718182736.GA20711@lsvm.iro.umontreal.ca>
+
+On 18 Jul 2005, Olivier Delalleau wrote:
+> I made some important changes to most methods computing statistics
+> (mean, variance & co) in plearn/vmat/VMat_basic_stats.cc. Basically,
+> these methods now rely on StatsCollectors instead of having their own
+> independent code living on its own.
+> In particular this means:
+> - missing values should now be handled correctly
+
+> - results may not be exactly the same (in particular, when computing the
+>   variance, the old code for non-weighted stats was dividing by n-1,
+>   while the new one will divide by n)
+
+I was wrong, I just checked and it will actually be divided by n-1, just
+as before. For the moment ;)
+
+--
+Olivier
+
+
+
+From lapalmej at iro.umontreal.ca  Mon Jul 18 21:57:50 2005
+From: lapalmej at iro.umontreal.ca (Jasmin Lapalme)
+Date: Mon, 18 Jul 2005 15:57:50 -0400
+Subject: [Plearn-developers] Filenames / Noms de fichiers
+Message-ID: <B33C04B7-0000-46D8-9AAB-45E0F46DCB7B@iro.umontreal.ca>
+
+Bonjour,
+     Je tente depuis quelques temps de faire un checkout avec svn. Le  
+checkout bloque car il y a des noms de fichiers avec des caract?res  
+qui sont r?server sur windows (par exemple le ":") et par le faire  
+m?me tout ce qui passe par SMB. Dans mon cas, j'utilise SMB pour  
+avoir mon home sur Mac OS X et maintenant il m'est impossible  
+d'utiliser PLearn ? cause des noms de fichiers avec des ":".
+
+     Est-ce qu'il serait possible d'enlever tous les ":" des tous les  
+noms de fichiers de PLearn? Voici la liste des caract?res qui ne  
+devrait pas ?tre utilis? :
+         Le deux point                  :
+         L'ast?rix                            *
+         Le point d'interrogation ?
+         Le guillemet                     "
+         Le plus-petit et plus grand    < >
+         La barre verticale            |
+
+Merci
+
+---
+Hi,
+     I try to checkout the new version of PLearn with svn. I'm unable  
+to do it because there's one or more filename with colon in it. The  
+colon is a reserved caracter in windows and in SMB. In my case, I use  
+SMB to mount my home directory on Mac OS X and I'm unable to use  
+PLearn anymore.
+     So, would you please remove all the colons (":") in your  
+filename in PLearn?
+     Actually, here is the list of the caracters that you should NOT  
+use :
+         The colon                        :
+         The star                            *
+         The question mark        ?
+         double quote                   "
+         Less than and greater than    < >
+         The "pipe"                        |
+
+
+Thanks
+
+Jasmin Lapalme
+
+
+
+From pascal at apstat.com  Mon Jul 18 23:17:19 2005
+From: pascal at apstat.com (Pascal Vincent)
+Date: Mon, 18 Jul 2005 17:17:19 -0400
+Subject: [Plearn-developers] Several commits
+Message-ID: <42DC1C5F.6000302@apstat.com>
+
+Hello PLearners,
+
+Just want to warn you of a few changes I just comitted:
+
+I) CHANGES REGARDING I/O AND LOGGING
+
+a) Method readAsciiNum of PStream now issues a PLERROR if what's on the 
+stream doesn't look like an ascii number
+(previously this was ignored, and the call simply returned, with the 
+"read" value set to 0)
+
+b) perr is now properly constructed as a PrPStreamBuf directed to the 
+standard error instead of standard output (note that it is opened in 
+*raw_ascii* mode, as it should be...)
+
+c) The pl_log sub-system now writes to perr in raw_ascii mode (it used 
+to log to cerr in plearn_ascii mode). This may change the output format 
+somewhat.
+
+d) PLERROR now logs a message to IMP_LOG prior to throwing the exception.
+
+d) Writing a VMatrix to a PStream now always prints the object's 
+structure, even in plearn_ascii mode (it used to print the matrix's 
+elements), as this is far more useful for debugging.
+
+e) operator>>(PStream& in, Object*& x) no longer attempts to read the 
+blanks after reading the object (this caused plearn server to hang in 
+special circumstances)
+
+
+II) CHANGES REGARDING GaussianDistribution
+
+I've added some options to GaussianDistribution to allow for a better 
+and clearer "regularization" control. It should be backward compatible. 
+If anybody notices unexpected behaviour for this class, please let me know.
+
+III) ONGOING WORK ON PARALLELIZATION AND REMOTE METHOD CALLS
+
+Ongoing work on parallelization made me modify the following classes: 
+PLearnServer, RemotePLearnServer, PLearnService, and PLearner
+But for now, nobody but me should be messing with this new 
+parallelization stuff, so this shouldn't affect you.
+
+-- 
+Pascal Vincent
+
+
+
+
+From pascal at apstat.com  Tue Jul 19 00:08:43 2005
+From: pascal at apstat.com (Pascal Vincent)
+Date: Mon, 18 Jul 2005 18:08:43 -0400
+Subject: [Plearn-developers] Files moved to DEPRECATED directory
+Message-ID: <42DC286B.40905@apstat.com>
+
+Hello fellow plearners,
+
+I have created a DEPRECATED directory in several of PLearn's 
+sub-directories, and have done a few 'svn move' of class files that are 
+deprecated into those directories. So if some of your code still depend 
+on those, you'll have to add an all-uppercase /DEPRECATED/ in your 
+#include directive to access them, which should also encourage you to 
+try and no longer depend on those...
+
+So far I have moved the following out of sight, into their respective 
+DEPRECATED sub-directories:
+
+plearn_learners/generic/DEPRECATED/Learner.{h,cc}
+plearn_learners/distributions/DEPRECATED/Distribution.{h,cc}
+plearn_learners/distributions/DEPRECATED/LocallyWeightedDistribution.{h,cc}
+plearn/math/DEPRECATED/StatsIterator.{h,cc}
+plearn_learners/misc/DEPRECATED/PExperiment.{h,cc}
+plearn_learners/misc/DEPRECATED/Experiment.{h,cc}
+plearn_learners/testers/DEPRECATED/TestMethod.{h,cc}
+
+-- 
+Pascal Vincent
+
+
+
+
+From delallea at iro.umontreal.ca  Tue Jul 19 22:48:39 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Tue, 19 Jul 2005 16:48:39 -0400
+Subject: [Plearn-developers] Changes to StatsCollector and GaussMix
+Message-ID: <20050719204839.GA16493@lsvm.iro.umontreal.ca>
+
+Some more potentially important changes to our beloved PLearn:
+
+1. Normalization for variance computation in StatsCollector has been
+changed in order to provide an (hopefully) unbiased estimator even for
+weighted statistics. This should not change anything for non-weighted
+stats (e.g. costs computed on non-weighted datasets), but will most
+likely yield a different result when using weights.
+
+2. GaussMix is in the process to be modified to handle missing values.
+To this purpose, the K-Means algorithm has been slightly modified (for
+the best), and since it was (almost) the only place in training where
+random numbers were used, I also modified the code in order to use the
+new random numbers generator (and in the generate() method too). This
+means training GaussMix may now give somewhat different results. I don't
+believe many people were using it, but if you *really* need a 100%
+backward-compatible version of GaussMix, please ask me and I'll write
+one just for you because I love you so much.
+
+--
+Olivier, without any internet access until Friday
+
+
+From delallea at iro.umontreal.ca  Tue Jul 26 01:46:29 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Mon, 25 Jul 2005 19:46:29 -0400
+Subject: [Plearn-developers] Change in getCovariance() in VecStatsCollector
+Message-ID: <20050725234629.GA26042@lsvm.iro.umontreal.ca>
+
+Hi,
+Another potentially damaging change in VecStatsCollector::getCovariance:
+the covariance now returned:
+- is an unbiased estimator of the covariance (instead of the direct
+  empirical estimator used previously), so that in particular the
+  diagonal is coherent with the getVariance() method
+- correctly handles missing values (which wasn't the case previously)
+
+There wasn't a lot of code in PLearn relying on this method. Only:
+- the incremental PCA algorithm
+- the computeInputMeanAndCovar, computeWeightedMeanAndCovar and
+  computeMeanAndCovar functions in plearn/vmat/VMat_basic_stats
+and, because of these 3 functions:
+- the classical PCA algorithm
+- GaussMix
+- GaussianDistribution
+- ConditionalGaussianDistribution and EmpiricalDistribution (both
+  deprecated anyway, as they inherit from deprecated classes)
+
+Note that I haven't had time yet to fully test the code, though it seems
+to work ok. I will do so asap :)
+
+--
+Olivier
+
+PS: I have computed myself the "unbiased" formulas for a weighted
+covariance estimator. Anyone willing to check them ?
+
+
+
+From delallea at iro.umontreal.ca  Tue Jul 26 15:51:49 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Tue, 26 Jul 2005 09:51:49 -0400
+Subject: [Plearn-developers] PRandom object for random numbers generation
+In-Reply-To: <20050712142424.GA28527@lsvm.iro.umontreal.ca>
+References: <20050712142424.GA28527@lsvm.iro.umontreal.ca>
+Message-ID: <20050726135149.GA7029@lsvm.iro.umontreal.ca>
+
+On 12 Jul 2005, Olivier Delalleau wrote:
+> Basic use is simple. Before you had something like:
+>   real x = gaussian_mu_sigma(1,4);
+> which will become
+>   real x = my_generator.gaussian_mu_sigma(1,4);
+> where my_generator is a PRandom class member and will have been
+> initialized at build time by:
+>   my_generator.manual_seed(seed);
+> (where seed is possibly -1 to initialize with the CPU time).
+> 
+
+Note that I actually do not recomment to use directly a PRandom class
+member, it is safer to use a smart pointer PP<PRandom>, that you would
+initialize in the default constructor:
+
+MyClass::MyClass():
+  my_generator(new PRandom()),
+  ...
+
+I have just modified the code so that *not* using a smart pointer
+actually works (it wasn't really the case before), but for various
+reasons, using smart pointers is probably a better idea unless you
+really know what you're doing.
+
+--
+Olivier
+
+
+From delallea at iro.umontreal.ca  Wed Jul 27 18:55:37 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Wed, 27 Jul 2005 12:55:37 -0400
+Subject: [Plearn-developers] PDistribution::updateFromConditionalSorting(..) is now const
+Message-ID: <20050727165537.GA2241@lsvm.iro.umontreal.ca>
+
+I had to define as 'const' the virtual method:
+PDistribution::updateFromConditionalSorting(..)
+If you have any PDistribution *not in PLearn* overriding this method,
+you should set it to 'const' too (gcc does not complain about it). The
+PLearn code has already been fixed.
+
+To check your code:
+perlgrep ::updateFromConditionalSorting <directory_with_your_own_secret_code>
+(unless you wrote the implementation in the header, in which case you
+deserve what will happen to you)
+
+--
+Olivier
+
+
+From delallea at iro.umontreal.ca  Fri Jul 29 18:00:19 2005
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 29 Jul 2005 12:00:19 -0400
+Subject: [Plearn-developers] Change in getCovariance() in VecStatsCollector
+In-Reply-To: <20050725234629.GA26042@lsvm.iro.umontreal.ca>
+References: <20050725234629.GA26042@lsvm.iro.umontreal.ca>
+Message-ID: <20050729160019.GA14845@lsvm.iro.umontreal.ca>
+
+It turned out the covariance estimator I came up with was unbiased as
+desired, but did not systematically return a positive semi-definite
+matrix when missing values were present.
+This is now the case (and the formula used is actually more coherent
+with what we would expect). How cool is that ?
+
+On 25 Jul 2005, Olivier Delalleau wrote:
+> Hi,
+> Another potentially damaging change in VecStatsCollector::getCovariance:
+> the covariance now returned:
+> - is an unbiased estimator of the covariance (instead of the direct
+>   empirical estimator used previously), so that in particular the
+>   diagonal is coherent with the getVariance() method
+> - correctly handles missing values (which wasn't the case previously)
+> 
+> [...]
+
+> Note that I haven't had time yet to fully test the code, though it seems
+> to work ok. I will do so asap :)
+> 
+
+
+
+From lapalmej at iro.umontreal.ca  Sun Jul 31 19:40:19 2005
+From: lapalmej at iro.umontreal.ca (Jasmin Lapalme)
+Date: Sun, 31 Jul 2005 13:40:19 -0400
+Subject: [Plearn-developers] -fno-coalesce
+Message-ID: <513CC6A3-AEC3-4434-A809-3BD0F8BF44D4@iro.umontreal.ca>
+
+Bonjour ? tous,
+     J'essaie toujours de compiler PLearn sur MacOS X et beaucoup de  
+probl?mes surgissent depuis le d?placement vers berlios.  
+Premi?rement, il y a l'option -fno-coalesce qui est ajout? par pymake  
+(ligne 77 de pymake.confif.model de PLearn) lorsque l'on est sur une  
+platforme darwin. Cette option n'est pas reconnu par le g++ de MacOS  
+X. ? quoi sert cette option? Pourquoi est-elle ajout?e seulement pour  
+Darwin, soit Mac OS X.
+     Si j'enl?ve cette option (-fno-coalesce), j'obtiens  ,...entre  
+autre..., l'erreur suivante dans Option.h :
+
+/Users/lapalmej/LISA/PLearn/plearn/base/Option.h:132: error: 'ptr'  
+was not declared in this scope
+/Users/lapalmej/LISA/PLearn/plearn/base/Option.h: In member function  
+`virtual void PLearn::TVecOption<ObjectType,  
+VecElementType>::writeAtIndex(const PLearn::Object*,  
+PLearn::PStream&, const std::string&) const':
+/Users/lapalmej/LISA/PLearn/plearn/base/Option.h:138: error: 'ptr'  
+was not declared in this scope
+
+     Est-ce que quelqu'un peut m'aider?
+
+Merci ? l'avance.
+
+Jasmin
+
+
+
+

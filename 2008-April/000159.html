@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] VMatrix in Python
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-April/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20VMatrix%20in%20Python&In-Reply-To=%3C47FF91C0.7040507%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000160.html">
+   <LINK REL="Next"  HREF="000161.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] VMatrix in Python</H1>
+    <B>Xavier Saint-Mleux</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20VMatrix%20in%20Python&In-Reply-To=%3C47FF91C0.7040507%40apstat.com%3E"
+       TITLE="[Plearn-developers] VMatrix in Python">saintmlx at apstat.com
+       </A><BR>
+    <I>Fri Apr 11 18:28:48 CEST 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000160.html">[Plearn-developers] VMatrix in Python
+</A></li>
+        <LI>Next message: <A HREF="000161.html">[Plearn-developers] VMatrix in Python
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#159">[ date ]</a>
+              <a href="thread.html#159">[ thread ]</a>
+              <a href="subject.html#159">[ subject ]</a>
+              <a href="author.html#159">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Here is an example that works:
+
+20080411-12:26:08-lodur:~/apstatsoft/python_modules/apstat/ARL/exp&gt; python
+Python 2.4.3 (#2, Mar  7 2008, 01:58:20)
+[GCC 4.0.3 (Ubuntu 4.0.3-1ubuntu5)] on linux2
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+ &gt;&gt;&gt; from apstat.arllearn_ext import *
+ &gt;&gt;&gt; x= 
+AutoVMatrix(filename=&quot;/home/louradoj/apstatsoft/projects/consultation/ARL/experiments/benchmark_test_unknown_haar_l=3_t=none_sl=100_m=sym_st=t4_so=_av=none_pr=True_ti=none_noopt.amat&quot;)
+ &gt;&gt;&gt; y= PythonProcessedVMatrix(code=&quot;from apstat.ARL.test_ppvmat import 
+*&quot;, source=x)
+ &gt;&gt;&gt; y.getRow(0)
+array([  1.00100000e+03,   1.00100000e+03,              nan,
+                    nan,   1.00100000e+03,   1.91600000e+03,
+         3.26700000e+03,   1.00100000e+03,              nan,
+                    nan,              nan,              nan,
+                    nan,              nan,              nan,
+                    nan,              nan,              nan,
+         4.89400000e+00,   3.24800000e+02,              nan,
+         8.06000000e+00,              nan,              nan,
+                    nan,              nan,              nan,
+                    nan,              nan,   2.20100000e+01,
+         6.74500000e+00,   2.92900000e+01,   1.02822000e+03,
+         1.00100000e+03,   1.00100000e+03,   2.00400000e+03,
+         3.00000000e+00,   1.30000000e+01,   1.50000000e+01,
+         1.70000000e+01,   4.80000000e+01,   0.00000000e+00,
+         3.00000000e+00,   7.90655253e-02,   8.20813316e-02,
+         2.24449311e-02,   8.39352561e-02,   7.98720395e-01,
+         2.82839065e+00,   4.73208694e-01,  -2.15559726e+00,
+        -2.15557981e+00,  -2.15550506e+00,  -2.15490999e+00,
+        -2.13970514e+00,   0.00000000e+00,  -9.53008944e-02,
+        -5.72792329e-02,  -3.65856282e-02,  -1.03386498e-01,
+        -7.71219340e-01,  -1.87342742e-05,   2.21751920e+00,
+         8.70332422e-06,  -1.48989109e-05,  -2.15370396e-05,
+        -4.80769101e-04,  -8.00596246e-03,   0.00000000e+00,
+        -5.84939867e-03,   2.56082620e-02,  -3.19826733e-02])
+ &gt;&gt;&gt; len(x.getRow(0))
+144
+ &gt;&gt;&gt; len(y.getRow(0))
+72
+ &gt;&gt;&gt;
+
+
+test_ppvmat.py is as follows:
+
+
+
+def getRow(row_no, source_row):
+    return source_row[:len(source_row)/2]
+
+def getFieldNames(source_field_names):
+    return source_field_names[:len(source_field_names)/2]
+
+
+Xavier
+
+
+
+Olivier Delalleau wrote:
+&gt;<i> Well, I tried to fool it and it almost works. Here is what I did:
+</I>&gt;<i>
+</I>&gt;<i> --- CODE for mydata.pymat ---
+</I>&gt;<i>
+</I>&gt;<i> from plearn.pyplearn import pl
+</I>&gt;<i>
+</I>&gt;<i> def main():
+</I>&gt;<i>     return pl.PythonProcessedVMatrix(
+</I>&gt;<i>         code_path = 'mydata.py',
+</I>&gt;<i>         source = pl.AutoVMatrix(        # Give source to make it happy.
+</I>&gt;<i>             filename = 'mydata.amat'))
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> --- CODE GIVEN TO PythonProcessedVMatrix, stored in mydata.py ---
+</I>&gt;<i>
+</I>&gt;<i> def getSource():
+</I>&gt;<i>     global source
+</I>&gt;<i>     try:
+</I>&gt;<i>         return source
+</I>&gt;<i>     except:
+</I>&gt;<i>         from plearn.pyext import pl
+</I>&gt;<i>         source = pl.AutoVMatrix(filename = 'mydata.amat')
+</I>&gt;<i>         return source
+</I>&gt;<i>
+</I>&gt;<i> def getRow(row_no, source_row):
+</I>&gt;<i>     return getSource().getRow(row_no)
+</I>&gt;<i>
+</I>&gt;<i> def getFieldNames(source_field_names):
+</I>&gt;<i>     return [ str(i) for i in range(len(source_field_names)) ]
+</I>&gt;<i>
+</I>&gt;<i> --- PROBLEM ---
+</I>&gt;<i>
+</I>&gt;<i> Seems to crash somewhere in the garbage collector, when PLearn quits.
+</I>&gt;<i> Anything obvious to a Python/C++ guru?
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On 11 Apr 2008, Olivier Delalleau wrote:
+</I>&gt;<i>   
+</I>&gt;&gt;<i> Hmm, it's not so great, it looks like I don't have access to the source
+</I>&gt;&gt;<i> itself (I guess it was not possible when that class -
+</I>&gt;&gt;<i> PythonProcessedVMatrix - was written). Any tip?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On 11 Apr 2008, Olivier Delalleau wrote:
+</I>&gt;&gt;<i>     
+</I>&gt;&gt;&gt;<i> Found it! I was looking in plearn/vmat and python_modules/plearn but it
+</I>&gt;&gt;&gt;<i> was in plearn/python.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> On 11 Apr 2008, Olivier Delalleau wrote:
+</I>&gt;&gt;&gt;<i>       
+</I>&gt;&gt;&gt;&gt;<i> Hey,
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> Can anyone point me to some ressource on how I can write a VMatrix in
+</I>&gt;&gt;&gt;&gt;<i> Python?
+</I>&gt;&gt;&gt;&gt;<i>         
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Olivier
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Plearn-developers mailing list
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">Plearn-developers at lists.berlios.de</A>
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">https://lists.berlios.de/mailman/listinfo/plearn-developers</A>
+</I>&gt;<i>   
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000160.html">[Plearn-developers] VMatrix in Python
+</A></li>
+	<LI>Next message: <A HREF="000161.html">[Plearn-developers] VMatrix in Python
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#159">[ date ]</a>
+              <a href="thread.html#159">[ thread ]</a>
+              <a href="subject.html#159">[ subject ]</a>
+              <a href="author.html#159">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

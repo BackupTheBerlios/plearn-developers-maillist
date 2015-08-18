@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] changes in subclasses of VMatrix
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-March/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20changes%20in%20subclasses%20of%20VMatrix&In-Reply-To=%3C20060313202725.GB17464%40pig.zood.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000072.html">
+   <LINK REL="Next"  HREF="000074.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] changes in subclasses of VMatrix</H1>
+    <B>Pascal Lamblin</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20changes%20in%20subclasses%20of%20VMatrix&In-Reply-To=%3C20060313202725.GB17464%40pig.zood.org%3E"
+       TITLE="[Plearn-developers] changes in subclasses of VMatrix">lamblinp at iro.umontreal.ca
+       </A><BR>
+    <I>Mon Mar 13 21:27:25 CET 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000072.html">[Plearn-developers] new plearn-core mailing-list
+</A></li>
+        <LI>Next message: <A HREF="000074.html">[Plearn-developers] changes in subclasses of VMatrix
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#73">[ date ]</a>
+              <a href="thread.html#73">[ thread ]</a>
+              <a href="subject.html#73">[ subject ]</a>
+              <a href="author.html#73">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi everybody,
+
+I did some changes in several VMatrix classes, which I'm going to commit
+soon. The goal is to have more coherent option names, especially for
+VMats performing operations on other VMats.
+
+The previous option names (used in scripts for example) should still
+work for the moment, but it would be cleaner if you changed to use the
+new ones.
+
+The changes in the names of the class members, however, are not backward
+compatible, so if you have code using explicitly some members, that you
+did not include in plearn nor lplearn, it might not compile anymore.
+
+Here is the list of changed classes, options and member names.
+
+Class that now derive from SourceVMatrix:
+Class                           option            member            new name
+ExtendedVMatrix                 distr             distr             source
+FinancePreprocVMatrix           underlying        vmat              source
+GeneralizedOneHotVMatrix        distr             distr             source
+IndexedVMatrix                  m                 m                 source
+JulianizeVMatrix                underlying        underlying        source
+OneHotVMatrix                   underlying_distr  underlying_distr  source
+PLearnerOutputVMatrix           data              data              source
+ProcessSymbolicSequenceVMatrix  source            source            source
+RemapLastColumnVMatrix          underlying_distr  underlying_distr  source
+ShiftAndRescaleVMatrix          vm                underlying_vmat   source
+SubVMatrix                      parent            parent            source
+
+[Not included in PLearn, no option compatibility for these ones]
+ConcatRowsSubVMatrix            distr             distr             source
+TemporalHorizonVMatrix          distr             distr             source
+ThresholdVMatrix                underlying_distr  underlying_distr  source
+UniformizeVMatrix               distr             distr             source
+VecExtendedVMatrix              underlying_       underlying_       source
+
+Parameters renaming only:
+AutoVMatrix                     specification     specification     filename
+ConcatColumnsVMatrix            array             array             sources
+ConcatRowsVMatrix               array             array             sources
+MemoryVMatrix                   data_vm           data_vm           source
+
+[Not included in PLearn, no option compatibility for these ones]
+BinaryOpVMatrix                 vm1               vm1               source1
+BinaryOpVMatrix                 vm2               vm2               source2
+KernelVMatrix                   d1                d1                source1
+KernelVMatrix                   d2                d2                source2
+CrossReferenceVMatrix           vm1               vm1               master
+CrossReferenceVMatrix           vm2               vm2               slave
+InterleaveVMatrix               vm                vm                sources
+
+
+Some tests at apstat might be broken, especially if they compare saved
+objects, or objects output to pout.
+
+If something is wrong in your code, you can revert to svn tag
+'before_source_vmat_options_change', and of course let me know.
+
+Hoping I'm not breaking everything,
+
+
+-- 
+Pascal
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000072.html">[Plearn-developers] new plearn-core mailing-list
+</A></li>
+	<LI>Next message: <A HREF="000074.html">[Plearn-developers] changes in subclasses of VMatrix
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#73">[ date ]</a>
+              <a href="thread.html#73">[ thread ]</a>
+              <a href="subject.html#73">[ subject ]</a>
+              <a href="author.html#73">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

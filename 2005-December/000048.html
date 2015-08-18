@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] PLearn, SAS and NSPR DLL crash under Windows
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2005-December/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PLearn%2C%20SAS%20and%20NSPR%20DLL%20crash%20under%20Windows&In-Reply-To=%3C20051221153250.GA11894%40lsvm.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000047.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] PLearn, SAS and NSPR DLL crash under Windows</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PLearn%2C%20SAS%20and%20NSPR%20DLL%20crash%20under%20Windows&In-Reply-To=%3C20051221153250.GA11894%40lsvm.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] PLearn, SAS and NSPR DLL crash under Windows">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Wed Dec 21 16:32:50 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000047.html">[Plearn-developers] Renamed options and variables in PDistribution
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#48">[ date ]</a>
+              <a href="thread.html#48">[ thread ]</a>
+              <a href="subject.html#48">[ subject ]</a>
+              <a href="author.html#48">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>This email is mainly meant for archive, in case it might help a future
+user of PLearn under Windows.
+When trying to build a DLL with PLearn code that could be called within
+SAS, I experienced a crash of SAS after the DLL code returned.
+I was using the NSPR DLL build from:
+<A HREF="ftp://ftp.mozilla.org/pub/mozilla.org/nspr/releases/v4.6/WINNT5.0_OPT.OBJ/">ftp://ftp.mozilla.org/pub/mozilla.org/nspr/releases/v4.6/WINNT5.0_OPT.OBJ/</A>
+
+The solution is instead to use the more generic Win32 build from:
+<A HREF="ftp://ftp.mozilla.org/pub/mozilla.org/nspr/releases/v4.6/WIN954.0_OPT.OBJ/">ftp://ftp.mozilla.org/pub/mozilla.org/nspr/releases/v4.6/WIN954.0_OPT.OBJ/</A>
+
+If anyone is interested, such a crash can be triggered by writing a DLL
+function that looks like:
+
+#include &lt;mozilla/nspr/prio.h&gt;
+extern &quot;C&quot; {
+void test_function () {
+    PR_STDOUT;
+    return;
+}
+}
+
+then calling it within SAS with the SAS program:
+
+filename sascbtbl 'C:\tmp\test_dll.dat';
+data _null_;
+  call module('*i', 'test_dll,test_function');
+run;
+
+Where 'C:\tmp\test_dll.dat' contains:
+
+routine test_function
+minarg=0
+maxarg=0
+CALLSEQ=BYVALUE
+MODULE=test_dll;
+
+--
+Olivier
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000047.html">[Plearn-developers] Renamed options and variables in PDistribution
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#48">[ date ]</a>
+              <a href="thread.html#48">[ thread ]</a>
+              <a href="subject.html#48">[ subject ]</a>
+              <a href="author.html#48">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

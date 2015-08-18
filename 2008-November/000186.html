@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] erreurs, warnings, logs, etc.
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-November/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20erreurs%2C%20warnings%2C%20logs%2C%20etc.&In-Reply-To=%3C492DB82E.5060206%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000188.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] erreurs, warnings, logs, etc.</H1>
+    <B>Xavier Saint-Mleux</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20erreurs%2C%20warnings%2C%20logs%2C%20etc.&In-Reply-To=%3C492DB82E.5060206%40apstat.com%3E"
+       TITLE="[Plearn-developers] erreurs, warnings, logs, etc.">saintmlx at apstat.com
+       </A><BR>
+    <I>Wed Nov 26 21:57:18 CET 2008</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000188.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#186">[ date ]</a>
+              <a href="thread.html#186">[ thread ]</a>
+              <a href="subject.html#186">[ subject ]</a>
+              <a href="author.html#186">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Salut &#224; tous,
+
+Je crois qu'il serait temps de [re]faire la lumi&#232;re sur les m&#233;canismes
+pr&#233;sents dans PLearn pour l'envoi de diff&#233;rents types de messages.  *En
+particulier, j'aimerais rendre &quot;deprecated&quot; les PLWARNINGS, alors
+s.v.p. lisez attentivement!*
+
+Il y a deux cat&#233;gories de cas pr&#233;visibles pour lesquels on veut faire
+planter PLearn:
+
+- Ajout de code qui ne respecte pas la s&#233;mantique: Les PLASSERTs devraient
+  servir &#224; s'assurer que le code est &quot;robuste sous &#233;volution&quot;, c'est-&#224;-dire
+  &#224; s'assurer que le nouveau code respecte la s&#233;mantique pr&#233;vue par le code
+  d&#233;j&#224; existant.  Les PLASSERTs s'adressent aux d&#233;veloppeurs et indiquent
+  ce que le nouveau code a bris&#233;.
+
+- Utilisation erronn&#233;e de code existant: Les PLERRORs devraient servir aux
+  cas d'inputs invalides fournis &#224; PLearn et &#224; indiquer &#224; l'usager ce qui
+  ne va pas et (si possible) comment le corriger.
+
+Il y a ensuite une multitude d'autres cas pour lesquels on voudrait donner
+de l'information &#224; l'usager et/ou au d&#233;veloppeur, et pour chacun de ces cas
+il peut exister des conditions dans lesquelles on veut avoir l'information
+et d'autres o&#249; on ne la veut pas.  Il y a aussi une multitude de mani&#232;res
+de fournir ce genre d'information &#224; l'usager, et justement il commence
+peut-&#234;tre &#224; y en avoir un peu trop...
+
+- Il y a toujours eu les streams de base, pout, perr, etc., mais ces
+  streams ne devraient [presque] jamais &#234;tre utilis&#233;es directement (trop
+  bas niveau.)
+
+- Il y a depuis longtemps les PLWARNINGS (et depuis peu les PLWARN_ERR) qui
+  servent &#224; &quot;avertir&quot; l'usager au besoin, mais:
+
+  - Tous les PLWARNINGs font partie de la m&#234;me cat&#233;gorie: PLWARNING.  Ce
+    n'est pas tr&#232;s pr&#233;cis.
+
+  - On n'a aucun contr&#244;le sur l'affichage de diff&#233;rents messages (ou de
+    diff&#233;rents types de messages): tout est toujours affich&#233; dans tous les
+    cas (sauf si on s'arrange pour qu'absolument rien ne soit affich&#233;.)
+
+  - Il n'existe pas une r&#232;gle g&#233;n&#233;rale universelle pour d&#233;cider dans quel
+    cas un avertissement est justifi&#233; et dans quel cas il est superflu.
+
+  - &#199;a utilise une syntaxe qui rappelle plus le langage C que le C++; &#231;a ne
+    s'utilise absolument pas de la m&#234;me mani&#232;re que les streams (tout comme
+    PLERROR, je sais...)
+
+Pour les messages qui ne requi&#232;rent pas n&#233;cessairement d'intervention
+de la part de l'usager, on a besoin de pouvoir cat&#233;goriser ces messages et
+de pouvoir activer ou non l'affichage ce certains de ces messages.
+
+e.g. en ce moment, lorsqu'on fait du bagging, on a le message suivant qui
+s'affiche &#224; r&#233;p&#233;tition (une fois par bag): &quot;In SelectRowsVMatrix::build_()
+- All rows have been selected!&quot;.  Comment se fait-il que chacun des bags
+soit en fait le dataset original? c'est inqui&#233;tant!  En r&#233;alit&#233;, ce n'est
+pas le cas, tout va bien, il n'y a aucun probl&#232;me et les bags sont tous
+diff&#233;rents... mais j'ai perdu un temps fou &#224; m'en assurer.  C'est donc un
+tr&#232;s bon exemple de PLWARNING superflu (pourquoi un message dans un des cas
+d'utilisation les plus fr&#233;quents? c'est la m&#234;me chose pour Shuffle, mais
+dans ce cas &#231;a a &#233;t&#233; patch&#233; sp&#233;cialement pour &#231;a -- oui, oui, la
+super-classe doit &#234;tre consciente de la sous-classe!!!) en plus d'&#234;tre un
+message trompeur (autant de rang&#233;es ne veut pas n&#233;cessairement dire toutes
+les rang&#233;es.)  Par contre ce genre message peut &#234;tre tr&#232;s int&#233;ressant quand
+on est en train de d&#233;boguer, alors on ne veut pas n&#233;cessairement l'&#233;liminer
+dans tous les cas (seulement dans la tr&#232;s grande majorit&#233; des cas; il ne
+faut pas crier &quot;au loup&quot; et noyer l'information la plus pertinente en
+avertissant l'usager de tout ce qui se passe, sinon les gens vont ignorer
+tous les messages.)
+
+HEUREUSEMENT, on a (depuis 2004) le module pl_log qui fait tout ce dont on
+a besoin!  Ce module d&#233;finit un ensemble de streams pour du &quot;logging&quot;.  Ces
+streams sont class&#233;es par importance et par module, et on peut donc
+cat&#233;goriser les messages en: 'mandatory', 'important', 'normal', 'debug' ou
+'extreme' (le cas de SelectRows est un bon exemple de 'debug' selon moi.)
+On peut ensuite d&#233;cider du niveau de verbosit&#233; que l'on d&#233;sire quand on
+roule PLearn, e.g. pas de messages 'debug' quand on n'est pas en train de
+d&#233;boguer.  La &quot;bonne&quot; mani&#232;re d'utiliser pl_log est aussi d'avoir des logs
+nomm&#233;s pour chaque module (.cc) plut&#244;t que d'utiliser les logs globaux.  On
+peut ensuite d&#233;cider de faire afficher les messages seulement pour les
+modules qui nous int&#233;ressent, en plus de choisir le niveau de verbosit&#233;.
+En plus de ces avantages, les logs permettent de beaucoup plus facilement
+rediriger les diff&#233;rents messages de diff&#233;rentes mani&#232;res.  Finalement, les
+logs sont des streams C++ comme les autres et s'utilisent donc de mani&#232;re
+naturelle pour un programmeur C++.
+
+Si personne n'&#233;met d'objection d'ici peu, je vais commencer par convertir
+certains PLWARNINGS, question de donner l'exemple, et &#233;ventuellement
+&#233;liminer de plerror tout ce qui a trait &#224; des warnings.
+
+En attendant, j'encourage tout le monde &#224; se familiariser avec:
+- $PLEARNDIR/plearn/io/pl_log.{h,cc}
+
+Tout feedback est bienvenu,
+
+Xavier
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000188.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#186">[ date ]</a>
+              <a href="thread.html#186">[ thread ]</a>
+              <a href="subject.html#186">[ subject ]</a>
+              <a href="author.html#186">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

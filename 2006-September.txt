@@ -1,0 +1,45 @@
+From chapados at apstat.com  Thu Sep  7 00:05:27 2006
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Wed, 06 Sep 2006 18:05:27 -0400
+Subject: [Plearn-developers] BestAveragingPLearner
+Message-ID: <44FF4627.5020102@apstat.com>
+
+Dear PLearners,
+
+This is to announce the availability of a new general-interest learner 
+called BestAveragingPLearner.  The idea stems from a common problem 
+encountered when training neural networks: what can you do if you fall 
+in a bad local minimum?  The easy answer is easy: start the optimization 
+again!  But what if you want to automate the process, without a human in 
+the loop?
+
+BestAveragingPLearner is the answer.  In operation, it is very simple:
+
+    * It trains N underlying models (e.g. neural nets initialized with a
+      different seed)
+    * It selects M of those models based on a train cost (e.g. E[mse]),
+      where, obviously, 0 < M <= N.
+    * At computeOutput time, it takes the simple arithmetic average of
+      the output of the M selected models.
+
+An example of how to use it is provided in the test-case, under:
+
+    
+$PLEARNDIR/plearn_learners/generic/test/BestAveragingPLearner/best_avg_nnet.pyplearn
+
+Obviously, this class can be enhanced in many ways, and already Yoshua 
+has an impressive laundry list of improvements to implement.  Your own 
+comments and suggestions are of course welcome.
+
+    Enjoy!
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20060906/9b434b38/attachment.html>
+

@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] cleaning in pymake and pymake.config.model
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20cleaning%20in%20pymake%20and%20pymake.config.model&In-Reply-To=%3C44B80CFD.8040106%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000104.html">
+   <LINK REL="Next"  HREF="000108.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] cleaning in pymake and pymake.config.model</H1>
+    <B>Pascal Vincent</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20cleaning%20in%20pymake%20and%20pymake.config.model&In-Reply-To=%3C44B80CFD.8040106%40apstat.com%3E"
+       TITLE="[Plearn-developers] cleaning in pymake and pymake.config.model">pascal at apstat.com
+       </A><BR>
+    <I>Fri Jul 14 23:30:37 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000104.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+        <LI>Next message: <A HREF="000108.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#106">[ date ]</a>
+              <a href="thread.html#106">[ thread ]</a>
+              <a href="subject.html#106">[ subject ]</a>
+              <a href="author.html#106">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Pascal Lamblin wrote:
+&gt;<i> Hi everybody,
+</I>&gt;<i>
+</I>&gt;<i> I'm going to make some changes in pymake and pymake.config.model, in
+</I>&gt;<i> order to get rid of some dependencies, dirty hacks and unused code.
+</I>&gt;<i>
+</I>&gt;<i> So I would like to know if some features/bugs/hacks are still used.
+</I>&gt;<i> Especially :
+</I>&gt;<i>   - Who uses QT stuff with pymake?
+</I>&gt;<i>   
+</I>Currently nobody. In the past Julien Keable coded a Qt data 
+visualisation software for ApSTAT, and if we have/want to some day again 
+compile/recompile  it or some other PLearn&amp;Qt-based application, Qt 
+support is certainly nice to have (and it was difficult enough to 
+add...). After all Qt is probably *the* major cross-platform GUI toolkit 
+used by C++ coders.
+&gt;<i>   - Who uses the --log-link and 'dorionc_hacked_pymake'?
+</I>&gt;<i>   
+</I>No idea what these are used for.
+&gt;<i>   - Who uses rsh (and not ssh) for launching remote compilations?
+</I>&gt;<i>   
+</I>Nobody anymore, but again, I wouldn't completely remove support for rsh, 
+as it might be useful on some installations, and it isn't an ugly hack 
+anyway.
+&gt;<i>   - Who uses the distcc variables (DISTCC_HOSTS, DISTCC_DIR,
+</I>&gt;<i>     ~/.distcc/hosts, /etc/distcc/hosts) to get a list of hosts on which
+</I>&gt;<i>     compiling, instead of ~/.pymake/...hosts?
+</I>&gt;<i>   
+</I>I believe Christian Hudon added this and it is used at ApSTAT (he 
+certainly thought that might be useful for some reason...)
+&gt;<i>   - Who uses SPC compilation (-spc option)?
+</I>&gt;<i>   
+</I>Anybody remembers what this was for??
+
+&gt;<i>   - Who needs pymake to use the first option when several incompatible
+</I>&gt;<i>     options are put on the command-line, ignoring the other ones,
+</I>&gt;<i>     instead of aborting?
+</I>&gt;<i>   
+</I>???
+&gt;<i>   - Who uses preprocessor variables &quot;DBDIR&quot; and &quot;METADATADIR&quot;?
+</I>&gt;<i>   
+</I>valhalla:~/PLearn&gt; perlgrep DBDIR .
+./plearn/db/NistDB.cc:57         
+imagef.open(DBDIR&quot;/MNIST/train-images-idx3-ubyte&quot;);
+./plearn/db/NistDB.cc:58         
+labelf.open(DBDIR&quot;/MNIST/train-labels-idx1-ubyte&quot;);
+./plearn/db/NistDB.cc:63         //      
+imagef.open(DBDIR&quot;/MNIST/test-images.idx3-ubyte&quot;);
+./plearn/db/NistDB.cc:64         //      
+labelf.open(DBDIR&quot;/MNIST/test-labels.idx1-ubyte&quot;);
+./plearn/db/NistDB.cc:66         
+imagef.open(DBDIR&quot;/MNIST/t10k-images-idx3-ubyte&quot;);
+./plearn/db/NistDB.cc:67         
+labelf.open(DBDIR&quot;/MNIST/t10k-labels-idx1-ubyte&quot;);
+./plearn/db/databases.cc:179 #ifdef DBDIR
+./plearn/db/databases.cc:180 static const string dbdir_name = DBDIR;
+
+DBDIR est un syst&#232;me pour sp&#233;cifier la localisation de datasets 
+&quot;standards&quot;. C'est un vieux syst&#232;me qu'il faudrait sans doute remplacer 
+(par quoi?), mais pour l'instant il semble encore utilis&#233; &#224; quelques 
+endroits.
+&gt;<i>   - Who doesn't have python 2.4?
+</I>&gt;<i>   
+</I>Sur ma machine chez ApSTAT c'est encore 2.3.5
+
+Encore une fois, si on veut que PLearn soit facilement installable sur 
+d'autres environnements, il peut &#234;tre bon de ne pas supposer qu'on a la 
+toute derni&#232;re version.
+Quelles features de 2.4 te manquent si cruellement?
+&gt;<i>   - Does this mean that we always link with X libraries:
+</I>&gt;<i> optionalLibrary( name = 'X',
+</I>&gt;<i>                  triggers='?', ... ) ?
+</I>&gt;<i>   - Who uses the following options:
+</I>&gt;<i>     &#183; g++3
+</I>&gt;<i>     &#183; purify
+</I>&gt;<i>     &#183; quantify
+</I>&gt;<i>     &#183; checkopt
+</I>&gt;<i>     &#183; exiterrors
+</I>&gt;<i>   
+</I>On peut sans doute se d&#233;barasser sans remord de g++3 et exiterrors (on 
+suppose que d&#233;csormais les compilos/syst&#232;mes sont capable de g&#233;rer les 
+exceptions C++ correctement!).
+
+purify peut &#234;tre utile pour des cas de debug de bug m&#233;moire ou rien 
+d'autre ne fonctionne (c'est d&#233;j&#224; arriv&#233;).
+
+quantify et checkopt, je sais plus ce que c'est.
+
+Note: je ne serais dans un premier temps pas trop agressif dans 
+l'&#233;limination des options comment&#233;es de pymake.config.model, 
+puisqu'elles peuvent fournir une aide utile &#224; des personnes qui 
+essayeraient de compiler plearn dans un autre environnement ou sur une 
+autre plateforme. pymake.config est pr&#233;vu pour &#234;tre hack&#233; et adapt&#233; aux 
+besions, et c'est plut&#244;t pratique d'avoir des exemples qu'il suffit de 
+d&#233;commenter. Et puis je pense qu'il y a d&#233;j&#224; suffisamment de cleaning &#224; 
+faire dans pymake lui-m&#234;me pour commencer. ;-)
+&gt;<i> For each item in the list, if no one answers it will probably be
+</I>&gt;<i> deleted, if someone answers he might be promoted responsible for that
+</I>&gt;<i> feature (yes, this is a fascist method).
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>
+
+-- 
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+<A HREF="http://www.apstat.com">http://www.apstat.com</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000104.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+	<LI>Next message: <A HREF="000108.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#106">[ date ]</a>
+              <a href="thread.html#106">[ thread ]</a>
+              <a href="subject.html#106">[ subject ]</a>
+              <a href="author.html#106">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

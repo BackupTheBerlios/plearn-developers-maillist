@@ -1,0 +1,159 @@
+From nouiz at nouiz.org  Tue Dec  2 19:38:15 2008
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Tue, 2 Dec 2008 13:38:15 -0500
+Subject: [Plearn-developers] Default value for logging
+Message-ID: <2d1d7fe70812021038m4ecfdb89n4fe15970df616fda@mail.gmail.com>
+
+Following some discussion with Nicolas, I think that we should change
+some default value about the logging.
+
+1) with pymake -dbg, should print de debug level of log
+2) The named log should be on for all module by default.
+That way new plearn developer won't miss log that they need and old
+developer could target the log they want. This will solve all
+objection that was raised about moving from PLWARNING to *LOG.
+
+Nicolas agreed with those change. Is their objection that I do the change?
+
+Fred
+
+
+From saintmlx at apstat.com  Fri Dec  5 18:31:04 2008
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Fri, 05 Dec 2008 12:31:04 -0500
+Subject: [Plearn-developers] Default value for logging
+In-Reply-To: <2d1d7fe70812021038m4ecfdb89n4fe15970df616fda@mail.gmail.com>
+References: <2d1d7fe70812021038m4ecfdb89n4fe15970df616fda@mail.gmail.com>
+Message-ID: <49396558.5040602@apstat.com>
+
+Fr?d?ric Bastien wrote:
+> 1) with pymake -dbg, should print de debug level of log
+> 2) The named log should be on for all module by default.
+> That way new plearn developer won't miss log that they need and old
+> developer could target the log they want. This will solve all
+> objection that was raised about moving from PLWARNING to *LOG.
+>   
+
+I agree with the idea of having a different default for logging 
+depending on the compilation options; this was already possible with the 
+pymake option "-logging=..." but I have no problem if "-dbg" also 
+implies "-logging=dbg", as long as it can still be overriden with 
+another "-logging=..." option.  I also think that non-debug modes 
+should, by default, not print any debug-related messages.
+
+As for which module logs should be displayed by default, again I think 
+that the most verbose option should apply only to debug modes (is it 
+what you had in mind?)  That is, I think the default for any non-debug 
+compilation should remain "__NONE__".  Also, it might be useful to 
+consider implementing a way to omit some modules when the default is 
+"__ALL__"; it may become necessary if, for example, PP is instrumented 
+to log all refs and unrefs.  As another example, I am currently 
+debugging the PLearn<->Python bridge (to allow parallel execution) and I 
+think most people will want to omit debug logs from PythonObjectWrapper 
+and PythonExtension once I'm done; I would rather not have to remove all 
+logs since they may be useful again in the future (and it would defeat 
+the purpose of logs altogether.)
+
+What remains to be solved is the exact definition of the different 
+logging levels.  We probably need to start using it and experimenting 
+with it before we can take any final decision.  For now, the following 
+examples illustrate messages which I think may belong to different levels:
+1- low-level core system debugging information; e.g. logging each ref 
+and unref to every PP
+2- machine-learning-related low-level information; e.g. number of rows 
+selected by SelectRowsVMatrix
+3- machine-learning-related potential errors; e.g. warning for bagging 
+with several identical bags
+4- user-oriented low-level information; e.g. validation error at each 
+stage of hyper-learning
+5- global progress information; e.g. start of a new split
+Does this list make sense to you?  If so, how would you assign each of 
+these messages to the different levels of logs?
+
+
+Xavier
+
+
+
+
+
+
+
+
+
+
+
+
+From delallea at iro.umontreal.ca  Fri Dec  5 19:40:12 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 5 Dec 2008 13:40:12 -0500
+Subject: [Plearn-developers] Default value for logging
+In-Reply-To: <49396558.5040602@apstat.com>
+References: <2d1d7fe70812021038m4ecfdb89n4fe15970df616fda@mail.gmail.com>
+	<49396558.5040602@apstat.com>
+Message-ID: <20081205184012.GA30736@opale.iro.umontreal.ca>
+
+On 05 Dec 2008, Xavier Saint-Mleux wrote:
+> Also, it might be useful to 
+> consider implementing a way to omit some modules when the default is 
+> "__ALL__"; it may become necessary if, for example, PP is instrumented 
+> to log all refs and unrefs.  As another example, I am currently 
+> debugging the PLearn<->Python bridge (to allow parallel execution) and I 
+> think most people will want to omit debug logs from PythonObjectWrapper 
+> and PythonExtension once I'm done; I would rather not have to remove all 
+> logs since they may be useful again in the future (and it would defeat 
+> the purpose of logs altogether.)
+
+I think debug logs (in the sense of being useful for debug code) should
+never show by default, but it should not be a module-level exclusion,
+but instead be based on the specific log level.
+Which I believe is what you're coming to in the following...
+
+> What remains to be solved is the exact definition of the different 
+> logging levels.  We probably need to start using it and experimenting 
+> with it before we can take any final decision.  For now, the following 
+> examples illustrate messages which I think may belong to different levels:
+> 1- low-level core system debugging information; e.g. logging each ref 
+> and unref to every PP
+> 2- machine-learning-related low-level information; e.g. number of rows 
+> selected by SelectRowsVMatrix
+> 3- machine-learning-related potential errors; e.g. warning for bagging 
+> with several identical bags
+> 4- user-oriented low-level information; e.g. validation error at each 
+> stage of hyper-learning
+> 5- global progress information; e.g. start of a new split
+> Does this list make sense to you?  If so, how would you assign each of 
+> these messages to the different levels of logs?
+
+Maybe I missed a part of the discussion at some point, but I thought
+initially the plan was just to get rid of PLWARNING. Are we now also
+trying to get rid of the direct use of pout/perr at the same time? If
+yes, isn't it going to be somewhat redundant with the verbosity / 
+report_progress options in some classes? (without the flexibility of
+being able to tweak the logging level for each instance of a class).
+Just trying to understand what's the plan here.
+
+--
+Olivier
+
+
+From delallea at iro.umontreal.ca  Fri Dec  5 19:47:54 2008
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 5 Dec 2008 13:47:54 -0500
+Subject: [Plearn-developers] Default value for logging
+In-Reply-To: <20081205184012.GA30736@opale.iro.umontreal.ca>
+References: <2d1d7fe70812021038m4ecfdb89n4fe15970df616fda@mail.gmail.com>
+	<49396558.5040602@apstat.com>
+	<20081205184012.GA30736@opale.iro.umontreal.ca>
+Message-ID: <20081205184754.GA999@opale.iro.umontreal.ca>
+
+On 05 Dec 2008, Olivier Delalleau wrote:
+> I think debug logs (in the sense of being useful for debug code) should
+> never show by default (...).
+
+Oops, in case this would make no sense, I meant "useful TO debug code".
+
+--
+Olivier
+
+

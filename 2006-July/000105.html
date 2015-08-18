@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] cleaning in pymake and pymake.config.model
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20cleaning%20in%20pymake%20and%20pymake.config.model&In-Reply-To=%3C20060714211437.GA3819%40pig.zood.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000116.html">
+   <LINK REL="Next"  HREF="000117.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] cleaning in pymake and pymake.config.model</H1>
+    <B>Pascal Lamblin</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20cleaning%20in%20pymake%20and%20pymake.config.model&In-Reply-To=%3C20060714211437.GA3819%40pig.zood.org%3E"
+       TITLE="[Plearn-developers] cleaning in pymake and pymake.config.model">lamblinp at iro.umontreal.ca
+       </A><BR>
+    <I>Fri Jul 14 23:14:37 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000116.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+        <LI>Next message: <A HREF="000117.html">[Plearn-developers] No space on berlios disk for subversion
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#105">[ date ]</a>
+              <a href="thread.html#105">[ thread ]</a>
+              <a href="subject.html#105">[ subject ]</a>
+              <a href="author.html#105">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Fri, Jul 14, 2006, Christian Hudon wrote:
+&gt;<i> Pascal Lamblin escribi&#243;:
+</I>&gt;<i> &gt; I'm going to make some changes in pymake and pymake.config.model, in
+</I>&gt;<i> &gt; order to get rid of some dependencies, dirty hacks and unused code.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; So I would like to know if some features/bugs/hacks are still used.
+</I>&gt;<i> &gt; Especially :
+</I>&gt;<i> &gt;   - Who uses the distcc variables (DISTCC_HOSTS, DISTCC_DIR,
+</I>&gt;<i> &gt;     ~/.distcc/hosts, /etc/distcc/hosts) to get a list of hosts on which
+</I>&gt;<i> &gt;     compiling, instead of ~/.pymake/...hosts?
+</I>&gt;<i> &gt;   
+</I>&gt;<i> ApSTAT does. (~/.pymake/hosts is only used as a fallback here. The list
+</I>&gt;<i> of machines is managed site-wide instead of every user having to know
+</I>&gt;<i> and make adjustments separately to their pymake hosts file when a
+</I>&gt;<i> machine is down, when new machines are added, etc., which is a lot
+</I>&gt;<i> better, if you ask me.)
+</I>
+I believe you if you say so... I only preferred to ask too many
+questions than too few.
+
+&gt;<i> &gt;   - Who doesn't have python 2.4?
+</I>&gt;<i> &gt;   
+</I>&gt;<i> ApSTAT still needs pymake to work with python 2.3. And in general, for
+</I>&gt;<i> tools like this, I think it's a good idea to be conservative with the
+</I>&gt;<i> usage of new python features forcing a upgrade to the latest python version.
+</I>
+OK. By the way, I see that there are a lot of ugly things to determine
+where we should find the python files to link with, do you think that a
+global variable or ppath could to the job?
+
+-- 
+Pascal
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000116.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+	<LI>Next message: <A HREF="000117.html">[Plearn-developers] No space on berlios disk for subversion
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#105">[ date ]</a>
+              <a href="thread.html#105">[ thread ]</a>
+              <a href="subject.html#105">[ subject ]</a>
+              <a href="author.html#105">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

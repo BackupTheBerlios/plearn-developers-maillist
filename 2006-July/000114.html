@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] cleaning in pymake and pymake.config.model
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20cleaning%20in%20pymake%20and%20pymake.config.model&In-Reply-To=%3C44BBF1CF.8080500%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000113.html">
+   <LINK REL="Next"  HREF="000115.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] cleaning in pymake and pymake.config.model</H1>
+    <B>Pascal Vincent</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20cleaning%20in%20pymake%20and%20pymake.config.model&In-Reply-To=%3C44BBF1CF.8080500%40apstat.com%3E"
+       TITLE="[Plearn-developers] cleaning in pymake and pymake.config.model">pascal at apstat.com
+       </A><BR>
+    <I>Mon Jul 17 22:23:43 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000113.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+        <LI>Next message: <A HREF="000115.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#114">[ date ]</a>
+              <a href="thread.html#114">[ thread ]</a>
+              <a href="subject.html#114">[ subject ]</a>
+              <a href="author.html#114">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Pascal Lamblin wrote:
+&gt;<i> On Fri, Jul 14, 2006, Pascal Vincent wrote:
+</I>&gt;<i>   
+</I>&gt;&gt;&gt;<i>   - Who uses QT stuff with pymake?
+</I>&gt;&gt;&gt;<i>       
+</I>&gt;&gt;<i> Currently nobody. In the past Julien Keable coded a Qt data 
+</I>&gt;&gt;<i> visualisation software for ApSTAT, and if we have/want to some day again 
+</I>&gt;&gt;<i> compile/recompile  it or some other PLearn&amp;Qt-based application, Qt 
+</I>&gt;&gt;<i> support is certainly nice to have (and it was difficult enough to 
+</I>&gt;&gt;<i> add...). After all Qt is probably *the* major cross-platform GUI toolkit 
+</I>&gt;&gt;<i> used by C++ coders.
+</I>&gt;&gt;<i>     
+</I>&gt;<i>
+</I>&gt;<i> &lt;troll&gt;
+</I>&gt;<i> And that's why plide uses gtk!
+</I>&gt;<i> &lt;/troll&gt;
+</I>&gt;<i>   
+</I>I believe plide is essentially written in python, not in C++ ... We now 
+tend to use pygtk for our GUI development at ApSTAT (for better or for 
+worse), but Qt is definitely a favorite of a great many *C++* 
+cross-platform GUI developers.
+&gt;<i> Even if we keep support for rsh, would you be OK with setting &quot;ssh&quot; as
+</I>&gt;<i> default?
+</I>&gt;<i>   
+</I>That's OK with me.
+&gt;&gt;&gt;<i>   - Who needs pymake to use the first option when several incompatible
+</I>&gt;&gt;&gt;<i>     options are put on the command-line, ignoring the other ones,
+</I>&gt;&gt;&gt;<i>     instead of aborting?
+</I>&gt;&gt;&gt;<i>       
+</I>&gt;&gt;<i> ???
+</I>&gt;&gt;<i>     
+</I>&gt;<i>
+</I>&gt;<i> Hmm, let me rephrase that:
+</I>&gt;<i> if you execute &quot;pymake -double -float plearn.cc&quot;, do you need it to
+</I>&gt;<i> compile in &quot;double&quot; mode (with a warning), or would it be OK if it
+</I>&gt;<i> aborted?
+</I>&gt;<i>   
+</I>Aborting with a nice explicit error message would be perfectly fine.
+
+&gt;<i> The reason why I ask is that some variables used in pymakeOption or
+</I>&gt;<i> optionalLibrary might depend on the command-line arguments (you can see
+</I>&gt;<i> the case of torch), and might be tricked by conflicting arguments.
+</I>&gt;<i>
+</I>&gt;<i>   
+</I>&gt;&gt;&gt;<i>   - Who uses preprocessor variables &quot;DBDIR&quot; and &quot;METADATADIR&quot;?
+</I>&gt;&gt;&gt;<i>   
+</I>&gt;&gt;&gt;<i>       
+</I>&gt;&gt;<i> valhalla:~/PLearn&gt; perlgrep DBDIR .
+</I>&gt;&gt;<i> ./plearn/db/NistDB.cc:57         
+</I>&gt;&gt;<i> imagef.open(DBDIR&quot;/MNIST/train-images-idx3-ubyte&quot;);
+</I>&gt;&gt;<i> ./plearn/db/NistDB.cc:58         
+</I>&gt;&gt;<i> labelf.open(DBDIR&quot;/MNIST/train-labels-idx1-ubyte&quot;);
+</I>&gt;&gt;<i> ./plearn/db/NistDB.cc:63         //      
+</I>&gt;&gt;<i> imagef.open(DBDIR&quot;/MNIST/test-images.idx3-ubyte&quot;);
+</I>&gt;&gt;<i> ./plearn/db/NistDB.cc:64         //      
+</I>&gt;&gt;<i> labelf.open(DBDIR&quot;/MNIST/test-labels.idx1-ubyte&quot;);
+</I>&gt;&gt;<i> ./plearn/db/NistDB.cc:66         
+</I>&gt;&gt;<i> imagef.open(DBDIR&quot;/MNIST/t10k-images-idx3-ubyte&quot;);
+</I>&gt;&gt;<i> ./plearn/db/NistDB.cc:67         
+</I>&gt;&gt;<i> labelf.open(DBDIR&quot;/MNIST/t10k-labels-idx1-ubyte&quot;);
+</I>&gt;&gt;<i> ./plearn/db/databases.cc:179 #ifdef DBDIR
+</I>&gt;&gt;<i> ./plearn/db/databases.cc:180 static const string dbdir_name = DBDIR;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> DBDIR est un syst&#232;me pour sp&#233;cifier la localisation de datasets 
+</I>&gt;&gt;<i> &quot;standards&quot;. C'est un vieux syst&#232;me qu'il faudrait sans doute remplacer 
+</I>&gt;&gt;<i> (par quoi?), mais pour l'instant il semble encore utilis&#233; &#224; quelques 
+</I>&gt;&gt;<i> endroits.
+</I>&gt;&gt;<i>     
+</I>&gt;<i>
+</I>&gt;<i> Sachant que getDataSet() ne supporte plus les sp&#233;cifications de dataset
+</I>&gt;<i> &quot;standard&quot;, je ne sais m&#234;me pas si ce code est utilis&#233;.
+</I>&gt;<i>
+</I>&gt;<i> Si on d&#233;cide de le r&#233;utiliser, je pr&#233;f&#232;rerais largement le remplacer par
+</I>&gt;<i> un PPath, comme pour UCI_MLDB_REP et UCI_MLDB.
+</I>&gt;<i>   
+</I>Oui, je seconde l'utilisation du m&#233;canisme de PPath avec un path ajout&#233; 
+&#224; ~/.plearn/ppath.config pour UCI_MLDB
+
+&gt;<i> Je suis d'accord avec toi sur le fond, mais d'une part je pr&#233;f&#232;re virer
+</I>&gt;<i> des mauvais exemples comment&#233;s (lorsqu'ils ont des chemins en &quot;/u/lisa&quot;
+</I>&gt;<i> en dur, par exemple), et d'autre part je pense qu'il y a assez d'options
+</I>&gt;<i> &quot;bidouill&#233;es&quot; d&#233;comment&#233;es (donc utilis&#233;es) pour servir d'exemple.
+</I>&gt;<i>
+</I>&gt;<i> En tous cas, merci pour le feedback,
+</I>&gt;<i>   
+</I>Oui, oui, mais attention &#224; ne pas faire trop de z&#232;le tout de m&#234;me lors 
+du &quot;cleaning&quot;, pour ne pas supprimer, au nom de la propret&#233; plus blanc 
+que blanc, des features utiles que certains ont pass&#233; un temps non 
+n&#233;gligeable &#224; ajouter, sans doute pour de bonnes raisons, m&#234;me si ce fut 
+fait dans l'urgence et de fa&#231;on pas tr&#232;s propre... (traduction: ne pas 
+jeter le b&#233;b&#233; avec l'eau du bain sous pr&#233;texte que l'eau est sale, mais 
+ne te g&#232;ne pas pour r&#233;curer le b&#233;b&#233; autant que tu veux! ;-&gt; Merci pour 
+tes efforts.)
+
+-- 
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+<A HREF="http://www.apstat.com">http://www.apstat.com</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000113.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+	<LI>Next message: <A HREF="000115.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#114">[ date ]</a>
+              <a href="thread.html#114">[ thread ]</a>
+              <a href="subject.html#114">[ subject ]</a>
+              <a href="author.html#114">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

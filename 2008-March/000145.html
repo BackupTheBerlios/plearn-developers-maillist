@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Changement a la syntaxe python	pour	vmat.getFieldIndex
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-March/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Changement%20a%20la%20syntaxe%20python%0A%09pour%09vmat.getFieldIndex&In-Reply-To=%3C47D187EB.9040200%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000144.html">
+   <LINK REL="Next"  HREF="000146.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Changement a la syntaxe python	pour	vmat.getFieldIndex</H1>
+    <B>Xavier Saint-Mleux</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Changement%20a%20la%20syntaxe%20python%0A%09pour%09vmat.getFieldIndex&In-Reply-To=%3C47D187EB.9040200%40apstat.com%3E"
+       TITLE="[Plearn-developers] Changement a la syntaxe python	pour	vmat.getFieldIndex">saintmlx at apstat.com
+       </A><BR>
+    <I>Fri Mar  7 19:22:35 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000144.html">[Plearn-developers] Changement a la syntaxe python pour	vmat.getFieldIndex
+</A></li>
+        <LI>Next message: <A HREF="000146.html">[Plearn-developers] Changement a la syntaxe python	pour	vmat.getFieldIndex
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#145">[ date ]</a>
+              <a href="thread.html#145">[ thread ]</a>
+              <a href="subject.html#145">[ subject ]</a>
+              <a href="author.html#145">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Pour ce qui est des valeurs par d&#233;faut, ce n'est pas trivial et &#231;a 
+risque de ne pas &#234;tre fait avant longtemps.  Sinon, pourquoi ne pas 
+simplement d&#233;crarer fieldIndex remote? &#231;a renvoie d&#233;j&#224; -1 pour les 
+champs qui n'existent pas (et getFieldIndex l'utilise.)  Autrement, il 
+me semble qu'un try/except serait appropri&#233; au lieu de toujours avoir &#224; 
+passer un bool&#233;en en plus, non?
+
+Xavier
+
+PS: m&#234;me si c'est r&#233;cent, j'utilise d&#233;j&#224; beaucoup getFieldIndex...
+
+
+Olivier Delalleau wrote:
+&gt;<i> Salut,
+</I>&gt;<i>
+</I>&gt;<i> Juste pour vous dire que si vous utilisez la (remote-declared) methode
+</I>&gt;<i> VMatrix.getFieldIndex(field) dans un script Python, il faut maintenant
+</I>&gt;<i> rajouter un second argument pour indiquer si on veut lancer une erreur
+</I>&gt;<i> quand le champ 'field' n'existe pas :
+</I>&gt;<i>     - True =&gt; erreur
+</I>&gt;<i>     - False =&gt; pas d'erreur (retourne -1)
+</I>&gt;<i>
+</I>&gt;<i> Vu que cette methode n'a ete declaree remote que recemment (par
+</I>&gt;<i> moi-meme), je me suis permis de le faire en esperant que ca ne cassera
+</I>&gt;<i> pas grand-chose :)
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Olivier
+</I>&gt;<i>
+</I>&gt;<i> PS: a quand les valeurs par defaut ?
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Plearn-developers mailing list
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">Plearn-developers at lists.berlios.de</A>
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">https://lists.berlios.de/mailman/listinfo/plearn-developers</A>
+</I>&gt;<i>   
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000144.html">[Plearn-developers] Changement a la syntaxe python pour	vmat.getFieldIndex
+</A></li>
+	<LI>Next message: <A HREF="000146.html">[Plearn-developers] Changement a la syntaxe python	pour	vmat.getFieldIndex
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#145">[ date ]</a>
+              <a href="thread.html#145">[ thread ]</a>
+              <a href="subject.html#145">[ subject ]</a>
+              <a href="author.html#145">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

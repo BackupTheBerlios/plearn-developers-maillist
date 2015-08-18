@@ -1,0 +1,233 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Plearn installation error due to	wrong	arguments in multiplyAcc ?
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2009-April/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Plearn%20installation%20error%20due%20to%0A%09wrong%09arguments%20in%20multiplyAcc%20%3F&In-Reply-To=%3C20090403151608.GA20209%40opale.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000223.html">
+   <LINK REL="Next"  HREF="000225.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Plearn installation error due to	wrong	arguments in multiplyAcc ?</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Plearn%20installation%20error%20due%20to%0A%09wrong%09arguments%20in%20multiplyAcc%20%3F&In-Reply-To=%3C20090403151608.GA20209%40opale.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] Plearn installation error due to	wrong	arguments in multiplyAcc ?">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Fri Apr  3 17:16:08 CEST 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000223.html">[Plearn-developers] Plearn installation error due to wrong	arguments in multiplyAcc ?
+</A></li>
+        <LI>Next message: <A HREF="000225.html">[Plearn-developers] Test failure on mammouth (python 2.6)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#224">[ date ]</a>
+              <a href="thread.html#224">[ thread ]</a>
+              <a href="subject.html#224">[ subject ]</a>
+              <a href="author.html#224">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>It should be fixed now, I removed the include of BetaKernel, which
+eventually triggered the include of LAPACK. A better fix would have been
+to edit distr_maths to hide the LAPACK-dependent stuff with -noblas, if
+anyone feels like doing it.
+
+-
+Olivier
+
+On 03 Apr 2009, Olivier Temam wrote:
+&gt;<i> Hi Fred,
+</I>&gt;<i> 
+</I>&gt;<i>   Just a note about installation: I could install/compile plearn_full, but I
+</I>&gt;<i> wanted to mention that there was a linking error with 'pymake -noblas
+</I>&gt;<i> plearn_noblas' because it is apparently using the lapack libraries and the
+</I>&gt;<i> -noblas flag seems to remove some of these libraries (see error messages
+</I>&gt;<i> below). Maybe it was just me doing something wrong, but if not, you may to
+</I>&gt;<i> remove the &quot;-noblas&quot; flag from the tutorial.
+</I>&gt;<i> 
+</I>&gt;<i> Take care,
+</I>&gt;<i> Olivier
+</I>&gt;<i> 
+</I>&gt;<i> /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn/math/OBJS/linux-i386___g++_dbg_double_python25_noblas_logging=dbg_numpy/distr_maths.o:
+</I>&gt;<i> In function `PLearn::lapack_Xsyevx_(char*, char*, char*, int*, double*,
+</I>&gt;<i> int*, double*, double*, int*, int*, double*, int*, double*, double*, int*,
+</I>&gt;<i> double*, int*, int*, int*, int*)':
+</I>&gt;<i> /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn/math/plapack.h:56:
+</I>&gt;<i> undefined reference to `dsyevx_'
+</I>&gt;<i> /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn/math/OBJS/linux-i386___g++_dbg_double_python25_noblas_logging=dbg_numpy/plapack.o:
+</I>&gt;<i> In function `PLearn::lapack_Xgesdd_(char*, int*, int*, double*, int*,
+</I>&gt;<i> double*, double*, int*, double*, int*, double*, int*, int*, int*)':
+</I>&gt;<i> /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn/math/plapack.h:62:
+</I>&gt;<i> undefined reference to `dgesdd_'
+</I>&gt;<i> /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn/math/OBJS/linux-i386___g++_dbg_double_python25_noblas_logging=dbg_numpy/plapack.o:
+</I>&gt;<i> In function `PLearn::lapack_Xpotrs_(char*, int*, int*, double*, int*,
+</I>&gt;<i> double*, int*, int*)':
+</I>&gt;<i> /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn/math/plapack.h:91:
+</I>&gt;<i> undefined reference to `dpotrs_'
+</I>&gt;<i> /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn/math/OBJS/linux-i386___g++_dbg_double_python25_noblas_logging=dbg_numpy/plapack.o:
+</I>&gt;<i> In function `PLearn::lapack_Xpotrf_(char*, int*, double*, int*, int*)':
+</I>&gt;<i> /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn/math/plapack.h:84:
+</I>&gt;<i> undefined reference to `dpotrf_'
+</I>&gt;<i> collect2: ld returned 1 exit status
+</I>&gt;<i> Link command failed to create file
+</I>&gt;<i> /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/commands/OBJS/linux-i386___g++_dbg_double_python25_noblas_logging=dbg_numpy/plearn_noblas_nolibblas______.new
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> On Thu, Mar 12, 2009 at 7:01 PM, Fr&#233;d&#233;ric Bastien &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">nouiz at nouiz.org</A>&gt; wrote:
+</I>&gt;<i> 
+</I>&gt;<i> &gt; Hi,
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Just a quick help about compilation. This is the flags that I use most
+</I>&gt;<i> &gt; often:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; to compile
+</I>&gt;<i> &gt; pymake $PLEARNDIR/commands/plearn_{full,noblas,...}
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; this will compile in debug mode. To compile in opt mode:
+</I>&gt;<i> &gt; pymake -opt $PLEARNDIR/commands/plearn_{full,noblas,...}
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; To speed up the link time if your plearndir is on nfs:
+</I>&gt;<i> &gt; pymake -local_ofiles $PLEARNDIR/commands/plearn_{full,noblas,...}
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; for parallel compilation on an SMP host where N is the number of parallel
+</I>&gt;<i> &gt; threads:
+</I>&gt;<i> &gt; pymake -local=N $PLEARNDIR/commands/plearn_{full,noblas,...}
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; You can also make parallel compilation on many computer with ssh if you
+</I>&gt;<i> &gt; need to compile it many times(likes us when we devellop for it)
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; To control the compilation verbosity their is the -v, -vv, -vvv, -vvvv
+</I>&gt;<i> &gt; option that default to -vv if I remember correctly.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Fred
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; On Thu, Mar 12, 2009 at 11:34 AM, Olivier Temam &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">olivier.temam at inria.fr</A>&gt;wrote:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;&gt; Hi Frederic &amp; Pascal,
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;   Many thanks for your quick reply. It did solve this compilation problem.
+</I>&gt;<i> &gt;&gt; I am still struggling with some link time issues but I will first try to
+</I>&gt;<i> &gt;&gt; resolve them by myself before further bothering you.
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; Take care,
+</I>&gt;<i> &gt;&gt; Olivier
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; On Wed, Mar 11, 2009 at 7:19 PM, Fr&#233;d&#233;ric Bastien &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">nouiz at nouiz.org</A>&gt;wrote:
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt; Hi,
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt; I have commited a fix update plearn to have it. The trouble is that the
+</I>&gt;<i> &gt;&gt;&gt; fct that exist is
+</I>&gt;<i> &gt;&gt;&gt; multiplyAcc(PLearn::Mat&amp;, PLearn::Mat&amp;, real)
+</I>&gt;<i> &gt;&gt;&gt; and it is
+</I>&gt;<i> &gt;&gt;&gt; multiplyAcc(PLearn::Mat&amp;, PLearn::Mat&amp;, int)
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt; that is called. Here the compiler cast the int to real(float or double,
+</I>&gt;<i> &gt;&gt;&gt; that is selected at compile time) automaticly.
+</I>&gt;<i> &gt;&gt;&gt; What is the compiler that you used and which version?
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt; thanks
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt; Fred
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt; On Wed, Mar 11, 2009 at 2:13 PM, Fr&#233;d&#233;ric Bastien &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">nouiz at nouiz.org</A>&gt;wrote:
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt; Hi,
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt; a fast fix is to don't include this file if you don't need it. To do
+</I>&gt;<i> &gt;&gt;&gt;&gt; this comment the line 257 in the file commands/plearn_noblas_inc.h
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt; here is this line to comment.
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt; #include &lt;plearn_learners/online/ShuntingNNetLayerModule.h&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt; Fred
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt; On Wed, Mar 11, 2009 at 1:44 PM, Pascal Vincent &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">pascal at apstat.com</A>&gt;wrote:
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; Bonjour Olivier,
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; Je fais suivre votre message &#224; la liste plearn-developers.
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; Le 09-03-11 &#224; 12:51, Olivier Temam a &#233;crit :
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; Hi,
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt;   I am really not sure I am mailing this to the proper address, so
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; thanks in advance for redirecting me to the right one, though I
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; could not find any &quot;users list&quot; for Plearn.
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; I have an installation problem which does not seem to be related to
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; library dependence issues, but rather to a coding issue. It is in
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; file ShuntingNNetLayerModule.cc, and the problem seems to be that
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; method multiplyAcc is called with &lt;TMat, TMat&gt; arguments while I
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; could only find methods with TVec arguments in TMat_maths_impl.h.
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; The full error is shown below (I have no other compilation error).
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; Thanks in advance for your help,
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; Olivier
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt;  /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; online/ShuntingNNetLayerModule.cc: In member function &#8216;virtual void
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; PLearn::ShuntingNNetLayerModule::bpropUpdate(const PLearn::Mat&amp;,
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; const PLearn::Mat&amp;, PLearn::Mat&amp;, const PLearn::Mat&amp;, bool)&#8217;:
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; online/ShuntingNNetLayerModule.cc:414: error: no matching function
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; for call to &#8216;multiplyAcc(PLearn::Mat&amp;, PLearn::Mat&amp;, int)&#8217;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; /home/olivier/___SVN___/inaccurate/exp/deep/PLearn/plearn_learners/
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; online/ShuntingNNetLayerModule.cc:415: error: no matching function
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt; for call to &#8216;multiplyAcc(PLearn::Mat&amp;, PLearn::Mat&amp;, int)&#8217;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; &gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; _______________________________________________
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; Plearn-developers mailing list
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">Plearn-developers at lists.berlios.de</A>
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt; <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">https://lists.berlios.de/mailman/listinfo/plearn-developers</A>
+</I>&gt;<i> &gt;&gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;&gt;
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;
+</I>
+&gt;<i> _______________________________________________
+</I>&gt;<i> Plearn-developers mailing list
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">Plearn-developers at lists.berlios.de</A>
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">https://lists.berlios.de/mailman/listinfo/plearn-developers</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000223.html">[Plearn-developers] Plearn installation error due to wrong	arguments in multiplyAcc ?
+</A></li>
+	<LI>Next message: <A HREF="000225.html">[Plearn-developers] Test failure on mammouth (python 2.6)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#224">[ date ]</a>
+              <a href="thread.html#224">[ thread ]</a>
+              <a href="subject.html#224">[ subject ]</a>
+              <a href="author.html#224">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

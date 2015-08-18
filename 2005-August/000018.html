@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Valeur INFINITY
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Valeur%20INFINITY&In-Reply-To=%3CB5AE724C-4221-407F-BE8E-9134D98C1C50%40iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000017.html">
+   <LINK REL="Next"  HREF="000019.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Valeur INFINITY</H1>
+    <B>Jasmin Lapalme</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Valeur%20INFINITY&In-Reply-To=%3CB5AE724C-4221-407F-BE8E-9134D98C1C50%40iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] Valeur INFINITY">lapalmej at iro.umontreal.ca
+       </A><BR>
+    <I>Mon Aug  1 20:42:07 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000017.html">[Plearn-developers] -fno-coalesce
+</A></li>
+        <LI>Next message: <A HREF="000019.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18">[ date ]</a>
+              <a href="thread.html#18">[ thread ]</a>
+              <a href="subject.html#18">[ subject ]</a>
+              <a href="author.html#18">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Bonjour,
+     J'ai encore des probl&#232;mes &#224; la compilation sous Mac OS X (10.4,  
+gcc 4.0.0). Dans PStream.cc:537, une constante INFINITY est donn&#233; &#224;  
+un double et ceci cause l'erreur suivante :
+
+error: floating constant exceeds tange of 'float'
+
+     Que repr&#233;sente la constante INFINITY? lorsque que je la remplace  
+DBL_MAX le fichier compile bien. Va-t-il y avoir un probl&#232;me si je  
+met DBL_MAX &#224; la place?
+
+Merci
+
+Jasmin
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000017.html">[Plearn-developers] -fno-coalesce
+</A></li>
+	<LI>Next message: <A HREF="000019.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18">[ date ]</a>
+              <a href="thread.html#18">[ thread ]</a>
+              <a href="subject.html#18">[ subject ]</a>
+              <a href="author.html#18">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

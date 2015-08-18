@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] PLearn script to collect results
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2007-April/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PLearn%20script%20to%20collect%20results&In-Reply-To=%3C461CC320.7050508%40iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000127.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] PLearn script to collect results</H1>
+    <B>Yoshua Bengio</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PLearn%20script%20to%20collect%20results&In-Reply-To=%3C461CC320.7050508%40iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] PLearn script to collect results">bengioy at iro.umontreal.ca
+       </A><BR>
+    <I>Wed Apr 11 13:14:40 CEST 2007</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000127.html">[Plearn-developers] Plearn: fichier qui ne compile pas
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#126">[ date ]</a>
+              <a href="thread.html#126">[ thread ]</a>
+              <a href="subject.html#126">[ subject ]</a>
+              <a href="author.html#126">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+I have commited a new script in PLearn/scripts, called collectres, to 
+help in collect results
+of learning experiments performed with PLearn. I allows to forage in 
+(and plot) the error
+curves that are generated during training, for example with early 
+stopping, but it can
+extract information from any systematically named set of pmat result 
+files, where the
+current methodologies (appendresults) do not fit the bill.
+
+The main things it can do are: find the &quot;best&quot; result in a set, sort the 
+results in some order,
+plot training curves.
+
+There is not much error checking and robustness in it right now, so feel 
+free to improve it
+(keep me informed if you want to change the current semantics).
+
+Here is what running it with no argument gives:
+
+Usage: collectres &lt;outputfile&gt; &lt;spec&gt; &lt;file1.pmat&gt; &lt;file2.pmat&gt; ...
+
+The &lt;spec&gt; can be the following:
+  &quot;min &lt;location-spec&gt;&quot; : identify the mininum of &lt;location-spec&gt; over 
+the &lt;file*.pmat&gt;
+                          prints the values of the selected 
+&lt;location-spec&gt; and the name
+                          of the minimizing &lt;file.pmat&gt; in the &lt;outputfile&gt;.
+  &quot;sort &lt;location-spec&gt;&quot; : make a sorted table of all the values at each 
+&lt;location-spec&gt;
+                           over the &lt;file*.pmat&gt;. The output format is 
+similar to &quot;min&quot; but
+                           it outputs the selected values for all the 
+pmat files, sorted
+                           by the first value in the &lt;location-spec&gt;.
+  &quot;plot cols &lt;xlabel&gt; &lt;ylabel&gt; &lt;minrow&gt; &lt;maxrow&gt; &lt;x&gt; &lt;col1&gt; &lt;name1&gt; 
+&lt;col2&gt; &lt;name2&gt; ...&quot; :
+                          make a smartplot file (see 
+PLearn/scripts/smartplot) with column with
+                          indices &lt;col1&gt; in &lt;fileX.pmat&gt; as y-columns 
+(with legend label &lt;namei&gt;),
+                          column with index &lt;x&gt; as x-column (or -1 for 
+the row indices).
+                          Axes are labeled &lt;xlabel&gt; and &lt;ylabel&gt;. Use 
+rows from &lt;minrow&gt; to &lt;maxrow&gt;
+                          row inclusively (&lt;maxrow&gt; = -1 means last row).
+
+In the above, &lt;location-spec&gt; can be the following:
+  &quot;pos &lt;row&gt; &lt;col0&gt; [&lt;col1&gt; &lt;col2&gt;...]&quot;: keep only the values at positions
+                          (&lt;row&gt; &lt;col0&gt;) (&lt;row&gt; &lt;col1&gt;) ... in each pmat 
+file, and the first value
+                          may be used to minimize over files in the min 
+command.
+  &quot;mincol &lt;mcol&gt; [&lt;col1&gt; &lt;col2&gt;...] &quot;: keep only the minimum value in 
+colun &lt;mcol&gt; of each pmat,
+                          keeping track at the same time of the &lt;coli&gt; 
+values at the min-selected row.
+
+
+Here is an example of use. First I found what were the best results for 
+two competing algorithms
+using a collectres sort command (note that I had to look at some of 
+these pmat files to find out
+what were the columns I wanted and decide on which one to sort):
+
+  collectres letter-sgrad-best-valid-NLL &quot;sort mincol 6 5 4 3&quot; 
+exp/letter-sgrad-*/Split0/LearnerExpdir/Strat0results.pmat
+
+  collectres letter-NatGradBlock-best-valid-NLL &quot;sort mincol 6 5 4 3&quot; 
+exp/letter-NatGradBlock-*/Split0/LearnerExpdir/Strat0results.pmat
+
+Then I copy-pasted the names of the best experiment directories into a 
+collectres plot command
+to display their error curves:
+
+  collectres letter-sgrad-vs-BlockNatGrad-best-valid-NLL-plot &quot;plot cols 
+cpu-sec NLL 0 99 8 6 valid-NLL&quot; 
+exp/letter-sgrad-nout=26-nh1=400-nh2=400-nh3=0-slr=0.01-dc=0-n_train_it=1600001-epoch=16000-seed=2-minibatch=1-20070405:002553/Split0/LearnerExpdir/Strat0results.pmat 
+exp/letter-natgradblockO-nout=26-nh1=400-nh2=400-nh3=0-slr=1e-5-dc=1e-6-n_train_it=1600001-epoch=16000-seed=1-minibatch=30-cov_minibatch=10-lambda=.03-k=3-gamma=.995-ren=1-ngv=0-20070401:220403/Split0/LearnerExpdir/Strat0results.pmat
+
+Finally I could display the curves (after possibly editing the gnuplot 
+command in the output file) using
+
+  smartplot letter-sgrad-vs-BlockNatGrad-best-valid-NLL-plot.eps 
+letter-sgrad-vs-BlockNatGrad-best-valid-NLL-plot
+
+-- Yoshua
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000127.html">[Plearn-developers] Plearn: fichier qui ne compile pas
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#126">[ date ]</a>
+              <a href="thread.html#126">[ thread ]</a>
+              <a href="subject.html#126">[ subject ]</a>
+              <a href="author.html#126">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

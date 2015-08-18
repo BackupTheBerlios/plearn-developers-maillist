@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] cleaning in pymake and pymake.config.model
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20cleaning%20in%20pymake%20and%20pymake.config.model&In-Reply-To=%3C20060714223306.GA4195%40pig.zood.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000106.html">
+   <LINK REL="Next"  HREF="000109.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] cleaning in pymake and pymake.config.model</H1>
+    <B>Pascal Lamblin</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20cleaning%20in%20pymake%20and%20pymake.config.model&In-Reply-To=%3C20060714223306.GA4195%40pig.zood.org%3E"
+       TITLE="[Plearn-developers] cleaning in pymake and pymake.config.model">lamblinp at iro.umontreal.ca
+       </A><BR>
+    <I>Sat Jul 15 00:33:06 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000106.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+        <LI>Next message: <A HREF="000109.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#108">[ date ]</a>
+              <a href="thread.html#108">[ thread ]</a>
+              <a href="subject.html#108">[ subject ]</a>
+              <a href="author.html#108">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Fri, Jul 14, 2006, Pascal Vincent wrote:
+&gt;<i> &gt;   - Who uses QT stuff with pymake?
+</I>&gt;<i>
+</I>&gt;<i> Currently nobody. In the past Julien Keable coded a Qt data 
+</I>&gt;<i> visualisation software for ApSTAT, and if we have/want to some day again 
+</I>&gt;<i> compile/recompile  it or some other PLearn&amp;Qt-based application, Qt 
+</I>&gt;<i> support is certainly nice to have (and it was difficult enough to 
+</I>&gt;<i> add...). After all Qt is probably *the* major cross-platform GUI toolkit 
+</I>&gt;<i> used by C++ coders.
+</I>
+&lt;troll&gt;
+And that's why plide uses gtk!
+&lt;/troll&gt;
+
+&gt;<i> &gt;   - Who uses the --log-link and 'dorionc_hacked_pymake'?
+</I>&gt;<i>
+</I>&gt;<i> No idea what these are used for.
+</I>
+It's labelled &quot;To be removed as soon as pymake is fixed under
+Windows!!!&quot;. Can I assume this is the case ?
+
+&gt;<i> &gt;   - Who uses rsh (and not ssh) for launching remote compilations?
+</I>&gt;<i> &gt;   
+</I>&gt;<i> Nobody anymore, but again, I wouldn't completely remove support for rsh, 
+</I>&gt;<i> as it might be useful on some installations, and it isn't an ugly hack 
+</I>&gt;<i> anyway.
+</I>
+ From what I read in pymake, I thought that it was because of rsh not
+handling correctly the return values of the processes that the remote
+compilation command we execute had to end with '; echo $?', which we
+have to get and remove in pymake. It is not _that_ ugly, but if we can
+get rid of that it might still be good.
+
+Even if we keep support for rsh, would you be OK with setting &quot;ssh&quot; as
+default?
+
+&gt;<i> &gt;   - Who uses SPC compilation (-spc option)?
+</I>&gt;<i>
+</I>&gt;<i> Anybody remembers what this was for??
+</I>
+I do. I think it was supposed to query the lisa cluster to get a list of
+free machines, and compile only on these machines, so it is faster when
+we only have a few files to compile.
+
+&gt;<i> &gt;   - Who needs pymake to use the first option when several incompatible
+</I>&gt;<i> &gt;     options are put on the command-line, ignoring the other ones,
+</I>&gt;<i> &gt;     instead of aborting?
+</I>&gt;<i>
+</I>&gt;<i> ???
+</I>
+Hmm, let me rephrase that:
+if you execute &quot;pymake -double -float plearn.cc&quot;, do you need it to
+compile in &quot;double&quot; mode (with a warning), or would it be OK if it
+aborted?
+
+The reason why I ask is that some variables used in pymakeOption or
+optionalLibrary might depend on the command-line arguments (you can see
+the case of torch), and might be tricked by conflicting arguments.
+
+&gt;<i> &gt;   - Who uses preprocessor variables &quot;DBDIR&quot; and &quot;METADATADIR&quot;?
+</I>&gt;<i> &gt;   
+</I>&gt;<i> valhalla:~/PLearn&gt; perlgrep DBDIR .
+</I>&gt;<i> ./plearn/db/NistDB.cc:57         
+</I>&gt;<i> imagef.open(DBDIR&quot;/MNIST/train-images-idx3-ubyte&quot;);
+</I>&gt;<i> ./plearn/db/NistDB.cc:58         
+</I>&gt;<i> labelf.open(DBDIR&quot;/MNIST/train-labels-idx1-ubyte&quot;);
+</I>&gt;<i> ./plearn/db/NistDB.cc:63         //      
+</I>&gt;<i> imagef.open(DBDIR&quot;/MNIST/test-images.idx3-ubyte&quot;);
+</I>&gt;<i> ./plearn/db/NistDB.cc:64         //      
+</I>&gt;<i> labelf.open(DBDIR&quot;/MNIST/test-labels.idx1-ubyte&quot;);
+</I>&gt;<i> ./plearn/db/NistDB.cc:66         
+</I>&gt;<i> imagef.open(DBDIR&quot;/MNIST/t10k-images-idx3-ubyte&quot;);
+</I>&gt;<i> ./plearn/db/NistDB.cc:67         
+</I>&gt;<i> labelf.open(DBDIR&quot;/MNIST/t10k-labels-idx1-ubyte&quot;);
+</I>&gt;<i> ./plearn/db/databases.cc:179 #ifdef DBDIR
+</I>&gt;<i> ./plearn/db/databases.cc:180 static const string dbdir_name = DBDIR;
+</I>&gt;<i> 
+</I>&gt;<i> DBDIR est un syst&#232;me pour sp&#233;cifier la localisation de datasets 
+</I>&gt;<i> &quot;standards&quot;. C'est un vieux syst&#232;me qu'il faudrait sans doute remplacer 
+</I>&gt;<i> (par quoi?), mais pour l'instant il semble encore utilis&#233; &#224; quelques 
+</I>&gt;<i> endroits.
+</I>
+Sachant que getDataSet() ne supporte plus les sp&#233;cifications de dataset
+&quot;standard&quot;, je ne sais m&#234;me pas si ce code est utilis&#233;.
+
+Si on d&#233;cide de le r&#233;utiliser, je pr&#233;f&#232;rerais largement le remplacer par
+un PPath, comme pour UCI_MLDB_REP et UCI_MLDB.
+
+&gt;<i> &gt;   - Who doesn't have python 2.4?
+</I>&gt;<i>
+</I>&gt;<i> Quelles features de 2.4 te manquent si cruellement?
+</I>
+Aucune, c'est juste que &#231;a fait une diff&#233;rence de configuration (donc
+des cas particuliers) en plus, ce que je cherchais &#224; &#233;viter si possible.
+Mais j'ai bien compris que vous en aviez besoin &#224; Apstat :)
+
+&gt;<i> &gt;   - Who uses the following options:
+</I>&gt;<i> &gt;     &#183; g++3
+</I>&gt;<i> &gt;     &#183; purify
+</I>&gt;<i> &gt;     &#183; quantify
+</I>&gt;<i> &gt;     &#183; checkopt
+</I>&gt;<i> &gt;     &#183; exiterrors
+</I>&gt;<i>
+</I>&gt;<i> On peut sans doute se d&#233;barasser sans remord de g++3 et exiterrors (on 
+</I>&gt;<i> suppose que d&#233;csormais les compilos/syst&#232;mes sont capable de g&#233;rer les 
+</I>&gt;<i> exceptions C++ correctement!).
+</I>
+Parfait ! &#199;a veut dire qu'on a d&#233;j&#224; un &quot;options_choice&quot; de moins !
+
+&gt;<i> quantify et checkopt, je sais plus ce que c'est.
+</I>
+&quot;quantify&quot; a l'air d'un truc du m&#234;me genre que &quot;purify&quot;, sauf que je ne
+sais pas ce que c'est.
+
+&quot;checkopt&quot; rajoute &quot;-funroll-loops&quot; dans les options de g++.
+
+&gt;<i> Note: je ne serais dans un premier temps pas trop agressif dans 
+</I>&gt;<i> l'&#233;limination des options comment&#233;es de pymake.config.model, 
+</I>&gt;<i> puisqu'elles peuvent fournir une aide utile &#224; des personnes qui 
+</I>&gt;<i> essayeraient de compiler plearn dans un autre environnement ou sur une 
+</I>&gt;<i> autre plateforme. pymake.config est pr&#233;vu pour &#234;tre hack&#233; et adapt&#233; aux 
+</I>&gt;<i> besions, et c'est plut&#244;t pratique d'avoir des exemples qu'il suffit de 
+</I>&gt;<i> d&#233;commenter. Et puis je pense qu'il y a d&#233;j&#224; suffisamment de cleaning &#224; 
+</I>&gt;<i> faire dans pymake lui-m&#234;me pour commencer. ;-)
+</I>
+Je suis d'accord avec toi sur le fond, mais d'une part je pr&#233;f&#232;re virer
+des mauvais exemples comment&#233;s (lorsqu'ils ont des chemins en &quot;/u/lisa&quot;
+en dur, par exemple), et d'autre part je pense qu'il y a assez d'options
+&quot;bidouill&#233;es&quot; d&#233;comment&#233;es (donc utilis&#233;es) pour servir d'exemple.
+
+En tous cas, merci pour le feedback,
+-- 
+Pascal
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000106.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+	<LI>Next message: <A HREF="000109.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#108">[ date ]</a>
+              <a href="thread.html#108">[ thread ]</a>
+              <a href="subject.html#108">[ subject ]</a>
+              <a href="author.html#108">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Valeur INFINITY
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Valeur%20INFINITY&In-Reply-To=%3C42EF93E8.7020701%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000022.html">
+   <LINK REL="Next"  HREF="000025.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Valeur INFINITY</H1>
+    <B>Pascal Vincent</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Valeur%20INFINITY&In-Reply-To=%3C42EF93E8.7020701%40apstat.com%3E"
+       TITLE="[Plearn-developers] Valeur INFINITY">pascal at apstat.com
+       </A><BR>
+    <I>Tue Aug  2 17:40:24 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000022.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+        <LI>Next message: <A HREF="000025.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24">[ date ]</a>
+              <a href="thread.html#24">[ thread ]</a>
+              <a href="subject.html#24">[ subject ]</a>
+              <a href="author.html#24">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Nicolas Chapados wrote:
+
+&gt;<i> Honn&#234;tement, ce n'est franchement pas clair que NaN est le bon choix 
+</I>&gt;<i> pour remplacer INFINITY.  L'arithm&#233;tique sur INFINITY est bien d&#233;finie 
+</I>&gt;<i> dans le standard IEEE-754 depuis plus de 20 ans, et c'est une valeur 
+</I>&gt;<i> d'initialisation naturelle pour des algorithmes de min/max it&#233;ratifs.  
+</I>&gt;<i> De plus, toutes les op&#233;rations du genre exp(-INFINITY), 1/INFINITY, 
+</I>&gt;<i> etc., donnent les r&#233;sultats auxquels on s'attend.
+</I>&gt;<i> Je crois qu'on ferait beaucoup plus de dommages en rempla&#231;ant du code 
+</I>&gt;<i> bien d&#233;fini par une erreur, sous pr&#233;texte de prendre par la main un 
+</I>&gt;<i> programmeur qui a explicitement &#233;crit INFINITY en pr&#233;sumant [...]
+</I>
+Je n'ai jamais sugg&#233;r&#233; de red&#233;finir INFINITY partout, mais de d&#233;cider 
+quoi faire lors de la d&#233;s&#233;rialisation de &quot;Inf&quot; sur une machine et un 
+compilo qui semble ne pas accepter que l'on &#233;crive x=INFINITY ...   Le 
+remplacer par x=DBL_MAX c'est pr&#233;sumer beaucoup aussi, et en plus 
+risquer que le probl&#232;me passe davantage inaper&#231;u.
+
+Jasmin, apr&#232;s avoir jet&#233; un oeil aux includes standards sous linux, il 
+semble que HUGE_VAL correspond &#224; un IEEE infinity sur les machines qui 
+en sont capables, et &#231;a semble aussi &#234;tre d&#233;fini sous Windows car une 
+bonne &#226;me (probablement Normand) a jug&#233; n&#233;cessaire de mettre le code 
+suivant dans general.h:
+
+//! INFINITY is not defined under Windows
+#ifdef _MSC_VER
+#define INFINITY HUGE_VAL
+#endif
+
+Donc je me demandais &#224; tout hasard, si tu remplace x=INFINITY par 
+x=HUGE_VAL est-ce que le compilateur est toujours insatisfait?
+
+Voil&#224; ce que dit math.h concernant HUGE_VAL:
+/* Get machine-dependent HUGE_VAL value (returned on overflow).
+   On all IEEE754 machines, this is +Infinity.  */
+
+
+-- 
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+<A HREF="http://www.apstat.com">http://www.apstat.com</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000022.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+	<LI>Next message: <A HREF="000025.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24">[ date ]</a>
+              <a href="thread.html#24">[ thread ]</a>
+              <a href="subject.html#24">[ subject ]</a>
+              <a href="author.html#24">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] PCA Missings Imputation
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-June/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PCA%20Missings%20Imputation&In-Reply-To=%3C20060610153715.GA22435%40frontal21.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000096.html">
+   <LINK REL="Next"  HREF="000098.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] PCA Missings Imputation</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PCA%20Missings%20Imputation&In-Reply-To=%3C20060610153715.GA22435%40frontal21.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] PCA Missings Imputation">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Sat Jun 10 17:37:17 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000096.html">[Plearn-developers] PCA Missings Imputation
+</A></li>
+        <LI>Next message: <A HREF="000098.html">[Plearn-developers] PCA Missings Imputation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#97">[ date ]</a>
+              <a href="thread.html#97">[ thread ]</a>
+              <a href="subject.html#97">[ subject ]</a>
+              <a href="author.html#97">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I guess that's true. Anyway, I vote against including this option in
+PLearner as a build option by default, as this is going to be yet
+another build option that most PLearners cannot use. You could still
+declare it as a nosave option by default, and redeclare it as a build
+option in the learners that implement it.
+Maybe we could have an ImputeMissingLearner instead of that
+MeanImputationVMatrix, that could be embedded in learners that need to
+have missing values imputed (so they could all use the same imputation
+algorithms - since we may want to use smarter methods than just the
+means, see the upcoming paper in NIPS'09!).
+
+--
+Olivier
+
+On 10 Jun 2006, Nicolas Chapados wrote:
+&gt;<i> But there is not necessarily an associated VMatrix for computeOutput...
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Olivier Delalleau wrote:
+</I>&gt;<i> &gt;Personally, it seems to me it would make more sense to put this in the
+</I>&gt;<i> &gt;VMatrices (this can be done for instance with the
+</I>&gt;<i> &gt;MeanImputationVMatrix), rather than add the same code in all learners.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;--
+</I>&gt;<i> &gt;Olivier
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;On 10 Jun 2006, Nicolas Chapados wrote:
+</I>&gt;<i> &gt;  
+</I>&gt;<i> &gt;&gt;Hello all,
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;Just a quick note: I added an &quot;impute_missings&quot; option to PCA.  If true, 
+</I>&gt;<i> &gt;&gt;and a missing value is encountered on a computeOutput(), then it is 
+</I>&gt;<i> &gt;&gt;replaced by the mean.  Note that this applies only to computeOutput, not 
+</I>&gt;<i> &gt;&gt;train().  [To filter out train-time missing values, you can still rely 
+</I>&gt;<i> &gt;&gt;on DisregardRowsVMatrix.]
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;I hereby make a suggestion: to use the same option name 
+</I>&gt;<i> &gt;&gt;&quot;impute_missings&quot; when a learner is capable of doing just so.  Does it 
+</I>&gt;<i> &gt;&gt;make sense to include this in PLearner?
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;    + Nicolas
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000096.html">[Plearn-developers] PCA Missings Imputation
+</A></li>
+	<LI>Next message: <A HREF="000098.html">[Plearn-developers] PCA Missings Imputation
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#97">[ date ]</a>
+              <a href="thread.html#97">[ thread ]</a>
+              <a href="subject.html#97">[ subject ]</a>
+              <a href="author.html#97">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

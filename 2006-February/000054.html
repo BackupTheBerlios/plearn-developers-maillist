@@ -1,0 +1,83 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] StatsCollector: Minor Python utility class
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-February/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20StatsCollector%3A%20Minor%20Python%20utility%20class&In-Reply-To=%3C43E29F66.9010107%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000055.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] StatsCollector: Minor Python utility class</H1>
+    <B>Nicolas Chapados</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20StatsCollector%3A%20Minor%20Python%20utility%20class&In-Reply-To=%3C43E29F66.9010107%40apstat.com%3E"
+       TITLE="[Plearn-developers] StatsCollector: Minor Python utility class">chapados at apstat.com
+       </A><BR>
+    <I>Fri Feb  3 01:10:14 CET 2006</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000055.html">[Plearn-developers] Named logging in PLearn
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#54">[ date ]</a>
+              <a href="thread.html#54">[ thread ]</a>
+              <a href="subject.html#54">[ subject ]</a>
+              <a href="author.html#54">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello all PLearners,
+
+I added a small Python utility class that vaguely mimics the 
+StatsCollector of PLearn.  It tries to be efficient and uses numarray 
+for all calculations, and never explicitly loops on the rows of the 
+matrix.  The choice of statistics is a bit limited, but can easily be 
+extended.
+
+Have a look under python_modules/plearn/math/StatsCollector.py
+
+To try it out, perform a svn update of PLearn, and try:
+
+    &gt; cd ~/PLearn/python_modules/plearn/math/test
+    &gt; python StatsCollector.py
+
+Comments and suggestions welcome.
+
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000055.html">[Plearn-developers] Named logging in PLearn
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#54">[ date ]</a>
+              <a href="thread.html#54">[ thread ]</a>
+              <a href="subject.html#54">[ subject ]</a>
+              <a href="author.html#54">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] new syntax in pymake *.hosts files
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2007-July/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20new%20syntax%20in%20pymake%20%2A.hosts%20files&In-Reply-To=%3C20070704024347.GA19202%40pig.zood.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000134.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] new syntax in pymake *.hosts files</H1>
+    <B>Pascal Lamblin</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20new%20syntax%20in%20pymake%20%2A.hosts%20files&In-Reply-To=%3C20070704024347.GA19202%40pig.zood.org%3E"
+       TITLE="[Plearn-developers] new syntax in pymake *.hosts files">lamblinp at iro.umontreal.ca
+       </A><BR>
+    <I>Wed Jul  4 04:43:47 CEST 2007</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000134.html">[Plearn-developers] pylearn compilation error
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#133">[ date ]</a>
+              <a href="thread.html#133">[ thread ]</a>
+              <a href="subject.html#133">[ subject ]</a>
+              <a href="author.html#133">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+I just committed a change that I've been thinking of for a while:
+there's now an extended syntax for the files linux-i386.hosts,
+linux-x86_64.hosts (and so on), which are used by pymake.
+
+Previously, each line consisted in a hostname (or an empty or
+commented-out line).
+Now, we can also specify a number of compilation processes to run on
+this host, and a nice value (useful if you want to compile on desktop
+machines). Both are optional: default number of processes is 1, and
+default nice value can be specified in your pymake.config.model
+(variable 'default_nice_value').
+
+The syntax is:
+hostname[/n_processes] [nice_value]
+
+The '/' was chosen because it's used in distcc's syntax.
+
+I changed the files in /u/lisa/.pymake, so if you have a symlink to
+them, you might want to update pymake and pymake.config.model:
+
+$ cd $PLEARNDIR; svn update pymake.config.model python_modules/plearn/pymake/pymake.py
+
+Please let me know if you experience any problem.
+-- 
+Pascal
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000134.html">[Plearn-developers] pylearn compilation error
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#133">[ date ]</a>
+              <a href="thread.html#133">[ thread ]</a>
+              <a href="subject.html#133">[ subject ]</a>
+              <a href="author.html#133">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

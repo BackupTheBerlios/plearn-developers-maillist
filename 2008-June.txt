@@ -1,0 +1,77 @@
+From saintmlx at apstat.com  Mon Jun 16 20:21:08 2008
+From: saintmlx at apstat.com (Xavier Saint-Mleux)
+Date: Mon, 16 Jun 2008 14:21:08 -0400
+Subject: [Plearn-developers] PStream::operator bool() is gone
+Message-ID: <4856AF14.8010102@apstat.com>
+
+Hello,
+
+I am about to commit a change that removes the implicit conversion of 
+PStream to bool.  The reason for this change is that allowing this 
+implicit conversion can lead to some very obscure bugs.  The "clean" 
+solution is to use the good() method explicitly; e.g.:
+
+while(cin) {...}
+
+becomes:
+
+while(cin.good()) {...}
+
+I already went through PLearn to make this change where it was needed.  
+If I missed something, please let me know and I'll fix it.
+
+Xavier
+
+
+
+From nouiz at nouiz.org  Wed Jun 18 22:03:42 2008
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Wed, 18 Jun 2008 16:03:42 -0400
+Subject: [Plearn-developers] plearn/base/RealMapping::map will be renamed to
+	mapto
+Message-ID: <2d1d7fe70806181303s63b6d276o4fd5c1c755c812a@mail.gmail.com>
+
+Hi,
+
+with gcc 4.3.0 I got an error. To correct it I need to rename
+plearn/base/RealMapping::map to plearn/base/RealMapping::mapto. I have
+all the modification in my version and all the test pass. Can I commit
+it safely of this will break stuff at apstat?
+
+thanks
+
+Frederic Bastien
+
+
+From nouiz at nouiz.org  Wed Jun 18 22:45:30 2008
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Wed, 18 Jun 2008 16:45:30 -0400
+Subject: [Plearn-developers] plearn/base/RealMapping::map will be
+	renamed to mapto
+In-Reply-To: <2d1d7fe70806181303s63b6d276o4fd5c1c755c812a@mail.gmail.com>
+References: <2d1d7fe70806181303s63b6d276o4fd5c1c755c812a@mail.gmail.com>
+Message-ID: <2d1d7fe70806181345j16f05726g119d15f47da1f370@mail.gmail.com>
+
+Hi,
+
+With Xavier we found another fix that don't ask to rename the
+function. So their will be no need for cascade change.
+
+thanks
+
+Fred
+
+On Wed, Jun 18, 2008 at 4:03 PM, Fr?d?ric Bastien <nouiz at nouiz.org> wrote:
+> Hi,
+>
+> with gcc 4.3.0 I got an error. To correct it I need to rename
+> plearn/base/RealMapping::map to plearn/base/RealMapping::mapto. I have
+> all the modification in my version and all the test pass. Can I commit
+> it safely of this will break stuff at apstat?
+>
+> thanks
+>
+> Frederic Bastien
+>
+
+

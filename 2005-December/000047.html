@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Renamed options and variables in PDistribution
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2005-December/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Renamed%20options%20and%20variables%20in%20PDistribution&In-Reply-To=%3C20051216155314.GA23915%40lsvm.iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000048.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Renamed options and variables in PDistribution</H1>
+    <B>Olivier Delalleau</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Renamed%20options%20and%20variables%20in%20PDistribution&In-Reply-To=%3C20051216155314.GA23915%40lsvm.iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] Renamed options and variables in PDistribution">delallea at iro.umontreal.ca
+       </A><BR>
+    <I>Fri Dec 16 16:53:14 CET 2005</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000048.html">[Plearn-developers] PLearn, SAS and NSPR DLL crash under Windows
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#47">[ date ]</a>
+              <a href="thread.html#47">[ thread ]</a>
+              <a href="subject.html#47">[ subject ]</a>
+              <a href="author.html#47">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Heya,
+
+This is hopefully the last big non-backward-compatible change in the
+PDistribution class. In order to remove confusion in options and
+variables names, I have renamed some of them. If you are using a
+PDistribution that is not in the PLearn repository, or a saved
+PDistribution in a PLearn script, you must:
+
+I. In C++ code, rename (old =&gt; new):
+    n_input             =&gt; n_predictor
+    n_target            =&gt; n_predicted
+    n_input_            =&gt; predictor_size
+    n_target_           =&gt; predicted_size
+    input_part          =&gt; predictor_part
+    target_part         =&gt; predicted_part
+    setInputTargetSizes =&gt; setPredictorPredictedSizes
+    setInput            =&gt; setPredictor
+
+II. In PLearn scripts, rename (old =&gt; new):
+    n_input             =&gt; predictor_size
+    n_target            =&gt; predicted_size
+    input_part          =&gt; predictor_part
+    n_input_learnt      =&gt; n_predictor
+    n_target_learnt     =&gt; n_predicted
+
+--
+Olivier
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000048.html">[Plearn-developers] PLearn, SAS and NSPR DLL crash under Windows
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#47">[ date ]</a>
+              <a href="thread.html#47">[ thread ]</a>
+              <a href="subject.html#47">[ subject ]</a>
+              <a href="author.html#47">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

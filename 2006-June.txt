@@ -1,0 +1,499 @@
+From delallea at iro.umontreal.ca  Tue Jun  6 17:40:58 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Tue, 6 Jun 2006 11:40:58 -0400
+Subject: [Plearn-developers] Anyone using UniformizeVMatrix?
+Message-ID: <20060606154056.GA29462@opale.iro.umontreal.ca>
+
+Is it safe for me to break UniformizeVMatrix? It doesn't seem to be used
+anywhere in PLearn at least.
+
+--
+Olivier
+
+
+
+From pascal at apstat.com  Wed Jun  7 20:38:29 2006
+From: pascal at apstat.com (Pascal Vincent)
+Date: Wed, 07 Jun 2006 14:38:29 -0400
+Subject: [Plearn-developers] Serialization format change for pairs
+Message-ID: <44871D25.6080703@apstat.com>
+
+Hello fellow PLearners,
+
+This is just ot let you know that the default serialization format for 
+*pairs* has been changed from
+first : second
+TO
+(first, second)
+
+This is to make it the same as the tuple serialization format.
+
+Note that this does not affect maps that will still use the key:value 
+format.
+Note also that backward compatibility is maintained, so that .plearn and 
+.psave files that use the old format can still be read.
+
+-- 
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+http://www.apstat.com
+
+
+
+From delallea at iro.umontreal.ca  Thu Jun  8 19:59:28 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Thu, 8 Jun 2006 13:59:28 -0400
+Subject: [Plearn-developers] Removal of option 'ignore_missing' in ShiftAndRescaleVMatrix
+Message-ID: <20060608175926.GA18328@opale.iro.umontreal.ca>
+
+I have removed the option 'ignore_missing' in ShiftAndRescaleVMatrix, as
+it actually had no effect (missing values are always ignored, even when
+ignore_missing == 0).
+It may cause some scripts to crash if you try to load a saved
+ShiftAndRescaleVMatrix object, in which case you will need to manually
+delete the option from the saved file. If this is a problem for you, let
+me know, and I will restore the option with the 'nosave' flag to prevent
+such crashes.
+
+--
+Olivier
+
+
+
+From chapados at apstat.com  Sat Jun 10 16:20:37 2006
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Sat, 10 Jun 2006 10:20:37 -0400
+Subject: [Plearn-developers] PCA Missings Imputation
+Message-ID: <448AD535.6040704@apstat.com>
+
+Hello all,
+
+Just a quick note: I added an "impute_missings" option to PCA.  If true, 
+and a missing value is encountered on a computeOutput(), then it is 
+replaced by the mean.  Note that this applies only to computeOutput, not 
+train().  [To filter out train-time missing values, you can still rely 
+on DisregardRowsVMatrix.]
+
+I hereby make a suggestion: to use the same option name 
+"impute_missings" when a learner is capable of doing just so.  Does it 
+make sense to include this in PLearner?
+
+     + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+
+
+From delallea at iro.umontreal.ca  Sat Jun 10 16:57:55 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Sat, 10 Jun 2006 10:57:55 -0400
+Subject: [Plearn-developers] PCA Missings Imputation
+In-Reply-To: <448AD535.6040704@apstat.com>
+References: <448AD535.6040704@apstat.com>
+Message-ID: <20060610145753.GA21973@frontal21.iro.umontreal.ca>
+
+Personally, it seems to me it would make more sense to put this in the
+VMatrices (this can be done for instance with the
+MeanImputationVMatrix), rather than add the same code in all learners.
+
+--
+Olivier
+
+On 10 Jun 2006, Nicolas Chapados wrote:
+> Hello all,
+> 
+> Just a quick note: I added an "impute_missings" option to PCA.  If true, 
+> and a missing value is encountered on a computeOutput(), then it is 
+> replaced by the mean.  Note that this applies only to computeOutput, not 
+> train().  [To filter out train-time missing values, you can still rely 
+> on DisregardRowsVMatrix.]
+> 
+> I hereby make a suggestion: to use the same option name 
+> "impute_missings" when a learner is capable of doing just so.  Does it 
+> make sense to include this in PLearner?
+> 
+>     + Nicolas
+> 
+
+
+From chapados at iro.umontreal.ca  Sat Jun 10 17:23:14 2006
+From: chapados at iro.umontreal.ca (Nicolas Chapados)
+Date: Sat, 10 Jun 2006 11:23:14 -0400
+Subject: [Plearn-developers] PCA Missings Imputation
+In-Reply-To: <20060610145753.GA21973@frontal21.iro.umontreal.ca>
+References: <448AD535.6040704@apstat.com> <20060610145753.GA21973@frontal21.iro.umontreal.ca>
+Message-ID: <448AE3E2.7080509@iro.umontreal.ca>
+
+But there is not necessarily an associated VMatrix for computeOutput...
+
+
+Olivier Delalleau wrote:
+> Personally, it seems to me it would make more sense to put this in the
+> VMatrices (this can be done for instance with the
+> MeanImputationVMatrix), rather than add the same code in all learners.
+>
+> --
+> Olivier
+>
+> On 10 Jun 2006, Nicolas Chapados wrote:
+>   
+>> Hello all,
+>>
+>> Just a quick note: I added an "impute_missings" option to PCA.  If true, 
+>> and a missing value is encountered on a computeOutput(), then it is 
+>> replaced by the mean.  Note that this applies only to computeOutput, not 
+>> train().  [To filter out train-time missing values, you can still rely 
+>> on DisregardRowsVMatrix.]
+>>
+>> I hereby make a suggestion: to use the same option name 
+>> "impute_missings" when a learner is capable of doing just so.  Does it 
+>> make sense to include this in PLearner?
+>>
+>>     + Nicolas
+>>
+>>     
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> http://lists.berlios.de/mailman/listinfo/plearn-developers
+>   
+
+-- 
+Nicolas Chapados, Ph.D. candidate
+D?partement d'informatique et recherche op?rationnelle
+Universit? de Montr?al
+http://www.iro.umontreal.ca/~chapados
+
+
+
+
+From delallea at iro.umontreal.ca  Sat Jun 10 17:37:17 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Sat, 10 Jun 2006 11:37:17 -0400
+Subject: [Plearn-developers] PCA Missings Imputation
+In-Reply-To: <448AE3E2.7080509@iro.umontreal.ca>
+References: <448AD535.6040704@apstat.com> <20060610145753.GA21973@frontal21.iro.umontreal.ca> <448AE3E2.7080509@iro.umontreal.ca>
+Message-ID: <20060610153715.GA22435@frontal21.iro.umontreal.ca>
+
+I guess that's true. Anyway, I vote against including this option in
+PLearner as a build option by default, as this is going to be yet
+another build option that most PLearners cannot use. You could still
+declare it as a nosave option by default, and redeclare it as a build
+option in the learners that implement it.
+Maybe we could have an ImputeMissingLearner instead of that
+MeanImputationVMatrix, that could be embedded in learners that need to
+have missing values imputed (so they could all use the same imputation
+algorithms - since we may want to use smarter methods than just the
+means, see the upcoming paper in NIPS'09!).
+
+--
+Olivier
+
+On 10 Jun 2006, Nicolas Chapados wrote:
+> But there is not necessarily an associated VMatrix for computeOutput...
+> 
+> 
+> Olivier Delalleau wrote:
+> >Personally, it seems to me it would make more sense to put this in the
+> >VMatrices (this can be done for instance with the
+> >MeanImputationVMatrix), rather than add the same code in all learners.
+> >
+> >--
+> >Olivier
+> >
+> >On 10 Jun 2006, Nicolas Chapados wrote:
+> >  
+> >>Hello all,
+> >>
+> >>Just a quick note: I added an "impute_missings" option to PCA.  If true, 
+> >>and a missing value is encountered on a computeOutput(), then it is 
+> >>replaced by the mean.  Note that this applies only to computeOutput, not 
+> >>train().  [To filter out train-time missing values, you can still rely 
+> >>on DisregardRowsVMatrix.]
+> >>
+> >>I hereby make a suggestion: to use the same option name 
+> >>"impute_missings" when a learner is capable of doing just so.  Does it 
+> >>make sense to include this in PLearner?
+> >>
+> >>    + Nicolas
+
+
+From bengioy at iro.umontreal.ca  Sat Jun 10 17:58:58 2006
+From: bengioy at iro.umontreal.ca (Yoshua Bengio)
+Date: Sat, 10 Jun 2006 11:58:58 -0400
+Subject: [Plearn-developers] PCA Missings Imputation
+In-Reply-To: <448AE3E2.7080509@iro.umontreal.ca>
+References: <448AD535.6040704@apstat.com> <20060610145753.GA21973@frontal21.iro.umontreal.ca> <448AE3E2.7080509@iro.umontreal.ca>
+Message-ID: <448AEC42.4080504@iro.umontreal.ca>
+
+Nicolas,
+
+This is a good point, but maybe this illustrates a flaw in our design.
+We now think of the VMatrix as two different things: a source
+of data, and a procedural preprocessing mechanism for the data.
+However, indeed if we use a Learner directly with ComputeOutput, outside 
+the context
+of the Learner::Test method, i.e. without a VMatrix to feed it, we may
+be in trouble with this system. Somehow we would like to be
+able to wrap the prepocessing and the Learner in the same
+package, to be able to use it in new contexts. This is especially
+important when the preprocessing is data-dependent (such as
+imputation of missing values by the mean).
+
+A reasonable way to go, without changing the basic design, could be
+to put all our preprocessing in a combined Learner that wraps the 
+preprocessing
+and the actual learner.
+
+Nicolas Chapados a ?crit :
+> But there is not necessarily an associated VMatrix for computeOutput...
+>
+>
+> Olivier Delalleau wrote:
+>> Personally, it seems to me it would make more sense to put this in the
+>> VMatrices (this can be done for instance with the
+>> MeanImputationVMatrix), rather than add the same code in all learners.
+>>
+>> -- 
+>> Olivier
+>>
+>> On 10 Jun 2006, Nicolas Chapados wrote:
+>>  
+>>> Hello all,
+>>>
+>>> Just a quick note: I added an "impute_missings" option to PCA.  If 
+>>> true, and a missing value is encountered on a computeOutput(), then 
+>>> it is replaced by the mean.  Note that this applies only to 
+>>> computeOutput, not train().  [To filter out train-time missing 
+>>> values, you can still rely on DisregardRowsVMatrix.]
+>>>
+>>> I hereby make a suggestion: to use the same option name 
+>>> "impute_missings" when a learner is capable of doing just so.  Does 
+>>> it make sense to include this in PLearner?
+>>>
+>>>     + Nicolas
+>>>
+>>>     
+>> _______________________________________________
+>> Plearn-developers mailing list
+>> Plearn-developers at lists.berlios.de
+>> http://lists.berlios.de/mailman/listinfo/plearn-developers
+>>   
+>
+
+
+
+
+From pascal at apstat.com  Mon Jun 12 17:04:13 2006
+From: pascal at apstat.com (Pascal Vincent)
+Date: Mon, 12 Jun 2006 11:04:13 -0400
+Subject: [Plearn-developers] PCA Missings Imputation
+In-Reply-To: <448AEC42.4080504@iro.umontreal.ca>
+References: <448AD535.6040704@apstat.com> <20060610145753.GA21973@frontal21.iro.umontreal.ca> <448AE3E2.7080509@iro.umontreal.ca> <448AEC42.4080504@iro.umontreal.ca>
+Message-ID: <448D826D.1030405@apstat.com>
+
+> Somehow we would like to be
+> able to wrap the prepocessing and the Learner in the same
+> package, to be able to use it in new contexts. This is especially
+> important when the preprocessing is data-dependent (such as
+> imputation of missing values by the mean).
+>
+> A reasonable way to go, without changing the basic design, could be
+> to put all our preprocessing in a combined Learner that wraps the 
+> preprocessing
+> and the actual learner.
+I agree that this is the right way to do it, and the basic building 
+blocks are already in place (even if some may need an 
+upgrade/simplification).
+Notice that a "preprocessing that is data-dependent" typically has a 
+learning phase on a training set, and should thus be seen as a learner 
+also. Indeed, missing value imputation by replacing with the mean is not 
+any different in that respect from any other method of "unsupervised 
+preprocessing" of the inputs, such as a "normalization", or a PCA. Thus 
+this should be done through an unsupervised MissingImputationLearner. 
+Also we should be able to chain any number of such preprocessing 
+learners. One way to currently chain such learners is to use a 
+StackedLearner; but it is a little cumbersome to use to stack *several* 
+layers of learners (as you'd have to embed a StackedLearner within 
+another StackedLearner within another StackedLearner...). It also has 
+more advanced capabilities than this simple stacking requires, with more 
+complex options (for ex, it has a splitter, combination operations, 
+etc...). But while I have long thought that a more straight forward 
+multiple-learner-stacking mechanism may be desirable (I'll probably 
+start working on this today), it should already be possible to use 
+StackedLearners to chain for ex: 1) Missing imputation, 2) PCA, 3) NNet. 
+Rather than re-implementing a similar missing imputation mechanism in 
+all learners.
+I know it often appears easier to add an option to a learner to do the 
+preprocessing we currently need, rather than to use the stacking 
+mechanism, but I believe that's only because the stacking mechanism is 
+currently too cumbersome to use to chain multiple learners, as it was 
+designed with something a little different and more complex in mind (I 
+bet, Nicolas, that your PCA is already part of a stacked learner or 
+something similar anyway?).
+> This is a good point, but maybe this illustrates a flaw in our design.
+> We now think of the VMatrix as two different things: a source
+> of data, and a procedural preprocessing mechanism for the data.
+A VMatrix is always a source of data, whichever way said data is 
+produced. Such data may or may not be the result of some processing. But 
+if we want to chain learners, it neseccarily involves passing to the 
+downstream learner, a training set resulting from the processing by the 
+upstrem learner. Whether this processing is done in a "precompute it"  
+fashion (ex: on disk or in memory) or a "compute it on the fly" fashion  
+(ex: a PLearnerOutputVMatrix)  should mostly be dictated by 
+ressource-efficiency concerns (ex: it's probably less wasteful to do 
+missing imputaiton by mean replacement on the fly, but it's probably 
+better to precompute the result of a PCA that is to be fed to a NNet ...).
+
+-- Pascal
+
+>
+> Nicolas Chapados a ?crit :
+>> But there is not necessarily an associated VMatrix for computeOutput...
+>>
+>>
+>> Olivier Delalleau wrote:
+>>> Personally, it seems to me it would make more sense to put this in the
+>>> VMatrices (this can be done for instance with the
+>>> MeanImputationVMatrix), rather than add the same code in all learners.
+>>>
+>>> -- 
+>>> Olivier
+>>>
+>>> On 10 Jun 2006, Nicolas Chapados wrote:
+>>>  
+>>>> Hello all,
+>>>>
+>>>> Just a quick note: I added an "impute_missings" option to PCA.  If 
+>>>> true, and a missing value is encountered on a computeOutput(), then 
+>>>> it is replaced by the mean.  Note that this applies only to 
+>>>> computeOutput, not train().  [To filter out train-time missing 
+>>>> values, you can still rely on DisregardRowsVMatrix.]
+>>>>
+>>>> I hereby make a suggestion: to use the same option name 
+>>>> "impute_missings" when a learner is capable of doing just so.  Does 
+>>>> it make sense to include this in PLearner?
+>>>>
+>>>>     + Nicolas
+>>>>
+>>>>     
+>>> _______________________________________________
+>>> Plearn-developers mailing list
+>>> Plearn-developers at lists.berlios.de
+>>> http://lists.berlios.de/mailman/listinfo/plearn-developers
+>>>   
+>>
+>
+>
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> http://lists.berlios.de/mailman/listinfo/plearn-developers
+
+
+-- 
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+http://www.apstat.com
+
+
+
+From larocheh at iro.umontreal.ca  Wed Jun 14 17:15:30 2006
+From: larocheh at iro.umontreal.ca (Hugo Larochelle)
+Date: Wed, 14 Jun 2006 11:15:30 -0400
+Subject: [Plearn-developers] SelectRowsVMatrix change
+Message-ID: <44902812.8070203@IRO.UMontreal.CA>
+
+Hi fellow PLearners,
+
+   I added the boolean option "rows_to_remove", which indicates that the 
+rows specified in the field indices corresponds to rows that should NOT 
+be selected. This option is by default false, so no change in your 
+current PLearn scripts should be needed.
+
+To do this, I had to add a field called "selected_indices", which is 
+filled at building time and specifies the rows really selected. This 
+means that modifying directly the field "indices" does not have an 
+impact on the VMatrix until build() is called. Since any modifications 
+to option fields should be followed by a build() call anyway, this 
+should not have an impact on the current PLearn code.
+
+Hugo
+
+
+From chapados at apstat.com  Mon Jun 19 05:43:10 2006
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Sun, 18 Jun 2006 23:43:10 -0400
+Subject: [Plearn-developers] PCA Missings Imputation
+In-Reply-To: <20060612142758.GA24332@opale.iro.umontreal.ca>
+References: <448AD535.6040704@apstat.com>
+ <20060612142758.GA24332@opale.iro.umontreal.ca>
+Message-ID: <D00DB50E-1B31-41DA-B1ED-14FCF1F51965@apstat.com>
+
+OK, due to popular demand, the option name has been changed to  
+"impute_missing" in PCA.
+
+
+Le 12 juin 2006 ? 10:28, Olivier Delalleau a ?crit :
+
+> Au fait, c'est un detail, mais je trouve que le s a missings ca fait
+> bizarre. D'ailleurs j'ai demande a Doug et lui aussi il trouve ca
+> "weird".
+>
+> --
+> Olivier
+>
+> On 10 Jun 2006, Nicolas Chapados wrote:
+>> Hello all,
+>>
+>> Just a quick note: I added an "impute_missings" option to PCA.  If  
+>> true,
+>> and a missing value is encountered on a computeOutput(), then it is
+>> replaced by the mean.  Note that this applies only to  
+>> computeOutput, not
+>> train().  [To filter out train-time missing values, you can still  
+>> rely
+>> on DisregardRowsVMatrix.]
+>>
+>> I hereby make a suggestion: to use the same option name
+>> "impute_missings" when a learner is capable of doing just so.   
+>> Does it
+>> make sense to include this in PLearner?
+>>
+>>     + Nicolas
+>>
+
+
+
+From lamblinp at iro.umontreal.ca  Fri Jun 30 02:58:55 2006
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Fri, 30 Jun 2006 02:58:55 +0200
+Subject: [Plearn-developers] changes in pymake
+Message-ID: <20060630005855.GC29560@pig.zood.org>
+
+Hi everybody,
+
+I made some changes in pymake so it can handle the case where it
+launched a compilation on a machine that does not exist or does not
+respond.
+
+Thus, if a machine on the is temporarily "en panne", the compilation
+will not crash when the ssh timeout, but rather remove the machine from
+the list of machines to use, and retry the compilation of the file on
+another machine.
+
+So you do not need to manually remove machines from your
+.pymake/...hosts files if they are temporarily unavailable. However, if
+you keep an updated list of machines, the compilation will be faster
+because you will not have to wait for the ssh to timeout.
+
+Please let me know if you experience problems because of this change.
+-- 
+Pascal
+
+

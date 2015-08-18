@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] erreurs, warnings, logs, etc.
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-November/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20erreurs%2C%20warnings%2C%20logs%2C%20etc.&In-Reply-To=%3CB83833B0-6F55-4340-850C-729FB3025760%40iro.umontreal.ca%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000192.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] erreurs, warnings, logs, etc.</H1>
+    <B>Nicolas Chapados</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20erreurs%2C%20warnings%2C%20logs%2C%20etc.&In-Reply-To=%3CB83833B0-6F55-4340-850C-729FB3025760%40iro.umontreal.ca%3E"
+       TITLE="[Plearn-developers] erreurs, warnings, logs, etc.">chapados at iro.umontreal.ca
+       </A><BR>
+    <I>Thu Nov 27 21:37:00 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000192.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#195">[ date ]</a>
+              <a href="thread.html#195">[ thread ]</a>
+              <a href="subject.html#195">[ subject ]</a>
+              <a href="author.html#195">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Si je peux ajouter mon grain de sel, voici quelques remarques:
+
+1) Quand on &#233;crit du code g&#233;n&#233;rique, il y a souvent des cas de base  
+&quot;qui ne semblent rien faire&quot;, qui ne devraient rien faire, ET QUI NE  
+SONT PAS DES ERREURS. Un exemple est l'&#233;l&#233;ment nul dans une addition:  
+si on fait a+0, &#231;a donne a.  C'est con, l'addition n'est pas utile  
+dans ce cas, mais ce n'est pas une erreur.  L&#224; o&#249; &#231;a devient utile  
+est que si par ailleurs, nous avions une expression de la forme &quot;a 
++b&quot;, et que b s'adonne &#224; &#234;tre 0, eh bien l'addition n'a rien fait l&#224;  
+non plus.  Non, ce n'est pas une erreur, &#231;a ne m&#233;rite m&#234;me pas un  
+warning, et il ne faudrait pas avoir &#224; &quot;d&#233;sactiver&quot; un &#233;ventuel  
+warning dans ce cas. S'il fallait que l'addition donne un warning  
+toutes les fois &quot;o&#249; elle est inutile&quot;, nous serions ensevelis par une  
+avalanche, et LES VRAIS WARNINGS seraient perdus dans le bruit.  En  
+particulier, l'addition n'a pas &#224; regarder quelles sont ses  
+op&#233;randes :: si ceux-ci sont valides, m&#234;me des cas qui font que  
+l'op&#233;ration soit l'identit&#233;, elle doit passer.
+
+2) Nous avons amplement fait usage des logs nomm&#233;s dans la conception  
+de FinLearn chez ApSTAT, et ceux-ci se pr&#234;tent extr&#234;mement bien &#224; la  
+maintenance &#224; grande &#233;chelle.  Le probl&#232;me avec les PLWARNINGS est  
+que ceux-ci limitent l'esprit et pensent &quot;petit&quot;: ils &#233;mettent  
+toujours le message sur la console, et ignorent la possibilit&#233; que la  
+composante fasse partie d'un plus gros amalgame qui &#233;mettra lui-m&#234;me  
+des messages, sera peut-&#234;tre roul&#233; dans une GUI, etc.  Le but des  
+logs est de permettre l'introspection profonde et contr&#244;l&#233;e du code,  
+sans &#234;tre noy&#233; dans le bruit et le &quot;chatter&quot; g&#233;n&#233;r&#233; par ce qui ne  
+nous int&#233;resse pas.  De plus, ils ont l'avantage de &quot;laisser l&#224;&quot; le  
+code de d&#233;buggage qu'on voudrait autrement mettre en commentaires, et  
+fournissent un m&#233;canisme UNIQUE et SYST&#201;MATIQUE pour activer et  
+d&#233;sactiver les messages. Et finalement, ils se pr&#234;tent tr&#232;s bien &#224; la  
+redirection dans des fen&#234;tres de GUI pour examiner et filtrer les  
+messages de mani&#232;re interactive.
+
+Je ne suis pas contre l'id&#233;e que pymake change par d&#233;faut (selon  
+l'option -dbg, -safeopt, etc) les logs qui seront imprim&#233;s &#224;  
+l'&#233;cran.  Et je suis bien s&#251;r favorable &#224; ce qu'on en documente  
+davantage l'utilisation.
+
+Par contre, je supporte enti&#232;rement l'id&#233;e de Xavier de rendre  
+PLWARNING &quot;deprecated&quot;, et de virer compl&#232;tement PL_WARN_ERR, qui ne  
+me semble absolument pas robuste comme principe de g&#233;nie logiciel  
+dans le cadre d'un d&#233;veloppement &#224; grande &#233;chelle.  Nous avons d&#233;j&#224;  
+un m&#233;canisme syst&#233;matique de logging qui a d&#233;montr&#233; son utilit&#233;  
+(c'est vachement pratique de pouvoir dire &#224; un utilisateur &#224; distance  
+&quot;roule ce code avec tous les logs et envoie-moi le r&#233;sultat&quot;),  
+am&#233;liorons-le au besoin, et servons-nous en.
+
+	+ Nicolas
+
+
+Le 26-Nov-08 &#224; 4:39 PM, Fr&#233;d&#233;ric Bastien a &#233;crit :
+
+&gt;<i> Dans le cas particulier des messages d'erreur que tu as eu, je crois
+</I>&gt;<i> que c'est la classe BootstrapVMatrix(qui h&#233;rite de SelectRowsVMatrix)
+</I>&gt;<i> qui devrait mettre warn_if_all_rows_selected a faut quand on l'utilise
+</I>&gt;<i> juste pour un shuffle.(Je crois que c'est bien cette class qui est
+</I>&gt;<i> utiliser dans ton cas, mais je peux me tromper). Autre choses
+</I>&gt;<i> possible, Dans SelectRowsVMatrix, on peut  generer le message d'erreur
+</I>&gt;<i> seulement si on selectionne toutes les lignes et qu'elles sont dans
+</I>&gt;<i> l'ordre de 0 a n-1(utilisation inutile de la classe).
+</I>&gt;<i>
+</I>&gt;<i> la classe SortRowsVMatrix herite aussi de SelectRowsVMatrix, si on
+</I>&gt;<i> modifie BootstrapVMatrix pour ne pas reneger le message d'erreur il
+</I>&gt;<i> faudrait aussi modifier SortRowsVMatrix. Donc modifier
+</I>&gt;<i> SelectRowsVMatrix semble la meilleur solution.
+</I>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="https://lists.berlios.de/pipermail/plearn-developers/attachments/20081127/6b6d3458/attachment.html">https://lists.berlios.de/pipermail/plearn-developers/attachments/20081127/6b6d3458/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000192.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#195">[ date ]</a>
+              <a href="thread.html#195">[ thread ]</a>
+              <a href="subject.html#195">[ subject ]</a>
+              <a href="author.html#195">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

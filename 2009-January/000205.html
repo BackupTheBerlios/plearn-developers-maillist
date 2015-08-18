@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Change in the default behavior of PTester?
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2009-January/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Change%20in%20the%20default%20behavior%20of%20PTester%3F&In-Reply-To=%3C497E46A9.1010500%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000204.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Change in the default behavior of PTester?</H1>
+    <B>Xavier Saint-Mleux</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Change%20in%20the%20default%20behavior%20of%20PTester%3F&In-Reply-To=%3C497E46A9.1010500%40apstat.com%3E"
+       TITLE="[Plearn-developers] Change in the default behavior of PTester?">saintmlx at apstat.com
+       </A><BR>
+    <I>Tue Jan 27 00:26:33 CET 2009</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000204.html">[Plearn-developers] Change in the default behavior of PTester?
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#205">[ date ]</a>
+              <a href="thread.html#205">[ thread ]</a>
+              <a href="subject.html#205">[ subject ]</a>
+              <a href="author.html#205">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Sorry for this late answer.  I have no problem with this modification.
+
+Xavier
+
+Fr&#233;d&#233;ric Bastien wrote:
+&gt;<i> Hi,
+</I>&gt;<i>
+</I>&gt;<i> in the commit 9862, I added flags to PLearner and PTester. The current 
+</I>&gt;<i> default don't change the current behavior, but I think that we should 
+</I>&gt;<i> change the default. The flag in PLearner::finalized was added. This 
+</I>&gt;<i> flag default to false, but when the fct PLearner::finilize() is 
+</I>&gt;<i> called, it set the flag to true. When PLearner::forget() is called the 
+</I>&gt;<i> flag is set to false.
+</I>&gt;<i> This is to remember when the training of a learner is supposed to be 
+</I>&gt;<i> finished. This allow some optimisation in the memory usage at load 
+</I>&gt;<i> time and I need those optimization.
+</I>&gt;<i>
+</I>&gt;<i> Also, the flag PTester::finalise_learner was added with the default 
+</I>&gt;<i> value of false. If true, will call learner-&gt;finalize() after the training.
+</I>&gt;<i> The current default is the current behavior. I would change it so that 
+</I>&gt;<i> be default, we finalize the learner after the training. Is their any 
+</I>&gt;<i> objection? If not, I will do so. This will break many test because the 
+</I>&gt;<i> value of the flags will change, but I can change them in PLearn, but I 
+</I>&gt;<i> can't do it at Apstat.
+</I>&gt;<i>
+</I>&gt;<i> Fred
+</I>&gt;<i>
+</I>&gt;<i> ------------------------------------------------------------------------
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Plearn-developers mailing list
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">Plearn-developers at lists.berlios.de</A>
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/plearn-developers">https://lists.berlios.de/mailman/listinfo/plearn-developers</A>
+</I>&gt;<i>   
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000204.html">[Plearn-developers] Change in the default behavior of PTester?
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#205">[ date ]</a>
+              <a href="thread.html#205">[ thread ]</a>
+              <a href="subject.html#205">[ subject ]</a>
+              <a href="author.html#205">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

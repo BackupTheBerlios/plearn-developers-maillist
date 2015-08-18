@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] PLearn::save and PLearn::tmpsave
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2009-February/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PLearn%3A%3Asave%20and%20PLearn%3A%3Atmpsave&In-Reply-To=%3C2d1d7fe70902050843p6a021a09wf574b311a20881ea%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000207.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] PLearn::save and PLearn::tmpsave</H1>
+    <B>Fr&#233;d&#233;ric Bastien</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PLearn%3A%3Asave%20and%20PLearn%3A%3Atmpsave&In-Reply-To=%3C2d1d7fe70902050843p6a021a09wf574b311a20881ea%40mail.gmail.com%3E"
+       TITLE="[Plearn-developers] PLearn::save and PLearn::tmpsave">nouiz at nouiz.org
+       </A><BR>
+    <I>Thu Feb  5 17:43:36 CET 2009</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000207.html">[Plearn-developers] PLearn::save and PLearn::tmpsave
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#206">[ date ]</a>
+              <a href="thread.html#206">[ thread ]</a>
+              <a href="subject.html#206">[ subject ]</a>
+              <a href="author.html#206">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+I added the fct PLearn::tmpsave, it does the same thing as PLearn::save
+execpt that it write it in a tmp file then move it to the real file. This
+allow do don't have partial file in case of a crash.
+
+Olivier D. was interested that I put this functionality in PLearn::save, is
+their any objection?
+
+Fred
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="https://lists.berlios.de/pipermail/plearn-developers/attachments/20090205/7e8b2e4a/attachment.html">https://lists.berlios.de/pipermail/plearn-developers/attachments/20090205/7e8b2e4a/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000207.html">[Plearn-developers] PLearn::save and PLearn::tmpsave
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#206">[ date ]</a>
+              <a href="thread.html#206">[ thread ]</a>
+              <a href="subject.html#206">[ subject ]</a>
+              <a href="author.html#206">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

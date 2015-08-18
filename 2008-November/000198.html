@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] erreurs, warnings, logs, etc.
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-November/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20erreurs%2C%20warnings%2C%20logs%2C%20etc.&In-Reply-To=%3C492F1F29.5030607%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000196.html">
+   <LINK REL="Next"  HREF="000197.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] erreurs, warnings, logs, etc.</H1>
+    <B>Xavier Saint-Mleux</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20erreurs%2C%20warnings%2C%20logs%2C%20etc.&In-Reply-To=%3C492F1F29.5030607%40apstat.com%3E"
+       TITLE="[Plearn-developers] erreurs, warnings, logs, etc.">saintmlx at apstat.com
+       </A><BR>
+    <I>Thu Nov 27 23:28:57 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000196.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+        <LI>Next message: <A HREF="000197.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#198">[ date ]</a>
+              <a href="thread.html#198">[ thread ]</a>
+              <a href="subject.html#198">[ subject ]</a>
+              <a href="author.html#198">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Olivier Delalleau wrote:
+&gt;<i> On 27 Nov 2008, Xavier Saint-Mleux wrote:
+</I>&gt;<i>   
+</I>&gt;&gt;&gt;<i> Je comprends mieux, je pensais que tu disais en g&#233;n&#233;ral que les
+</I>&gt;&gt;&gt;<i> PLWARNING c'&#233;tait mauvais et qu'il fallait plus ou moins tous les
+</I>&gt;&gt;&gt;<i> &#233;liminer.
+</I>&gt;&gt;&gt;<i>   
+</I>&gt;&gt;&gt;<i>       
+</I>&gt;&gt;<i> Je veux effectivement me *d&#233;barasser de tous les PLWARNINGs* et il me 
+</I>&gt;&gt;<i> semble que c'&#233;tait assez clair dans mon premier message.  Les logs 
+</I>&gt;&gt;<i> permettent de faire tout ce que les warnings font et beaucoup plus et n'ont 
+</I>&gt;&gt;<i> pas les pires d&#233;fauts des warnings.  Le cas particulier est d&#233;crit dans 
+</I>&gt;&gt;<i> un paragraphe qui commence par &quot;e.g.&quot;.
+</I>&gt;&gt;<i>     
+</I>&gt;<i>
+</I>&gt;<i> Alors je suis tout &#224; fait oppos&#233; &#224; cette id&#233;e. Comme je l'ai dit, les
+</I>&gt;<i> logs ne s'affichent que si on le demande, et je ne peux pas deviner &#224;
+</I>&gt;<i> l'avance de quels logs j'ai besoin pour &#234;tre s&#251;r d'avoir des warnings
+</I>&gt;<i> potentiellement importants. Et je ne veux pas activer TOUS les logs et
+</I>&gt;<i> avoir des tas de messages dont je n'ai rien &#224; faire.
+</I>&gt;<i>   
+</I>
+Tu peux activer tous les logs *et* mettre le bon niveau de verbosity, 
+c'est exactement &#224; &#231;a que &#231;a sert et les warnings n'ont justement pas 
+cette souplesse.  S'il existe des messages de logs qui sont &#224; un niveau 
+de verbosity trop bas (ou trop haut), on peut les modifier.  Si tu ne 
+veux pas de tas de messages dont tu n'as rien &#224; faire, tu peux activer 
+les logs seulement pour ce qui t'int&#233;resse, ou simplement les laisser 
+tous d&#233;sactiv&#233;s.  C'est justement fait pour &#231;a, et de cette mani&#232;re, tu 
+n'as pas &#224; endurer les messages des autres dont tu te fous ET les autres 
+n'ont pas &#224; endurer tes messages dont ils se foutent.  Je te ferais 
+remarquer qu'il est tr&#232;s fr&#233;quent que des messages que tu trouves 
+absolument n&#233;cessaires soient inutiles et m&#234;me irritants &#224; mes yeux car 
+je sais comment v&#233;rifier sans &#231;a et ils m'emp&#234;chent de voir facilement 
+ce qui m'int&#233;resse vraiment.  C'est un probl&#232;me qui aurait pu ne jamais 
+exister car la solution &#233;tait d&#233;j&#224; l&#224; d'avance, mais elle n'est pas 
+utilis&#233;e.  C'est un peu pour &#231;a que j'insiste sur les logs, plut&#244;t que 
+de laisser le probl&#232;me s'aggraver.
+
+
+&gt;<i> P-&#234; qu'on peut adapter le syst&#232;me pour obtenir les m&#234;mes fonctionalit&#233;s
+</I>&gt;<i> avec pl_log. Tant mieux. Mais dire qu'on supprime tous les warnings, je
+</I>&gt;<i> ne trouve pas &#231;a une bonne id&#233;e.
+</I>&gt;<i>   
+</I>C'est d&#233;j&#224; fait: les logs font tout ce que les warnings font, et plus.  
+Quand je dis qu'il faut rendre les warnings &quot;deprecated&quot; car les logs 
+permettent d&#233;j&#224; de faire tout ce que les warnings font et beaucoup plus, 
+&#231;a veut justement dire de remplacer les warnings par des logs.
+
+&gt;<i> Cela dit, je n'ai pas vraiment envie de m'obstiner l&#224;-dessus non plus,
+</I>&gt;<i> donc faites ce que vous voulez. PLearn est en train de passer en mode
+</I>&gt;<i> deprecated de tte mani&#232;re.
+</I>&gt;<i>   
+</I>C'est en train de se faire, mais je ne retiens pas mon souffle... j'ai 
+l'impression que certains morceaux de PLearn vont survivre encore un 
+certain temps.  &#192; mes yeux, le fait que ce soit moins utilis&#233; n'est pas 
+une raison pour abandonner de bonnes habitudes.
+
+
+Xavier
+
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000196.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+	<LI>Next message: <A HREF="000197.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#198">[ date ]</a>
+              <a href="thread.html#198">[ thread ]</a>
+              <a href="subject.html#198">[ subject ]</a>
+              <a href="author.html#198">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

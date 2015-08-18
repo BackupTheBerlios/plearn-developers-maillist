@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] cleaning in pymake and pymake.config.model
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-July/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20cleaning%20in%20pymake%20and%20pymake.config.model&In-Reply-To=%3C20060714203435.GA3478%40pig.zood.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000104.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] cleaning in pymake and pymake.config.model</H1>
+    <B>Pascal Lamblin</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20cleaning%20in%20pymake%20and%20pymake.config.model&In-Reply-To=%3C20060714203435.GA3478%40pig.zood.org%3E"
+       TITLE="[Plearn-developers] cleaning in pymake and pymake.config.model">lamblinp at iro.umontreal.ca
+       </A><BR>
+    <I>Fri Jul 14 22:34:35 CEST 2006</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000104.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#103">[ date ]</a>
+              <a href="thread.html#103">[ thread ]</a>
+              <a href="subject.html#103">[ subject ]</a>
+              <a href="author.html#103">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi everybody,
+
+I'm going to make some changes in pymake and pymake.config.model, in
+order to get rid of some dependencies, dirty hacks and unused code.
+
+So I would like to know if some features/bugs/hacks are still used.
+Especially :
+  - Who uses QT stuff with pymake?
+  - Who uses the --log-link and 'dorionc_hacked_pymake'?
+  - Who uses rsh (and not ssh) for launching remote compilations?
+  - Who uses the distcc variables (DISTCC_HOSTS, DISTCC_DIR,
+    ~/.distcc/hosts, /etc/distcc/hosts) to get a list of hosts on which
+    compiling, instead of ~/.pymake/...hosts?
+  - Who uses SPC compilation (-spc option)?
+  - Who needs pymake to use the first option when several incompatible
+    options are put on the command-line, ignoring the other ones,
+    instead of aborting?
+  - Who uses preprocessor variables &quot;DBDIR&quot; and &quot;METADATADIR&quot;?
+  - Who doesn't have python 2.4?
+  - Does this mean that we always link with X libraries:
+optionalLibrary( name = 'X',
+                 triggers='?', ... ) ?
+  - Who uses the following options:
+    &#183; g++3
+    &#183; purify
+    &#183; quantify
+    &#183; checkopt
+    &#183; exiterrors
+
+For each item in the list, if no one answers it will probably be
+deleted, if someone answers he might be promoted responsible for that
+feature (yes, this is a fascist method).
+
+
+-- 
+Pascal
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000104.html">[Plearn-developers] cleaning in pymake and pymake.config.model
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#103">[ date ]</a>
+              <a href="thread.html#103">[ thread ]</a>
+              <a href="subject.html#103">[ subject ]</a>
+              <a href="author.html#103">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

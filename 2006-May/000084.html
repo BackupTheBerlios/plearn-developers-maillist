@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] NEW! VERY EASY way to add remote methods to PLearn Objects
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-May/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20NEW%21%20VERY%20EASY%20way%20to%20add%20remote%20methods%20to%20PLearn%20Objects&In-Reply-To=%3C4460B65F.70908%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000083.html">
+   <LINK REL="Next"  HREF="000085.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] NEW! VERY EASY way to add remote methods to PLearn Objects</H1>
+    <B>Nicolas Chapados</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20NEW%21%20VERY%20EASY%20way%20to%20add%20remote%20methods%20to%20PLearn%20Objects&In-Reply-To=%3C4460B65F.70908%40apstat.com%3E"
+       TITLE="[Plearn-developers] NEW! VERY EASY way to add remote methods to PLearn Objects">chapados at apstat.com
+       </A><BR>
+    <I>Tue May  9 17:33:51 CEST 2006</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000083.html">[Plearn-developers] Added extrasize field to VMatrix
+</A></li>
+        <LI>Next message: <A HREF="000085.html">[Plearn-developers] New: FAQ for PLearn added to SVN
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#84">[ date ]</a>
+              <a href="thread.html#84">[ thread ]</a>
+              <a href="subject.html#84">[ subject ]</a>
+              <a href="author.html#84">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Dear all fellow PLearners,
+
+Few people know about it, but PLearn has supported a *remote method 
+invokation* mechanism for all PLearn Objects for over a year.  This lets 
+you run PLearn in *server mode* (using the &quot;server&quot; command), where it 
+waits for connections and dispatches method calls to instantiated objects.
+
+Until today however, making your objects &quot;remote-callable&quot; involved a 
+complicated procedure: you had to override the Object::call() method, 
+handle argument and return value marshalling/unmarshalling, etc, for 
+EACH method to be &quot;published&quot; outside.  Furthermore, there was no way to 
+query an object as to what methods are remote-callable, or to attach 
+documentation to them.
+
+In order to make more of PLearn remote-callable, and not lose our 
+collective sanity, I am pleased to announce a new mechanism to declare 
+remote methods, called quite appropriately &quot;declareMethods&quot;, and similar 
+to the existing &quot;declareOptions&quot;.  The idea is as follows: for each C++ 
+member function that you want to make available remotely, you simply 
+declare it with a &quot;declareMethod&quot;, give it a remote name and some 
+documentation. Most functions do not even have to know that they will be 
+called from afar, as all the necessary wrapping code is generated 
+automatically!  For example:
+
+    // It is necessary to inherit directly or indirectly from PLearn::Object
+    class X : public PLearn::Object
+    {
+    public:
+        //! This method is to be published for remote invocation. Note that 
+        //! we accept normal C++ argument types and return normal types.  The
+        //! only requirement is for those types to be serializable to a PStream.
+        //! All wrapping to a PStream representation is handled automatically
+        //! by the declareMethod below
+        Vec complexServerCalculation(Vec inputs, const map&lt;string,real&gt;&amp; params);
+
+    protected:
+        //! This is where remote method declaration happens
+        static void declareMethods(RemoteMethodMap&amp; rmm);
+
+        //! Plus the usual PLearn poutine in the class definition...
+    };
+
+    void X::declareMethods(RemoteMethodMap&amp; rmm)
+    {
+        // Make sure that inherited methods are declared
+        rmm.inherited(inherited::_getRemoteMethodMap_());
+
+        // Insert class-specific methods
+        declareMethod(rmm, &quot;complexServerCalculation&quot;, &amp;X::complexServerCalculation,
+                      (BodyDoc(&quot;This function carries out a computation of such\n&quot;
+                               &quot;complexity that it should only be attempted on a\n&quot;
+                               &quot;capable server.&quot;),
+                       ArgDoc (&quot;inputs&quot;, &quot;Vector of inputs for the computation&quot;),
+                       ArgDoc (&quot;params&quot;, &quot;Additional parameters that will condition\n&quot;
+                                         &quot;the operations&quot;),
+                       RetDoc (&quot;The return value is a vector of computed results.&quot;)));
+    } 
+            
+
+
+Notice the following points:
+
+   1. It is no longer necessary to override Object::call() for having
+      remote methods.
+   2. Normal C++ member functions can easily be exported with no
+      additional fuss; you don't need to write special code that is
+      remote-callable.  (Although in some contexts it may be necessary
+      as you won't necessarily have precisely the same interface).
+   3. You don't need to declare the argument types or return value type
+      of &quot;complexServerCalculation&quot; in the *declareMethod*.  This is
+      inferred automatically, thanks to C++ (also called &quot;deep template
+      voodoo&quot; in polite company).
+   4. Documentation can be attached to the method and given some
+      semantics. In the above, &quot;BodyDoc&quot; means the main documentation of
+      the function, and should explain the purpose. &quot;ArgDoc&quot; means
+      argument documentation, and there should be one such element per
+      function argument: the order of declaration is important for
+      ArgDocs and must match the function argument order! Finally,
+      &quot;RetDoc&quot; means return value documentation, and should explain how
+      the return value should be interpreted.
+   5. There is an additional pair of parenthesis around the
+      documentation components: don't dare forget it!
+
+The HTMLHelpCommand has been updated to automatically query all classes 
+for their remote methods, and outputs a very nice documentation for all 
+of them. This documentation is accessible from Plide or the PLearn 
+website, which will be updated. At the moment, most remote methods are 
+the standard ones declared at the level of PLearn::Object, but PLearner 
+and PTester have both been upgraded to the new mechanism, so you can 
+look at these classes to get an idea of what is possible.
+
+Comments, flowers, gifts, dark chocolate, and suggestions welcome!
+
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="https://lists.berlios.de/pipermail/plearn-developers/attachments/20060509/4761db87/attachment.html">https://lists.berlios.de/pipermail/plearn-developers/attachments/20060509/4761db87/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000083.html">[Plearn-developers] Added extrasize field to VMatrix
+</A></li>
+	<LI>Next message: <A HREF="000085.html">[Plearn-developers] New: FAQ for PLearn added to SVN
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#84">[ date ]</a>
+              <a href="thread.html#84">[ thread ]</a>
+              <a href="subject.html#84">[ subject ]</a>
+              <a href="author.html#84">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

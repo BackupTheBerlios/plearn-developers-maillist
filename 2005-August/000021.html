@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Valeur INFINITY
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2005-August/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Valeur%20INFINITY&In-Reply-To=%3C42EE99D3.40205%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000020.html">
+   <LINK REL="Next"  HREF="000022.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Valeur INFINITY</H1>
+    <B>Pascal Vincent</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Valeur%20INFINITY&In-Reply-To=%3C42EE99D3.40205%40apstat.com%3E"
+       TITLE="[Plearn-developers] Valeur INFINITY">pascal at apstat.com
+       </A><BR>
+    <I>Mon Aug  1 23:53:23 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000020.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+        <LI>Next message: <A HREF="000022.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21">[ date ]</a>
+              <a href="thread.html#21">[ thread ]</a>
+              <a href="subject.html#21">[ subject ]</a>
+              <a href="author.html#21">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> NON!  &#192; mon avis, c'est une tr&#232;s mauvaise id&#233;e de remplacer INFINITY 
+</I>&gt;<i> par MISSING_VALUE.  Premi&#232;rement, INFINITY est une constante d&#233;finie 
+</I>&gt;<i> par ISO C99 (le nouveau C) et va de pair la repr&#233;sentation d'infinit&#233; 
+</I>&gt;<i> dans IEEE 754 (le standard floating-point).  La diff&#233;rence 
+</I>&gt;<i> fondamentale entre INFINITY et NaN est que les op&#233;rateurs relationnels 
+</I>&gt;<i> fonctionnent correctement avec INFINITY ::
+</I>&gt;<i>
+</I>&gt;<i>    INFINITY &gt;= x, pour tout x (sauf NaN),
+</I>&gt;<i>
+</I>&gt;<i> alors que tout op&#233;rateur relationnel retourne FAUX lorsqu'un des 
+</I>&gt;<i> arguments est NaN (incluant ==).
+</I>&gt;<i>
+</I>&gt;<i> Choses &#224; essayer:
+</I>&gt;<i>
+</I>&gt;<i> 1) regarde si tu peux d&#233;finir une constante de compilation qui 
+</I>&gt;<i> activerait l'inclusion des symboles ISO C99.  Je crois que ces 
+</I>&gt;<i> derniers sont inclus automatiquement avec g++ sous Linux, mais 
+</I>&gt;<i> peut-&#234;tre que les settings sous OS X sont diff&#233;rents.
+</I>&gt;<i>
+</I>&gt;<i> 2) si &#231;a ne marche pas, tu peux effectivement remplacer INFINITY par 
+</I>&gt;<i> DBL_MAX, qui est je crois un meilleur choix que MISSING_VALUE.
+</I>
+Je maintiens qu'il vaut mieux remplacer par NaN, car les NaN ont la 
+propri&#233;t&#233; fort utile de se &quot;propager&quot; (tout comme les infinis). Et 
+puisque tr&#232;s probablement un infini est le r&#233;sultat d'un bug ou d'une 
+instabilit&#233; num&#233;rique, on ne veut pas qu'il passe inapper&#231;u trop 
+facilement en se retrouvant travesti en un nombre ordinaire (aussi grand 
+soit-il...). Evidemment l'id&#233;al serait qu'il demeure un infini...
+
+Maintenant si certaines personnes ont d&#233;cid&#233; de faire des comparaisons 
+avec des choses infinies de fa&#231;on explicite dans leur code, c'est une 
+autre histoire...
+
+-- Pascal
+
+
+-- 
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+<A HREF="http://www.apstat.com">http://www.apstat.com</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000020.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+	<LI>Next message: <A HREF="000022.html">[Plearn-developers] Valeur INFINITY
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#21">[ date ]</a>
+              <a href="thread.html#21">[ thread ]</a>
+              <a href="subject.html#21">[ subject ]</a>
+              <a href="author.html#21">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

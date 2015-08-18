@@ -1,0 +1,934 @@
+From lamblinp at iro.umontreal.ca  Fri Jul 14 22:34:35 2006
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Fri, 14 Jul 2006 22:34:35 +0200
+Subject: [Plearn-developers] cleaning in pymake and pymake.config.model
+Message-ID: <20060714203435.GA3478@pig.zood.org>
+
+Hi everybody,
+
+I'm going to make some changes in pymake and pymake.config.model, in
+order to get rid of some dependencies, dirty hacks and unused code.
+
+So I would like to know if some features/bugs/hacks are still used.
+Especially :
+  - Who uses QT stuff with pymake?
+  - Who uses the --log-link and 'dorionc_hacked_pymake'?
+  - Who uses rsh (and not ssh) for launching remote compilations?
+  - Who uses the distcc variables (DISTCC_HOSTS, DISTCC_DIR,
+    ~/.distcc/hosts, /etc/distcc/hosts) to get a list of hosts on which
+    compiling, instead of ~/.pymake/...hosts?
+  - Who uses SPC compilation (-spc option)?
+  - Who needs pymake to use the first option when several incompatible
+    options are put on the command-line, ignoring the other ones,
+    instead of aborting?
+  - Who uses preprocessor variables "DBDIR" and "METADATADIR"?
+  - Who doesn't have python 2.4?
+  - Does this mean that we always link with X libraries:
+optionalLibrary( name = 'X',
+                 triggers='?', ... ) ?
+  - Who uses the following options:
+    ? g++3
+    ? purify
+    ? quantify
+    ? checkopt
+    ? exiterrors
+
+For each item in the list, if no one answers it will probably be
+deleted, if someone answers he might be promoted responsible for that
+feature (yes, this is a fascist method).
+
+
+-- 
+Pascal
+
+
+From chapados at apstat.com  Fri Jul 14 22:52:21 2006
+From: chapados at apstat.com (Nicolas Chapados)
+Date: Fri, 14 Jul 2006 16:52:21 -0400
+Subject: [Plearn-developers] cleaning in pymake and pymake.config.model
+In-Reply-To: <20060714203435.GA3478@pig.zood.org>
+References: <20060714203435.GA3478@pig.zood.org>
+Message-ID: <44B80405.1040407@apstat.com>
+
+
+>   - Who uses the distcc variables (DISTCC_HOSTS, DISTCC_DIR,
+>     ~/.distcc/hosts, /etc/distcc/hosts) to get a list of hosts on which
+>     compiling, instead of ~/.pymake/...hosts?
+>   
+This one was added by Christian Hudon.  People at ApSTAT use it (it's 
+our standard way of compiling).
+
+>   - Who doesn't have python 2.4?
+>   
+Still in the process of upgrading ApSTAT.  Better to leave 2.3 
+compatibility for now.
+
+    + Nicolas
+
+-- 
+Nicolas Chapados, M.Sc.
+ApSTAT Technologies Inc.
+www.apstat.com
+
+
+
+From lamblinp at iro.umontreal.ca  Fri Jul 14 23:14:37 2006
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Fri, 14 Jul 2006 23:14:37 +0200
+Subject: [Plearn-developers] cleaning in pymake and pymake.config.model
+In-Reply-To: <44B801C7.2030306@apstat.com>
+References: <20060714203435.GA3478@pig.zood.org> <44B801C7.2030306@apstat.com>
+Message-ID: <20060714211437.GA3819@pig.zood.org>
+
+On Fri, Jul 14, 2006, Christian Hudon wrote:
+> Pascal Lamblin escribi?:
+> > I'm going to make some changes in pymake and pymake.config.model, in
+> > order to get rid of some dependencies, dirty hacks and unused code.
+> >
+> > So I would like to know if some features/bugs/hacks are still used.
+> > Especially :
+> >   - Who uses the distcc variables (DISTCC_HOSTS, DISTCC_DIR,
+> >     ~/.distcc/hosts, /etc/distcc/hosts) to get a list of hosts on which
+> >     compiling, instead of ~/.pymake/...hosts?
+> >   
+> ApSTAT does. (~/.pymake/hosts is only used as a fallback here. The list
+> of machines is managed site-wide instead of every user having to know
+> and make adjustments separately to their pymake hosts file when a
+> machine is down, when new machines are added, etc., which is a lot
+> better, if you ask me.)
+
+I believe you if you say so... I only preferred to ask too many
+questions than too few.
+
+> >   - Who doesn't have python 2.4?
+> >   
+> ApSTAT still needs pymake to work with python 2.3. And in general, for
+> tools like this, I think it's a good idea to be conservative with the
+> usage of new python features forcing a upgrade to the latest python version.
+
+OK. By the way, I see that there are a lot of ugly things to determine
+where we should find the python files to link with, do you think that a
+global variable or ppath could to the job?
+
+-- 
+Pascal
+
+
+From pascal at apstat.com  Fri Jul 14 23:30:37 2006
+From: pascal at apstat.com (Pascal Vincent)
+Date: Fri, 14 Jul 2006 17:30:37 -0400
+Subject: [Plearn-developers] cleaning in pymake and pymake.config.model
+In-Reply-To: <20060714203435.GA3478@pig.zood.org>
+References: <20060714203435.GA3478@pig.zood.org>
+Message-ID: <44B80CFD.8040106@apstat.com>
+
+Pascal Lamblin wrote:
+> Hi everybody,
+>
+> I'm going to make some changes in pymake and pymake.config.model, in
+> order to get rid of some dependencies, dirty hacks and unused code.
+>
+> So I would like to know if some features/bugs/hacks are still used.
+> Especially :
+>   - Who uses QT stuff with pymake?
+>   
+Currently nobody. In the past Julien Keable coded a Qt data 
+visualisation software for ApSTAT, and if we have/want to some day again 
+compile/recompile  it or some other PLearn&Qt-based application, Qt 
+support is certainly nice to have (and it was difficult enough to 
+add...). After all Qt is probably *the* major cross-platform GUI toolkit 
+used by C++ coders.
+>   - Who uses the --log-link and 'dorionc_hacked_pymake'?
+>   
+No idea what these are used for.
+>   - Who uses rsh (and not ssh) for launching remote compilations?
+>   
+Nobody anymore, but again, I wouldn't completely remove support for rsh, 
+as it might be useful on some installations, and it isn't an ugly hack 
+anyway.
+>   - Who uses the distcc variables (DISTCC_HOSTS, DISTCC_DIR,
+>     ~/.distcc/hosts, /etc/distcc/hosts) to get a list of hosts on which
+>     compiling, instead of ~/.pymake/...hosts?
+>   
+I believe Christian Hudon added this and it is used at ApSTAT (he 
+certainly thought that might be useful for some reason...)
+>   - Who uses SPC compilation (-spc option)?
+>   
+Anybody remembers what this was for??
+
+>   - Who needs pymake to use the first option when several incompatible
+>     options are put on the command-line, ignoring the other ones,
+>     instead of aborting?
+>   
+???
+>   - Who uses preprocessor variables "DBDIR" and "METADATADIR"?
+>   
+valhalla:~/PLearn> perlgrep DBDIR .
+./plearn/db/NistDB.cc:57         
+imagef.open(DBDIR"/MNIST/train-images-idx3-ubyte");
+./plearn/db/NistDB.cc:58         
+labelf.open(DBDIR"/MNIST/train-labels-idx1-ubyte");
+./plearn/db/NistDB.cc:63         //      
+imagef.open(DBDIR"/MNIST/test-images.idx3-ubyte");
+./plearn/db/NistDB.cc:64         //      
+labelf.open(DBDIR"/MNIST/test-labels.idx1-ubyte");
+./plearn/db/NistDB.cc:66         
+imagef.open(DBDIR"/MNIST/t10k-images-idx3-ubyte");
+./plearn/db/NistDB.cc:67         
+labelf.open(DBDIR"/MNIST/t10k-labels-idx1-ubyte");
+./plearn/db/databases.cc:179 #ifdef DBDIR
+./plearn/db/databases.cc:180 static const string dbdir_name = DBDIR;
+
+DBDIR est un syst?me pour sp?cifier la localisation de datasets 
+"standards". C'est un vieux syst?me qu'il faudrait sans doute remplacer 
+(par quoi?), mais pour l'instant il semble encore utilis? ? quelques 
+endroits.
+>   - Who doesn't have python 2.4?
+>   
+Sur ma machine chez ApSTAT c'est encore 2.3.5
+
+Encore une fois, si on veut que PLearn soit facilement installable sur 
+d'autres environnements, il peut ?tre bon de ne pas supposer qu'on a la 
+toute derni?re version.
+Quelles features de 2.4 te manquent si cruellement?
+>   - Does this mean that we always link with X libraries:
+> optionalLibrary( name = 'X',
+>                  triggers='?', ... ) ?
+>   - Who uses the following options:
+>     ? g++3
+>     ? purify
+>     ? quantify
+>     ? checkopt
+>     ? exiterrors
+>   
+On peut sans doute se d?barasser sans remord de g++3 et exiterrors (on 
+suppose que d?csormais les compilos/syst?mes sont capable de g?rer les 
+exceptions C++ correctement!).
+
+purify peut ?tre utile pour des cas de debug de bug m?moire ou rien 
+d'autre ne fonctionne (c'est d?j? arriv?).
+
+quantify et checkopt, je sais plus ce que c'est.
+
+Note: je ne serais dans un premier temps pas trop agressif dans 
+l'?limination des options comment?es de pymake.config.model, 
+puisqu'elles peuvent fournir une aide utile ? des personnes qui 
+essayeraient de compiler plearn dans un autre environnement ou sur une 
+autre plateforme. pymake.config est pr?vu pour ?tre hack? et adapt? aux 
+besions, et c'est plut?t pratique d'avoir des exemples qu'il suffit de 
+d?commenter. Et puis je pense qu'il y a d?j? suffisamment de cleaning ? 
+faire dans pymake lui-m?me pour commencer. ;-)
+> For each item in the list, if no one answers it will probably be
+> deleted, if someone answers he might be promoted responsible for that
+> feature (yes, this is a fascist method).
+>
+>
+>   
+
+
+-- 
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+http://www.apstat.com
+
+
+
+From chrish at apstat.com  Fri Jul 14 23:37:26 2006
+From: chrish at apstat.com (Christian Hudon)
+Date: Fri, 14 Jul 2006 17:37:26 -0400
+Subject: [Plearn-developers] cleaning in pymake and pymake.config.model
+In-Reply-To: <20060714203435.GA3478@pig.zood.org>
+References: <20060714203435.GA3478@pig.zood.org>
+Message-ID: <44B80E96.5040709@apstat.com>
+
+Pascal Lamblin escribi?:
+> Hi everybody,
+>
+> I'm going to make some changes in pymake and pymake.config.model, in
+> order to get rid of some dependencies, dirty hacks and unused code.
+>
+> So I would like to know if some features/bugs/hacks are still used.
+> Especially :
+>   - Who uses the distcc variables (DISTCC_HOSTS, DISTCC_DIR,
+>     ~/.distcc/hosts, /etc/distcc/hosts) to get a list of hosts on which
+>     compiling, instead of ~/.pymake/...hosts?
+>   
+ApSTAT does. (~/.pymake/hosts is only used as a fallback here. The list
+of machines is managed site-wide instead of every user having to know
+and make adjustments separately to their pymake hosts file when a
+machine is down, when new machines are added, etc., which is a lot
+better, if you ask me.)
+
+>   - Who doesn't have python 2.4?
+>   
+ApSTAT still needs pymake to work with python 2.3. And in general, for
+tools like this, I think it's a good idea to be conservative with the
+usage of new python features forcing a upgrade to the latest python version.
+
+  Christian
+
+
+
+
+From lamblinp at iro.umontreal.ca  Sat Jul 15 00:33:06 2006
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Sat, 15 Jul 2006 00:33:06 +0200
+Subject: [Plearn-developers] cleaning in pymake and pymake.config.model
+In-Reply-To: <44B80CFD.8040106@apstat.com>
+References: <20060714203435.GA3478@pig.zood.org> <44B80CFD.8040106@apstat.com>
+Message-ID: <20060714223306.GA4195@pig.zood.org>
+
+On Fri, Jul 14, 2006, Pascal Vincent wrote:
+> >   - Who uses QT stuff with pymake?
+>
+> Currently nobody. In the past Julien Keable coded a Qt data 
+> visualisation software for ApSTAT, and if we have/want to some day again 
+> compile/recompile  it or some other PLearn&Qt-based application, Qt 
+> support is certainly nice to have (and it was difficult enough to 
+> add...). After all Qt is probably *the* major cross-platform GUI toolkit 
+> used by C++ coders.
+
+<troll>
+And that's why plide uses gtk!
+</troll>
+
+> >   - Who uses the --log-link and 'dorionc_hacked_pymake'?
+>
+> No idea what these are used for.
+
+It's labelled "To be removed as soon as pymake is fixed under
+Windows!!!". Can I assume this is the case ?
+
+> >   - Who uses rsh (and not ssh) for launching remote compilations?
+> >   
+> Nobody anymore, but again, I wouldn't completely remove support for rsh, 
+> as it might be useful on some installations, and it isn't an ugly hack 
+> anyway.
+
+ From what I read in pymake, I thought that it was because of rsh not
+handling correctly the return values of the processes that the remote
+compilation command we execute had to end with '; echo $?', which we
+have to get and remove in pymake. It is not _that_ ugly, but if we can
+get rid of that it might still be good.
+
+Even if we keep support for rsh, would you be OK with setting "ssh" as
+default?
+
+> >   - Who uses SPC compilation (-spc option)?
+>
+> Anybody remembers what this was for??
+
+I do. I think it was supposed to query the lisa cluster to get a list of
+free machines, and compile only on these machines, so it is faster when
+we only have a few files to compile.
+
+> >   - Who needs pymake to use the first option when several incompatible
+> >     options are put on the command-line, ignoring the other ones,
+> >     instead of aborting?
+>
+> ???
+
+Hmm, let me rephrase that:
+if you execute "pymake -double -float plearn.cc", do you need it to
+compile in "double" mode (with a warning), or would it be OK if it
+aborted?
+
+The reason why I ask is that some variables used in pymakeOption or
+optionalLibrary might depend on the command-line arguments (you can see
+the case of torch), and might be tricked by conflicting arguments.
+
+> >   - Who uses preprocessor variables "DBDIR" and "METADATADIR"?
+> >   
+> valhalla:~/PLearn> perlgrep DBDIR .
+> ./plearn/db/NistDB.cc:57         
+> imagef.open(DBDIR"/MNIST/train-images-idx3-ubyte");
+> ./plearn/db/NistDB.cc:58         
+> labelf.open(DBDIR"/MNIST/train-labels-idx1-ubyte");
+> ./plearn/db/NistDB.cc:63         //      
+> imagef.open(DBDIR"/MNIST/test-images.idx3-ubyte");
+> ./plearn/db/NistDB.cc:64         //      
+> labelf.open(DBDIR"/MNIST/test-labels.idx1-ubyte");
+> ./plearn/db/NistDB.cc:66         
+> imagef.open(DBDIR"/MNIST/t10k-images-idx3-ubyte");
+> ./plearn/db/NistDB.cc:67         
+> labelf.open(DBDIR"/MNIST/t10k-labels-idx1-ubyte");
+> ./plearn/db/databases.cc:179 #ifdef DBDIR
+> ./plearn/db/databases.cc:180 static const string dbdir_name = DBDIR;
+> 
+> DBDIR est un syst?me pour sp?cifier la localisation de datasets 
+> "standards". C'est un vieux syst?me qu'il faudrait sans doute remplacer 
+> (par quoi?), mais pour l'instant il semble encore utilis? ? quelques 
+> endroits.
+
+Sachant que getDataSet() ne supporte plus les sp?cifications de dataset
+"standard", je ne sais m?me pas si ce code est utilis?.
+
+Si on d?cide de le r?utiliser, je pr?f?rerais largement le remplacer par
+un PPath, comme pour UCI_MLDB_REP et UCI_MLDB.
+
+> >   - Who doesn't have python 2.4?
+>
+> Quelles features de 2.4 te manquent si cruellement?
+
+Aucune, c'est juste que ?a fait une diff?rence de configuration (donc
+des cas particuliers) en plus, ce que je cherchais ? ?viter si possible.
+Mais j'ai bien compris que vous en aviez besoin ? Apstat :)
+
+> >   - Who uses the following options:
+> >     ? g++3
+> >     ? purify
+> >     ? quantify
+> >     ? checkopt
+> >     ? exiterrors
+>
+> On peut sans doute se d?barasser sans remord de g++3 et exiterrors (on 
+> suppose que d?csormais les compilos/syst?mes sont capable de g?rer les 
+> exceptions C++ correctement!).
+
+Parfait ! ?a veut dire qu'on a d?j? un "options_choice" de moins !
+
+> quantify et checkopt, je sais plus ce que c'est.
+
+"quantify" a l'air d'un truc du m?me genre que "purify", sauf que je ne
+sais pas ce que c'est.
+
+"checkopt" rajoute "-funroll-loops" dans les options de g++.
+
+> Note: je ne serais dans un premier temps pas trop agressif dans 
+> l'?limination des options comment?es de pymake.config.model, 
+> puisqu'elles peuvent fournir une aide utile ? des personnes qui 
+> essayeraient de compiler plearn dans un autre environnement ou sur une 
+> autre plateforme. pymake.config est pr?vu pour ?tre hack? et adapt? aux 
+> besions, et c'est plut?t pratique d'avoir des exemples qu'il suffit de 
+> d?commenter. Et puis je pense qu'il y a d?j? suffisamment de cleaning ? 
+> faire dans pymake lui-m?me pour commencer. ;-)
+
+Je suis d'accord avec toi sur le fond, mais d'une part je pr?f?re virer
+des mauvais exemples comment?s (lorsqu'ils ont des chemins en "/u/lisa"
+en dur, par exemple), et d'autre part je pense qu'il y a assez d'options
+"bidouill?es" d?comment?es (donc utilis?es) pour servir d'exemple.
+
+En tous cas, merci pour le feedback,
+-- 
+Pascal
+
+
+From chapados at iro.umontreal.ca  Sat Jul 15 01:09:47 2006
+From: chapados at iro.umontreal.ca (Nicolas Chapados)
+Date: Fri, 14 Jul 2006 19:09:47 -0400
+Subject: [Plearn-developers] cleaning in pymake and pymake.config.model
+In-Reply-To: <20060714223306.GA4195@pig.zood.org>
+References: <20060714203435.GA3478@pig.zood.org> <44B80CFD.8040106@apstat.com>
+	<20060714223306.GA4195@pig.zood.org>
+Message-ID: <44B8243B.5060003@iro.umontreal.ca>
+
+
+>> quantify et checkopt, je sais plus ce que c'est.
+>>     
+>
+> "quantify" a l'air d'un truc du m?me genre que "purify", sauf que je ne
+> sais pas ce que c'est.
+>   
+Quantify est un outil de profiling graphique tr?s cute.  Fait le m?me 
+travail que gprof, mais en plus intelligible.  Il co?te cher et je ne 
+sais pas qui a des licences.  Y en a-t-il au LISA?  Nous n'en avons pas 
+chez ApSTAT.
+
+    + Nicolas
+
+-- 
+Nicolas Chapados, Ph.D. candidate
+D?partement d'informatique et recherche op?rationnelle
+Universit? de Montr?al
+http://www.iro.umontreal.ca/~chapados
+
+
+
+
+From lamblinp at iro.umontreal.ca  Sat Jul 15 01:21:41 2006
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Sat, 15 Jul 2006 01:21:41 +0200
+Subject: [Plearn-developers] cleaning in pymake and pymake.config.model
+In-Reply-To: <20060714223306.GA4195@pig.zood.org>
+References: <20060714203435.GA3478@pig.zood.org> <44B80CFD.8040106@apstat.com>
+	<20060714223306.GA4195@pig.zood.org>
+Message-ID: <20060714232141.GA4621@pig.zood.org>
+
+On Sat, Jul 15, 2006, Pascal Lamblin wrote:
+> > >   - Who uses preprocessor variables "DBDIR" and "METADATADIR"?
+> >
+> > DBDIR est un syst?me pour sp?cifier la localisation de datasets 
+> > "standards". C'est un vieux syst?me qu'il faudrait sans doute remplacer 
+> > (par quoi?), mais pour l'instant il semble encore utilis? ? quelques 
+> > endroits.
+> 
+> Sachant que getDataSet() ne supporte plus les sp?cifications de dataset
+> "standard", je ne sais m?me pas si ce code est utilis?.
+
+En effet, DBDIR est utilis? seulement dans la classe
+NistDB, qui elle-m?me n'est utilis?e que dans la fonction
+loadClassificationDataset() de databases.cc, elle-m?me jamais appel?e.
+
+On Fri, Jul 14, 2006, Nicolas Chapados wrote:
+> >> quantify et checkopt, je sais plus ce que c'est.
+> >
+> > "quantify" a l'air d'un truc du m?me genre que "purify", sauf que je
+> > ne sais pas ce que c'est.
+>
+> Quantify est un outil de profiling graphique tr?s cute. Fait le m?me.
+> travail que gprof, mais en plus intelligible. Il co?te cher et je ne.
+> sais pas qui a des licences. Y en a-t-il au LISA? Nous n'en avons pas.
+> chez ApSTAT.
+
+Je ne vois aucune trace de ?a au Lisa, en tous cas.
+
+Ce n'est pas que cette option me d?range, ou quoi, mais simplement
+je ne sais pas trop lorsque je change une autre option (des flags de
+compilation pour g++ par exemple), si je dois r?percuter le changement
+sur purify et quantify...
+
+-- 
+Pascal
+
+
+From dorionc at apstat.com  Sat Jul 15 20:17:40 2006
+From: dorionc at apstat.com (Christian Dorion)
+Date: Sat, 15 Jul 2006 14:17:40 -0400
+Subject: [Plearn-developers] cleaning in pymake and pymake.config.model
+In-Reply-To: <20060714223306.GA4195@pig.zood.org>
+References: <20060714203435.GA3478@pig.zood.org> <44B80CFD.8040106@apstat.com>
+	<20060714223306.GA4195@pig.zood.org>
+Message-ID: <44B93144.1020809@apstat.com>
+
+Hi everyone,
+
+Pascal Lamblin escribi?:
+>
+> - Who uses the --log-link and 'dorionc_hacked_pymake'?
+>
+Well, I would have thought the answer to this to be trivial ;-) 
+>> No idea what these are used for.
+>>     
+It is used to handle the fact the Pymake doesn't manage link properly 
+under some Windows flavors...
+> It's labelled "To be removed as soon as pymake is fixed under
+> Windows!!!". Can I assume this is the case ?
+You sure can't :-D   Unless R?jean (I did that hack for his use) tells 
+me that the thing magically fixed itself, this hack is needed for 
+crucial development at ApStat... If you feel like a magician ;-) , I 
+will ask R?jean to describe you the pathological behavior  and you can 
+try to fix it... Otherwise, we'll have to wait until my 
+'spare-time-stack' empties a little... which, I must admit, is quite a 
+slow process ;-)
+
+A+
+-- 
+*Christian Dorion*/
+Doctorant en Finance (Desautels Faculty of Management -- McGill)
+M.Sc. Informatique et Recherche Op?rationnelle//
+ApStat Technologies Inc./
+http://www.apstat.com
+T?l : (514) 343-9119, ext. 237
+
+"Soyons r?alistes, exigeons l'impossible",
+Ernesto "Che" Guevara, 1928-1967
+
+"Love is a Temple, Love the higher Law",
+One, U2
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <https://lists.berlios.de/pipermail/plearn-developers/attachments/20060715/3cb15a71/attachment.html>
+
+From lheureup at iro.umontreal.ca  Mon Jul 17 16:34:49 2006
+From: lheureup at iro.umontreal.ca (lheureup at iro.umontreal.ca)
+Date: Mon, 17 Jul 2006 10:34:49 -0400
+Subject: [Plearn-developers] cleaning in pymake and pymake.config.model
+In-Reply-To: <20060714203435.GA3478@pig.zood.org>
+References: <20060714203435.GA3478@pig.zood.org>
+Message-ID: <20060717103449.u1sww909w0c00ggs@webmail.iro.umontreal.ca>
+
+Quoting Pascal Lamblin <lamblinp at iro.umontreal.ca>:
+> So I would like to know if some features/bugs/hacks are still used.
+> Especially :
+>  - Who uses rsh (and not ssh) for launching remote compilations?
+
+I'm using rsh.
+
+>  - Who doesn't have python 2.4?
+
+me, at AstraZeneca.
+
+>  - Who uses the following options:
+>    =B7 exiterrors
+
+I used it when compiling on Mammouth. Olivier tells me that they corrected the
+bug that prevented throwerror to work properly.
+
+PJ
+
+----------------------------------------------------------------
+This message was sent using IMP, the Internet Messaging Program.
+
+
+
+From lamblinp at iro.umontreal.ca  Mon Jul 17 19:25:29 2006
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Mon, 17 Jul 2006 19:25:29 +0200
+Subject: [Plearn-developers] cleaning in pymake and pymake.config.model
+In-Reply-To: <44B93144.1020809@apstat.com>
+References: <20060714203435.GA3478@pig.zood.org> <44B80CFD.8040106@apstat.com>
+	<20060714223306.GA4195@pig.zood.org> <44B93144.1020809@apstat.com>
+Message-ID: <20060717172529.GA31707@pig.zood.org>
+
+Hi again,
+
+On Sat, Jul 15, 2006, Christian Dorion wrote:
+> >- Who uses the --log-link and 'dorionc_hacked_pymake'?
+>
+> Well, I would have thought the answer to this to be trivial ;-) 
+
+How should ? R?jean ? be a trivial answer here? ;^)
+
+> It is used to handle the fact the Pymake doesn't manage link properly 
+> under some Windows flavors...
+
+> >It's labelled "To be removed as soon as pymake is fixed under
+> >Windows!!!". Can I assume this is the case ?
+>
+> You sure can't :-D   Unless R?jean (I did that hack for his use) tells 
+> me that the thing magically fixed itself, this hack is needed for 
+> crucial development at ApStat...
+
+OK, I thought Olivier was the only one left using PLearn on Windows, and
+I don't think he uses that.
+
+> If you feel like a magician ;-) , I will ask R?jean to describe you
+> the pathological behavior and you can try to fix it...
+
+Oh, yes, I always have wanted to do some black magic (and I think Yoshua
+will have chicken to sacrifice at some point)...
+
+See you,
+-- 
+Pascal
+
+
+From pascal at apstat.com  Mon Jul 17 22:23:43 2006
+From: pascal at apstat.com (Pascal Vincent)
+Date: Mon, 17 Jul 2006 16:23:43 -0400
+Subject: [Plearn-developers] cleaning in pymake and pymake.config.model
+In-Reply-To: <20060714223306.GA4195@pig.zood.org>
+References: <20060714203435.GA3478@pig.zood.org> <44B80CFD.8040106@apstat.com>
+	<20060714223306.GA4195@pig.zood.org>
+Message-ID: <44BBF1CF.8080500@apstat.com>
+
+Pascal Lamblin wrote:
+> On Fri, Jul 14, 2006, Pascal Vincent wrote:
+>   
+>>>   - Who uses QT stuff with pymake?
+>>>       
+>> Currently nobody. In the past Julien Keable coded a Qt data 
+>> visualisation software for ApSTAT, and if we have/want to some day again 
+>> compile/recompile  it or some other PLearn&Qt-based application, Qt 
+>> support is certainly nice to have (and it was difficult enough to 
+>> add...). After all Qt is probably *the* major cross-platform GUI toolkit 
+>> used by C++ coders.
+>>     
+>
+> <troll>
+> And that's why plide uses gtk!
+> </troll>
+>   
+I believe plide is essentially written in python, not in C++ ... We now 
+tend to use pygtk for our GUI development at ApSTAT (for better or for 
+worse), but Qt is definitely a favorite of a great many *C++* 
+cross-platform GUI developers.
+> Even if we keep support for rsh, would you be OK with setting "ssh" as
+> default?
+>   
+That's OK with me.
+>>>   - Who needs pymake to use the first option when several incompatible
+>>>     options are put on the command-line, ignoring the other ones,
+>>>     instead of aborting?
+>>>       
+>> ???
+>>     
+>
+> Hmm, let me rephrase that:
+> if you execute "pymake -double -float plearn.cc", do you need it to
+> compile in "double" mode (with a warning), or would it be OK if it
+> aborted?
+>   
+Aborting with a nice explicit error message would be perfectly fine.
+
+> The reason why I ask is that some variables used in pymakeOption or
+> optionalLibrary might depend on the command-line arguments (you can see
+> the case of torch), and might be tricked by conflicting arguments.
+>
+>   
+>>>   - Who uses preprocessor variables "DBDIR" and "METADATADIR"?
+>>>   
+>>>       
+>> valhalla:~/PLearn> perlgrep DBDIR .
+>> ./plearn/db/NistDB.cc:57         
+>> imagef.open(DBDIR"/MNIST/train-images-idx3-ubyte");
+>> ./plearn/db/NistDB.cc:58         
+>> labelf.open(DBDIR"/MNIST/train-labels-idx1-ubyte");
+>> ./plearn/db/NistDB.cc:63         //      
+>> imagef.open(DBDIR"/MNIST/test-images.idx3-ubyte");
+>> ./plearn/db/NistDB.cc:64         //      
+>> labelf.open(DBDIR"/MNIST/test-labels.idx1-ubyte");
+>> ./plearn/db/NistDB.cc:66         
+>> imagef.open(DBDIR"/MNIST/t10k-images-idx3-ubyte");
+>> ./plearn/db/NistDB.cc:67         
+>> labelf.open(DBDIR"/MNIST/t10k-labels-idx1-ubyte");
+>> ./plearn/db/databases.cc:179 #ifdef DBDIR
+>> ./plearn/db/databases.cc:180 static const string dbdir_name = DBDIR;
+>>
+>> DBDIR est un syst?me pour sp?cifier la localisation de datasets 
+>> "standards". C'est un vieux syst?me qu'il faudrait sans doute remplacer 
+>> (par quoi?), mais pour l'instant il semble encore utilis? ? quelques 
+>> endroits.
+>>     
+>
+> Sachant que getDataSet() ne supporte plus les sp?cifications de dataset
+> "standard", je ne sais m?me pas si ce code est utilis?.
+>
+> Si on d?cide de le r?utiliser, je pr?f?rerais largement le remplacer par
+> un PPath, comme pour UCI_MLDB_REP et UCI_MLDB.
+>   
+Oui, je seconde l'utilisation du m?canisme de PPath avec un path ajout? 
+? ~/.plearn/ppath.config pour UCI_MLDB
+
+> Je suis d'accord avec toi sur le fond, mais d'une part je pr?f?re virer
+> des mauvais exemples comment?s (lorsqu'ils ont des chemins en "/u/lisa"
+> en dur, par exemple), et d'autre part je pense qu'il y a assez d'options
+> "bidouill?es" d?comment?es (donc utilis?es) pour servir d'exemple.
+>
+> En tous cas, merci pour le feedback,
+>   
+Oui, oui, mais attention ? ne pas faire trop de z?le tout de m?me lors 
+du "cleaning", pour ne pas supprimer, au nom de la propret? plus blanc 
+que blanc, des features utiles que certains ont pass? un temps non 
+n?gligeable ? ajouter, sans doute pour de bonnes raisons, m?me si ce fut 
+fait dans l'urgence et de fa?on pas tr?s propre... (traduction: ne pas 
+jeter le b?b? avec l'eau du bain sous pr?texte que l'eau est sale, mais 
+ne te g?ne pas pour r?curer le b?b? autant que tu veux! ;-> Merci pour 
+tes efforts.)
+
+-- 
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+http://www.apstat.com
+
+
+
+From lamblinp at iro.umontreal.ca  Fri Jul 21 06:14:40 2006
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Fri, 21 Jul 2006 06:14:40 +0200
+Subject: [Plearn-developers] cleaning in pymake and pymake.config.model
+In-Reply-To: <44BBF1CF.8080500@apstat.com>
+References: <20060714203435.GA3478@pig.zood.org> <44B80CFD.8040106@apstat.com>
+	<20060714223306.GA4195@pig.zood.org> <44BBF1CF.8080500@apstat.com>
+Message-ID: <20060721041440.GA19111@pig.zood.org>
+
+On Mon, Jul 17, 2006, Pascal Vincent wrote:
+> > if you execute "pymake -double -float plearn.cc", do you need it to
+> > compile in "double" mode (with a warning), or would it be OK if it
+> > aborted?
+>
+> Aborting with a nice explicit error message would be perfectly fine.
+
+Done. Let me know if the message is not explicit enough.
+
+> >> DBDIR est un syst?me pour sp?cifier la localisation de datasets 
+> >> "standards". C'est un vieux syst?me qu'il faudrait sans doute remplacer 
+> >> (par quoi?), mais pour l'instant il semble encore utilis? ? quelques 
+> >> endroits.
+> >
+> > Sachant que getDataSet() ne supporte plus les sp?cifications de dataset
+> > "standard", je ne sais m?me pas si ce code est utilis?.
+> >
+> > Si on d?cide de le r?utiliser, je pr?f?rerais largement le remplacer par
+> > un PPath, comme pour UCI_MLDB_REP et UCI_MLDB.
+>
+> Oui, je seconde l'utilisation du m?canisme de PPath avec un path ajout? 
+> ? ~/.plearn/ppath.config pour UCI_MLDB
+
+C'est fait, j'ai modifi? le script "setup" pour qu'il initialise
+"DBDIR:" ? "$DBDIR" s'il existe sinon ? "/u/lisa/Database".
+J'ai ?galement rajout? "UCI_MLDB_REP:", initialis? ? "DBDIR:UCI_MLDB".
+
+Attention : si vous relancez le "setup" ? la main pour qu'il modifie le
+~/.plearn/ppath.config, pensez ? r??diter ce dernier pour remplacer
+PLEARN_LIBDIR "/u/lisa/local/<plateforme>/lib" par
+PLEARN_LIBDIR "${PLEARN_LIBDIR}" si vous ?tes au lisa.
+
+D'ailleurs, est-ce que ?a serait possible que la variable ne soit pas
+?valu?e quand on lance "setup" ?
+
+Sinon, j'ai remplac? les DBDIR "..." par des "DBDIR:..." dans PLearn,
+mais je n'ai pas touch? ? LisaPLearn. Donc ce changement vous pose des
+probl?mes, pr?venez-moi et je rectifierai ?a dans LisaPLearn aussi.
+(Si ?a vous pose probl?me dans Apstatsoft, par contre, d?brouillez-vous
+;)
+
+? plus,
+-- 
+Pascal
+
+
+From lamblinp at iro.umontreal.ca  Wed Jul 26 04:08:11 2006
+From: lamblinp at iro.umontreal.ca (Pascal Lamblin)
+Date: Wed, 26 Jul 2006 04:08:11 +0200
+Subject: [Plearn-developers] cleaning in pymake and pymake.config.model
+In-Reply-To: <20060714203435.GA3478@pig.zood.org>
+References: <20060714203435.GA3478@pig.zood.org>
+Message-ID: <20060726020811.GA19034@pig.zood.org>
+
+Hi again,
+
+On Fri, Jul 14, 2006, Pascal Lamblin wrote:
+> I'm going to make some changes in pymake and pymake.config.model, in
+> order to get rid of some dependencies, dirty hacks and unused code.
+
+I just committed some (quite big) changes to pymake, which now calls a
+(still dirty) module in plearn/python_modules/plearn/pymake.
+
+If you experience some problems with this version, please let me know so
+Ican fix it.
+
+In the meantime, the previous version is still present as
+scripts/pymake.old, so if you launch "pymake.old plearn", it should work
+just like before my commit.
+
+See you,
+-- 
+Pascal
+
+
+From chrish at apstat.com  Thu Jul 27 22:40:19 2006
+From: chrish at apstat.com (Christian Hudon)
+Date: Thu, 27 Jul 2006 16:40:19 -0400
+Subject: [Plearn-developers] No space on berlios disk for subversion
+Message-ID: <44C924B3.4070205@apstat.com>
+
+Hi,
+
+if you try to make a commit to PLearn and it fails with a message like this:
+
+svn: Can't close file
+'/svnroot/repos/plearn/db/transactions/6137-1.txn/node.0.0': No space
+left on device
+
+it is because (as the message says) there is no space left on the
+Berlios disk where the subversion repositories are hosted. The Berlios
+admins have been notified:
+
+https://developer.berlios.de/support/?func=detailsupport&support_id=102171&group_id=1
+
+FYI.
+
+  Christian
+
+
+From delallea at iro.umontreal.ca  Fri Jul 28 15:32:34 2006
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Fri, 28 Jul 2006 09:32:34 -0400
+Subject: [Plearn-developers] No space on berlios disk for subversion
+In-Reply-To: <44C924B3.4070205@apstat.com>
+References: <44C924B3.4070205@apstat.com>
+Message-ID: <20060728133232.GA26685@opale.iro.umontreal.ca>
+
+As a side note... Sourceforge now offers SubVersion for version control.
+
+--
+Olivier
+
+On 27 Jul 2006, Christian Hudon wrote:
+> Hi,
+> 
+> if you try to make a commit to PLearn and it fails with a message like this:
+> 
+> svn: Can't close file
+> '/svnroot/repos/plearn/db/transactions/6137-1.txn/node.0.0': No space
+> left on device
+> 
+> it is because (as the message says) there is no space left on the
+> Berlios disk where the subversion repositories are hosted. The Berlios
+> admins have been notified:
+> 
+> https://developer.berlios.de/support/?func=detailsupport&support_id=102171&group_id=1
+> 
+> FYI.
+> 
+>   Christian
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> http://bat.berlios.de/mailman/listinfo/plearn-developers
+
+
+From chapados at iro.umontreal.ca  Fri Jul 28 16:05:37 2006
+From: chapados at iro.umontreal.ca (Nicolas Chapados)
+Date: Fri, 28 Jul 2006 10:05:37 -0400
+Subject: [Plearn-developers] No space on berlios disk for subversion
+In-Reply-To: <20060728133232.GA26685@opale.iro.umontreal.ca>
+References: <44C924B3.4070205@apstat.com>
+	<20060728133232.GA26685@opale.iro.umontreal.ca>
+Message-ID: <44CA19B1.5050001@iro.umontreal.ca>
+
+And Google joins the party with open souce hosting (not ready for 
+PLearn, yet, imho, but keep watching!). They have subversion only. 
+http://code.google.com/hosting/
+
+    + Nicolas
+
+
+Olivier Delalleau wrote:
+> As a side note... Sourceforge now offers SubVersion for version control.
+>
+> --
+> Olivier
+>
+> On 27 Jul 2006, Christian Hudon wrote:
+>   
+>> Hi,
+>>
+>> if you try to make a commit to PLearn and it fails with a message like this:
+>>
+>> svn: Can't close file
+>> '/svnroot/repos/plearn/db/transactions/6137-1.txn/node.0.0': No space
+>> left on device
+>>
+>> it is because (as the message says) there is no space left on the
+>> Berlios disk where the subversion repositories are hosted. The Berlios
+>> admins have been notified:
+>>
+>> https://developer.berlios.de/support/?func=detailsupport&support_id=102171&group_id=1
+>>
+>> FYI.
+>>
+>>   Christian
+>> _______________________________________________
+>> Plearn-developers mailing list
+>> Plearn-developers at lists.berlios.de
+>> http://bat.berlios.de/mailman/listinfo/plearn-developers
+>>     
+> _______________________________________________
+> Plearn-developers mailing list
+> Plearn-developers at lists.berlios.de
+> http://bat.berlios.de/mailman/listinfo/plearn-developers
+>   
+
+-- 
+Nicolas Chapados, Ph.D. candidate
+D?partement d'informatique et recherche op?rationnelle
+Universit? de Montr?al
+http://www.iro.umontreal.ca/~chapados
+
+
+
+

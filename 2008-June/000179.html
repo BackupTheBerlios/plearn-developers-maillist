@@ -1,0 +1,77 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] PStream::operator bool() is gone
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-June/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PStream%3A%3Aoperator%20bool%28%29%20is%20gone&In-Reply-To=%3C4856AF14.8010102%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000180.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] PStream::operator bool() is gone</H1>
+    <B>Xavier Saint-Mleux</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20PStream%3A%3Aoperator%20bool%28%29%20is%20gone&In-Reply-To=%3C4856AF14.8010102%40apstat.com%3E"
+       TITLE="[Plearn-developers] PStream::operator bool() is gone">saintmlx at apstat.com
+       </A><BR>
+    <I>Mon Jun 16 20:21:08 CEST 2008</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000180.html">[Plearn-developers] plearn/base/RealMapping::map will be renamed to	mapto
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#179">[ date ]</a>
+              <a href="thread.html#179">[ thread ]</a>
+              <a href="subject.html#179">[ subject ]</a>
+              <a href="author.html#179">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello,
+
+I am about to commit a change that removes the implicit conversion of 
+PStream to bool.  The reason for this change is that allowing this 
+implicit conversion can lead to some very obscure bugs.  The &quot;clean&quot; 
+solution is to use the good() method explicitly; e.g.:
+
+while(cin) {...}
+
+becomes:
+
+while(cin.good()) {...}
+
+I already went through PLearn to make this change where it was needed.  
+If I missed something, please let me know and I'll fix it.
+
+Xavier
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000180.html">[Plearn-developers] plearn/base/RealMapping::map will be renamed to	mapto
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#179">[ date ]</a>
+              <a href="thread.html#179">[ thread ]</a>
+              <a href="subject.html#179">[ subject ]</a>
+              <a href="author.html#179">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

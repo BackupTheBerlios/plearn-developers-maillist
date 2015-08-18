@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] Added extrasize field to VMatrix
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2006-May/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Added%20extrasize%20field%20to%20VMatrix&In-Reply-To=%3C4459063A.2050104%40apstat.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000084.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] Added extrasize field to VMatrix</H1>
+    <B>Pascal Vincent</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20Added%20extrasize%20field%20to%20VMatrix&In-Reply-To=%3C4459063A.2050104%40apstat.com%3E"
+       TITLE="[Plearn-developers] Added extrasize field to VMatrix">pascal at apstat.com
+       </A><BR>
+    <I>Wed May  3 21:36:26 CEST 2006</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000084.html">[Plearn-developers] NEW! VERY EASY way to add remote methods to PLearn Objects
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#83">[ date ]</a>
+              <a href="thread.html#83">[ thread ]</a>
+              <a href="subject.html#83">[ subject ]</a>
+              <a href="author.html#83">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello fellow PLearners,
+
+I've just comitted a long due change: adding an extrasize_ to VMatrix.
+The semantic is now that the row of a VMatrix as understood from a 
+PLearner is made of
+inputsize_ input fields
+followed by targetsize_ target fields
+followed by weightsize_ (1 or 0) sample weight fields
+followed by extrasize_ extra fields
+
+The extra fields serve to put additional information that should neither 
+be considered a learner's input, target or a sample weight, but may be 
+used for other things (such as performance assessment).
+
+I also added a new method getExtra to access the extra info (which 
+complements the already existing getExample method)
+
+    //! Default version calls getSubRow based on inputsize_ targetsize_ 
+weightsize_
+    //! But exotic subclasses may construct, input, target and weight 
+however they please.
+    //! If not a weighted matrix, weight should be set to default value 1.
+    virtual void getExample(int i, Vec&amp; input, Vec&amp; target, real&amp; weight);
+
+    //! Complements the getExample method, fetching the the extrasize_ 
+&quot;extra&quot; fields
+    //! expected to appear after the input, target and weight fields
+    //! Default version calls getSubRow based on inputsize_ targetsize_ 
+weightsize_ and extrasize_
+    virtual void getExtra(int i, Vec&amp; extra);
+
+(Note to self: these methods should some day be made const, and in all 
+subclasses as well)
+
+Note that all the testsuite passes.
+
+Also extrasize_ defaults to zero. Thus all current code using *current 
+datasets* should still work exactly as before.
+
+Also nothing currently *enforces* 
+inputsize_+targetsize_+weightsize_+extrasize_ to be equal to width_ 
+(although it is recommended that it be the case), so that old code that 
+used extra fields beyond the weight and inferred their size from width_ 
+should still work (but could be corrected for clarity).
+
+Now of course things may go sour if you make up a *new* dataset with a 
+non-zero extrasize and pass it through VMatrix processing or learners 
+that enforce or suppose that
+inputsize_+targetsize_+weightsize_ == width_  (incriminating ex: 
+fetching the weight with v[width_-1] is wrong!).
+So you may need to make a few minor modifications to the code to 
+properly handle VMatrixes with non-zero extrasize_
+
+Should this little incremental change of mine cause the Earth to stop 
+revolving around the Sun, you/we may go back to previous version that 
+was tagged under SVN: tags/before_adding_VMatrix_extrasize
+
+Have fun!
+
+-- Pascal
+
+-- 
+
+Pascal Vincent
+Directeur Technique, ApSTAT Technologies Inc.
+Tel: (514) 343-9119  #219
+<A HREF="http://www.apstat.com">http://www.apstat.com</A>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000084.html">[Plearn-developers] NEW! VERY EASY way to add remote methods to PLearn Objects
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#83">[ date ]</a>
+              <a href="thread.html#83">[ thread ]</a>
+              <a href="subject.html#83">[ subject ]</a>
+              <a href="author.html#83">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

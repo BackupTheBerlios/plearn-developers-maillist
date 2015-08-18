@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Plearn-developers] erreurs, warnings, logs, etc.
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/plearn-developers/2008-November/index.html" >
+   <LINK REL="made" HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20erreurs%2C%20warnings%2C%20logs%2C%20etc.&In-Reply-To=%3C2d1d7fe70811271352o472e3b22o9d7baea09b7138fd%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000198.html">
+   <LINK REL="Next"  HREF="000199.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Plearn-developers] erreurs, warnings, logs, etc.</H1>
+    <B>Fr&#233;d&#233;ric Bastien</B> 
+    <A HREF="mailto:plearn-developers%40lists.berlios.de?Subject=Re%3A%20%5BPlearn-developers%5D%20erreurs%2C%20warnings%2C%20logs%2C%20etc.&In-Reply-To=%3C2d1d7fe70811271352o472e3b22o9d7baea09b7138fd%40mail.gmail.com%3E"
+       TITLE="[Plearn-developers] erreurs, warnings, logs, etc.">nouiz at nouiz.org
+       </A><BR>
+    <I>Thu Nov 27 22:52:37 CET 2008</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000198.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+        <LI>Next message: <A HREF="000199.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#197">[ date ]</a>
+              <a href="thread.html#197">[ thread ]</a>
+              <a href="subject.html#197">[ subject ]</a>
+              <a href="author.html#197">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Salut,
+
+il y a deux problemes dans cette discutions, un generic(PLWARNING vs
+log g&#233;n&#233;ric vs log nomm&#233;) et un specifique(SelectRowsVMatrix)
+
+le generic:
+Je ne suis pas contre de changer les PLWARNINGS pour des log, mais je
+suggere fortement de changer l'option de default pour pymake -dbg pour
+imprimet le niveau de log debug.
+
+Changer tous les PLWARNINGS pour des log non-nomm&#233; de niveau NORMAL,
+je n'ai aucune objection, mais cela ne change pas grand chose a ce qui
+est fait actuellement sauf qu'on peut tous les desactiver sur la ligne
+de commande. Il faut faire attention si on change le niveau d'un
+warning pour debug ou si on le mets dans des log nomm&#233;. Je propose de
+les changer automatiquement pour les log de niveau normal et
+non-nomm&#233;. Quand on rencontre un probleme avec un message qui arrive
+trop souvent ou vraiment inutilement, on l'imprime moins souvent.
+Comme cela on ne risque pas d'en perdre par erreur.
+
+Quand pensez-vous?
+
+Pour les PL_WARN_ERR(), ceci a &#233;t&#233; ajout&#233; pour transform&#233; des erreur
+en warning. Pas pour transform&#233; des warning en erreur...
+
+Pour la partie sp&#233;cifique, je reponds dans un message a plusieurs
+messages de Xavier:
+
+&gt;<i>2) Si on v&#233;rifie toutes les lignes, on ne peut plus rien faire en O(1) sur une SelectRowsVMatrix: m&#234;me dans les cas o&#249; on ne veut &gt;que, par ex., le metadatadir, &#231;a va prendre un temps O(n).  Encore une fois, ce test n'est pas valable dans le cas g&#233;n&#233;ral (e.g. &gt;filtre qui conserve tout, tri d'une vmat d&#233;j&#224; tri&#233;e, etc.), ni tellement mieux pour du bagging, car on peut quand-m&#234;me avoir &gt;exactement les m&#234;mes &#233;l&#233;ments, mais dans un ordre diff&#233;rent.
+</I>
+Je ne vois pas le raisonnement de ne pas rajout&#233; cette v&#233;rification
+meme si on deplace le message vers les log nomm&#233;.
+La fonction SelectRowsVMatrix::build_() sans cette v&#233;rification
+suppl&#233;mentaire est en O(selected rows), cette v&#233;rification est en
+O(sources-&gt;length()). Donc je ne vois pas de probleme a rajout&#233; un
+check dans le cas special si sources-&gt;length() == new_rows en O(n).
+Cela devien O(sources-&gt;length()*2 + d'autre choses). De plus ceci
+c'est en O(n) sur un vecteur d'indices, par sur la matrices donc pas
+de problemes d'acces memoire et c'est tres loin d'une section
+critique...
+
+&gt;<i>Une SelectRowsVMatrix peut avoir moins, plus ou autant de lignes que sa sous-matrice, et que de ces trois cas, le plus fr&#233;quent &gt;est probablement celui o&#249; on a autant de lignes!  &#199;a n'arrive pas que pour du &quot;shuffle&quot;: dans le cas du bagging, l'id&#233;e est que &gt;chacun des bags peut contenir des r&#233;p&#233;titions et omettre d'autres lignes, et on veut habituellement que le total reste le m&#234;me; il &gt;y a aussi beaucoup d'autres cas o&#249; la taille est la m&#234;me car le SelectRows ne change rien par rapport &#224; la vmat source (voir plus &gt;haut.)
+</I>
+Dans tes utilisations, une SelectRowsVMatrix ne change pas la taille
+de la matrice source souvent... dans mon utilisation c'est toujours le
+cas sauf en cas d'erreur... Alors log nomm&#233; ou non-nomm&#233;? Cela d&#233;pend
+de l'utilisation. Si on rajoute la v&#233;rification, je pense qu'elle
+n'arrivera pas souvent quand elle n'est pas necessaire et qu'elle va
+etre la seulement quand c'est une erreur. Donc j'opterait pour log
+non-nomm&#233; as moins que vous me dites que cela arrivera plus souvent
+que je le pense.
+
+&gt;&gt;<i> Perso, je m'en fous un peu qu'il y ait un warning ou pas dans cete
+</I>&gt;&gt;<i> classe, du moment qu'on puisse le d&#233;sactiver &#224; volont&#233; (ce qui est le
+</I>&gt;&gt;<i> cas).
+</I>&gt;<i> Non, ce n'est pas le cas.  On doit modifier du code pour y arriver, ce
+</I>&gt;<i> qui ne correspond pas &#224; ma d&#233;finition de &quot;&#224; volont&#233;&quot;.  De plus, ce
+</I>&gt;<i> warning est apparu il y a quelques mois et a donc modifi&#233; le
+</I>&gt;<i> comportement de tout ce qui l'utilisait d&#233;j&#224;.  Quand j'ai &#233;crit le
+</I>&gt;<i> BaggingLearner, je n'avais pas ces messages et c'&#233;tait parfait comme
+</I>&gt;<i> &#231;a.  Si on veut d&#233;boguer un cas particulier, &#231;a ne doit pas nous obliger
+</I>&gt;<i> &#224; tout modifier ce qui existait d&#233;j&#224; avant...
+</I>
+Ce n'est pas du code qu'il faut modifier, mais un script plearn...
+mais je comprend que c'est plus compliquer que sur la ligne de
+commande...
+
+Aussi, comme Olivier a dit, je n'ai pas l'intension de m'obstiner. Je
+ne mettrais pas de temps a tout changer non plus. Si vous le faite, je
+vais juste modifier pymake -dbg pour qu'il imprime le niveau debug par
+default.
+
+Fred
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000198.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+	<LI>Next message: <A HREF="000199.html">[Plearn-developers] erreurs, warnings, logs, etc.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#197">[ date ]</a>
+              <a href="thread.html#197">[ thread ]</a>
+              <a href="subject.html#197">[ subject ]</a>
+              <a href="author.html#197">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/plearn-developers">More information about the Plearn-developers
+mailing list</a><br>
+</body></html>

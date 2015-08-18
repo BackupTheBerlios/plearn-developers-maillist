@@ -1,0 +1,212 @@
+From bengioy at iro.umontreal.ca  Wed Apr 11 13:14:40 2007
+From: bengioy at iro.umontreal.ca (Yoshua Bengio)
+Date: Wed, 11 Apr 2007 07:14:40 -0400
+Subject: [Plearn-developers] PLearn script to collect results
+Message-ID: <461CC320.7050508@iro.umontreal.ca>
+
+Hi,
+
+I have commited a new script in PLearn/scripts, called collectres, to 
+help in collect results
+of learning experiments performed with PLearn. I allows to forage in 
+(and plot) the error
+curves that are generated during training, for example with early 
+stopping, but it can
+extract information from any systematically named set of pmat result 
+files, where the
+current methodologies (appendresults) do not fit the bill.
+
+The main things it can do are: find the "best" result in a set, sort the 
+results in some order,
+plot training curves.
+
+There is not much error checking and robustness in it right now, so feel 
+free to improve it
+(keep me informed if you want to change the current semantics).
+
+Here is what running it with no argument gives:
+
+Usage: collectres <outputfile> <spec> <file1.pmat> <file2.pmat> ...
+
+The <spec> can be the following:
+  "min <location-spec>" : identify the mininum of <location-spec> over 
+the <file*.pmat>
+                          prints the values of the selected 
+<location-spec> and the name
+                          of the minimizing <file.pmat> in the <outputfile>.
+  "sort <location-spec>" : make a sorted table of all the values at each 
+<location-spec>
+                           over the <file*.pmat>. The output format is 
+similar to "min" but
+                           it outputs the selected values for all the 
+pmat files, sorted
+                           by the first value in the <location-spec>.
+  "plot cols <xlabel> <ylabel> <minrow> <maxrow> <x> <col1> <name1> 
+<col2> <name2> ..." :
+                          make a smartplot file (see 
+PLearn/scripts/smartplot) with column with
+                          indices <col1> in <fileX.pmat> as y-columns 
+(with legend label <namei>),
+                          column with index <x> as x-column (or -1 for 
+the row indices).
+                          Axes are labeled <xlabel> and <ylabel>. Use 
+rows from <minrow> to <maxrow>
+                          row inclusively (<maxrow> = -1 means last row).
+
+In the above, <location-spec> can be the following:
+  "pos <row> <col0> [<col1> <col2>...]": keep only the values at positions
+                          (<row> <col0>) (<row> <col1>) ... in each pmat 
+file, and the first value
+                          may be used to minimize over files in the min 
+command.
+  "mincol <mcol> [<col1> <col2>...] ": keep only the minimum value in 
+colun <mcol> of each pmat,
+                          keeping track at the same time of the <coli> 
+values at the min-selected row.
+
+
+Here is an example of use. First I found what were the best results for 
+two competing algorithms
+using a collectres sort command (note that I had to look at some of 
+these pmat files to find out
+what were the columns I wanted and decide on which one to sort):
+
+  collectres letter-sgrad-best-valid-NLL "sort mincol 6 5 4 3" 
+exp/letter-sgrad-*/Split0/LearnerExpdir/Strat0results.pmat
+
+  collectres letter-NatGradBlock-best-valid-NLL "sort mincol 6 5 4 3" 
+exp/letter-NatGradBlock-*/Split0/LearnerExpdir/Strat0results.pmat
+
+Then I copy-pasted the names of the best experiment directories into a 
+collectres plot command
+to display their error curves:
+
+  collectres letter-sgrad-vs-BlockNatGrad-best-valid-NLL-plot "plot cols 
+cpu-sec NLL 0 99 8 6 valid-NLL" 
+exp/letter-sgrad-nout=26-nh1=400-nh2=400-nh3=0-slr=0.01-dc=0-n_train_it=1600001-epoch=16000-seed=2-minibatch=1-20070405:002553/Split0/LearnerExpdir/Strat0results.pmat 
+exp/letter-natgradblockO-nout=26-nh1=400-nh2=400-nh3=0-slr=1e-5-dc=1e-6-n_train_it=1600001-epoch=16000-seed=1-minibatch=30-cov_minibatch=10-lambda=.03-k=3-gamma=.995-ren=1-ngv=0-20070401:220403/Split0/LearnerExpdir/Strat0results.pmat
+
+Finally I could display the curves (after possibly editing the gnuplot 
+command in the output file) using
+
+  smartplot letter-sgrad-vs-BlockNatGrad-best-valid-NLL-plot.eps 
+letter-sgrad-vs-BlockNatGrad-best-valid-NLL-plot
+
+-- Yoshua
+
+
+
+From nouiz at nouiz.org  Thu Apr 19 19:11:25 2007
+From: nouiz at nouiz.org (=?ISO-8859-1?Q?Fr=E9d=E9ric_Bastien?=)
+Date: Thu, 19 Apr 2007 13:11:25 -0400
+Subject: [Plearn-developers] Plearn: fichier qui ne compile pas
+Message-ID: <4627A2BD.6080907@nouiz.org>
+
+Bonjour,
+
+Vincent ma demander la liste des fichiers qui ne compile pas. Elle est a 
+la fin du email. Est-ce que vous avez des objections a ce que ces 
+fichiers soit mis DEPREACATED, car il ne sont pas inclus nulle part et 
+ne compile pas. Si vous avez des raisons de ne pas rendre certain de ces 
+fichiers DEPRECATED, veuillez le dire avant 1 semaine.
+
+merci
+
+Fred
+
+/u/bastienf/Plearn/commands/language/proper_noun_filter.cc
+/u/bastienf/Plearn/commands/language/full_filter.cc
+/u/bastienf/Plearn/commands/language/num_np_tagset_filter.cc
+/u/bastienf/Plearn/commands/language/WordNet/generate_ontology.cc
+/u/bastienf/Plearn/commands/language/WordNet/buildBrown.cc
+/u/bastienf/Plearn/commands/language/WordNet/buildSemCor.cc
+/u/bastienf/Plearn/plearn/ker/LogOfGaussianDensityKernel.cc
+/u/bastienf/Plearn/plearn/ker/SquaredExponentialARDKernel.cc
+/u/bastienf/Plearn/plearn/ker/ConvexBasisKernel.cc
+/u/bastienf/Plearn/plearn/ker/SigmoidPrimitiveKernel.cc
+/u/bastienf/Plearn/plearn/ker/DifferenceKernel.cc
+/u/bastienf/Plearn/plearn/ker/GaussianDensityKernel.cc
+/u/bastienf/Plearn/plearn/db/SimpleDB.cc
+/u/bastienf/Plearn/plearn/db/SDBVMat.cc
+/u/bastienf/Plearn/plearn/db/AutoSDBVMatrix.cc
+/u/bastienf/Plearn/plearn/db/SDBWithStats.cc
+/u/bastienf/Plearn/plearn/var/NllGeneralGaussianVariable.cc
+/u/bastienf/Plearn/plearn/var/NllSemisphericalGaussianVariable.cc
+/u/bastienf/Plearn/plearn/randomvar/RandomVar.cc
+/u/bastienf/Plearn/plearn/math/ProbSparseMatrix.cc
+/u/bastienf/Plearn/plearn/io/MPIPStreamBuf.cc
+/u/bastienf/Plearn/plearn/io/IntStream.cc
+/u/bastienf/Plearn/plearn/vmat/ReIndexedTargetVMatrix.cc
+/u/bastienf/Plearn/plearn/base/test/PMemPool/test_pool.cc
+/u/bastienf/Plearn/plearn_learners_experimental/FeatureSetSequentialCRF.cc
+/u/bastienf/Plearn/plearn_learners_experimental/StructuralLearner.cc
+/u/bastienf/Plearn/plearn_learners_experimental/onlineNNLM/NnlmOnlineLearner.cc
+/u/bastienf/Plearn/plearn_learners/language/TextSenseSequenceVMatrix.cc
+/u/bastienf/Plearn/plearn_learners/language/Bitext/ShellProgressBar.cc
+/u/bastienf/Plearn/plearn_learners/language/Bitext/GraphicalBiText.cc
+/u/bastienf/Plearn/plearn_learners/language/WordNet/WordNetOntology.cc
+/u/bastienf/Plearn/plearn_learners/language/Smoothing/SmoothedProbSparseMatrix.cc
+/u/bastienf/Plearn/plearn_learners/sequential/SequentialLearner.cc
+/u/bastienf/Plearn/plearn_learners/sequential/SequentialModelSelector.cc
+/u/bastienf/Plearn/plearn_learners/sequential/EmbeddedSequentialLearner.cc
+/u/bastienf/Plearn/plearn_learners/generic/EXPERIMENTAL/NatGradItEstimator.cc
+/u/bastienf/Plearn/plearn_learners/unsupervised/GaussianContinuum.cc
+
+
+From delallea at iro.umontreal.ca  Thu Apr 19 19:18:14 2007
+From: delallea at iro.umontreal.ca (Olivier Delalleau)
+Date: Thu, 19 Apr 2007 13:18:14 -0400
+Subject: [Plearn-developers] Plearn: fichier qui ne compile pas
+In-Reply-To: <4627A2BD.6080907@nouiz.org>
+References: <4627A2BD.6080907@nouiz.org>
+Message-ID: <20070419171814.GA2207@opale.iro.umontreal.ca>
+
+Salut,
+
+Je te conseille de regarder la date d'ecriture de ces fichiers, car
+certains *pourraient* etre relativement recents, on ne sait jamais.
+
+> /u/bastienf/Plearn/plearn_learners/sequential/SequentialLearner.cc
+> /u/bastienf/Plearn/plearn_learners/sequential/SequentialModelSelector.cc
+> /u/bastienf/Plearn/plearn_learners/sequential/EmbeddedSequentialLearner.cc
+
+Il me semble que les SequentialLearner etaient utilises chez Apstat,
+est-ce encore le cas ?
+
+--
+Olivier
+
+
+From chrish at apstat.com  Thu Apr 19 19:54:10 2007
+From: chrish at apstat.com (Christian Hudon)
+Date: Thu, 19 Apr 2007 13:54:10 -0400
+Subject: [Plearn-developers] Plearn: fichier qui ne compile pas
+In-Reply-To: <20070419171814.GA2207@opale.iro.umontreal.ca>
+References: <4627A2BD.6080907@nouiz.org>
+	<20070419171814.GA2207@opale.iro.umontreal.ca>
+Message-ID: <4627ACC2.5030405@apstat.com>
+
+Olivier Delalleau escribi?:
+> Salut,
+>
+> Je te conseille de regarder la date d'ecriture de ces fichiers, car
+> certains *pourraient* etre relativement recents, on ne sait jamais.
+>
+>   
+>> /u/bastienf/Plearn/plearn_learners/sequential/SequentialLearner.cc
+>> /u/bastienf/Plearn/plearn_learners/sequential/SequentialModelSelector.cc
+>> /u/bastienf/Plearn/plearn_learners/sequential/EmbeddedSequentialLearner.cc
+>>     
+>
+> Il me semble que les SequentialLearner etaient utilises chez Apstat,
+> est-ce encore le cas ?
+>   
+Je pensais qu'ils seraient peut-?tre utilis?s par finlearn2, mais j'ai
+v?rifi?, et ce n'est pas le cas. (Il utilise SequentialValidation et
+SequentialSplitter, mais pas les fichiers ci-haut.)
+
+  Christian
+
+
+
+
